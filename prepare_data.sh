@@ -1,6 +1,18 @@
 #!/bin/bash
+
+# You need to have MuseScore installed and correctly set in the script the path to it in src/musicxml2pdf.py for the
+# musicxml to pdf conversion to work. If you don't have MuseScore, the script will still run but will skip the PDF
+# conversion step.
+
+# You also need to have ffmpeg installed for the m4a to wav conversion step.
+
+# You also need to have pdftoppm installed for the pdf to png conversion step.
+
+# You also need to have window access to the machine you are running on (e.g., ssh -Y user@host) for the musicxml to pdf conversion step, since MuseScore requires a display.
+
 set -euo pipefail
 
+ROOT_DIR="$(pwd)"
 DATA_ROOT="$(pwd)/data"
 ORIG_ROOT="$DATA_ROOT/original/chorale-bricks"
 TARGET_ROOT="$DATA_ROOT/chorale-bricks"
@@ -8,6 +20,7 @@ MASTER_MIX_DIR="$ORIG_ROOT/master-mixes"
 ZIP_URL="https://zenodo.org/records/15081741/files/01_AudioAndAnnotations.zip"
 ZIP_FILE="$ORIG_ROOT/01_AudioAndAnnotations.zip"
 EXTRACT_DIR="$ORIG_ROOT/01_AudioAndAnnotations"
+PYTHON="$ROOT_DIR/.venv/bin/python"
 
 trap 'echo "Error: command '\''${BASH_COMMAND}'\'' failed at line ${LINENO}" >&2' ERR
 
@@ -79,6 +92,34 @@ for dir in */; do
     src_musicxml="$dir/$subdir_name.musicxml"
     if [[ -f "$src_musicxml" ]]; then
         cp "$src_musicxml" "$tgt_dir/symbolic.musicxml"
+        
+        # Convert MusicXML to PDF
+        if [[ -f "$tgt_dir/image.pdf" ]]; then
+            log "PDF already exists for $subdir_name; skipping musicxml to pdf conversion."
+        else
+            log "Converting $subdir_name musicxml to pdf..."
+            "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2pdf.py" -i "$tgt_dir/symbolic.musicxml" -o "$tgt_dir/image.pdf" || echo "Warning: PDF conversion failed for $subdir_name" >&2
+        fi
+        
+        # Convert MusicXML to ABC
+        if [[ -f "$tgt_dir/symbolic.abc.txt" ]]; then
+            log "ABC already exists for $subdir_name; skipping musicxml to abc conversion."
+        else
+            log "Converting $subdir_name musicxml to abc..."
+            "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2abc.py" "$tgt_dir/symbolic.musicxml" "$tgt_dir/symbolic.abc.txt" || echo "Warning: ABC conversion failed for $subdir_name" >&2
+        fi
+        
+        # Convert PDF to PNG
+        if [[ -f "$tgt_dir/image.pdf" ]]; then
+            if [[ -f "$tgt_dir/image.png" ]]; then
+                log "PNG already exists for $subdir_name; skipping pdf to png conversion."
+            else
+                log "Converting $subdir_name pdf to png..."
+                pdftoppm -png -singlefile "$tgt_dir/image.pdf" "$tgt_dir/image" || echo "Warning: PNG conversion failed for $subdir_name" >&2
+            fi
+        else
+            log "PDF not found for $subdir_name; skipping pdf to png conversion."
+        fi
     else
         echo "Warning: missing $src_musicxml" >&2
     fi
