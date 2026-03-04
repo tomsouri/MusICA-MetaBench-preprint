@@ -1,7 +1,7 @@
 from music21 import converter, note, chord, stream
 import os
 
-def get_first_soprano_pitch(musicxml_path: str) -> str:
+def first_soprano_note_scientific_pitch(musicxml_path: str) -> str:
     """
     Parses a MusicXML file and returns the scientific pitch notation 
     of the first note in the Soprano part.
@@ -66,9 +66,9 @@ def get_first_soprano_pitch(musicxml_path: str) -> str:
 
 # --- Example Usage --- #
 if __name__ == "__main__":
-    import sys
-    # Example: 
-    path_to_musicxml = sys.argv[1] if len(sys.argv) > 1 else "path/to/bach_chorale.musicxml"
-    answer = get_first_soprano_pitch(path_to_musicxml)
-    print(f"The first soprano note is: {answer}")
+    # import sys
+    # # Example: 
+    # path_to_musicxml = sys.argv[1] if len(sys.argv) > 1 else "path/to/bach_chorale.musicxml"
+    # answer = first_soprano_note_scientific_pitch(path_to_musicxml)
+    # print(f"The first soprano note is: {answer}")
     pass
