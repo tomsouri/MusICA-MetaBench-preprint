@@ -1,5 +1,3 @@
-# from https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks , right-click on the audios to get the link to the master mixes 
-
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Anonymous_AusMeinesHerzensGrunde_tp_fh_bar_tba.m4a
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Bach_IchStehAnDeinerKrippe_fl_cl_bar_tba.m4a
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Crueger_AufAufMeinHerzMitFreuden_as_as_bs_bs.m4a
@@ -10,4 +8,3 @@ https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Jan_DuGross
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Telemann_DerLiebenSonneLichtUndPracht_fh_fh_bar_bs.m4a
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Vulpius_DieHelleSonnLeuchtJetztHerfuer_ob_eh_bs_bs.m4a
 https://audiolabs-erlangen.de/resources/MIR/2025-ChoraleBricks/mixes/Vulpius_ChristusDerIstMeinLeben_bar_bar_bar_bar.m4a
-
