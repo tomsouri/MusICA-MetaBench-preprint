@@ -22,6 +22,26 @@ ZIP_FILE="$ORIG_ROOT/01_AudioAndAnnotations.zip"
 EXTRACT_DIR="$ORIG_ROOT/01_AudioAndAnnotations"
 PYTHON="$ROOT_DIR/.venv/bin/python"
 
+# --- Statistics Counters ---
+count_m4a2wav_success=0
+count_m4a2wav_error=0
+count_m4a2wav_skip=0
+
+count_xml2pdf_success=0
+count_xml2pdf_error=0
+count_xml2pdf_skip=0
+
+count_xml2abc_success=0
+count_xml2abc_error=0
+count_xml2abc_skip=0
+
+count_pdf2png_success=0
+count_pdf2png_error=0
+count_pdf2png_skip=0
+
+count_missing_files=0
+# ---------------------------
+
 trap 'echo "Error: command '\''${BASH_COMMAND}'\'' failed at line ${LINENO}" >&2' ERR
 
 log() {
@@ -53,6 +73,7 @@ if [[ -f "$LIST_FILE" ]]; then
     wget -nc -i "$LIST_FILE"
 else
     echo "Warning: master mix list not found at $LIST_FILE" >&2
+    count_missing_files=$((count_missing_files + 1))
 fi
 
 log "Converting .m4a master mixes to .wav..."
@@ -61,9 +82,15 @@ for file in *.m4a; do
     wav_output="${file%.m4a}.wav"
     if [[ -f "$wav_output" ]]; then
         log "Skipping conversion for $file (already have $wav_output)."
+        count_m4a2wav_skip=$((count_m4a2wav_skip + 1))
     else
         log "Converting $file..."
-        ffmpeg -i "$file" "$wav_output"
+        if ffmpeg -y -i "$file" "$wav_output" -loglevel error; then
+            count_m4a2wav_success=$((count_m4a2wav_success + 1))
+        else
+            echo "Warning: WAV conversion failed for $file" >&2
+            count_m4a2wav_error=$((count_m4a2wav_error + 1))
+        fi
     fi
 done
 shopt -u nullglob
@@ -80,6 +107,7 @@ for dir in */; do
         cp "$src_csv" "$tgt_dir/symbolic.midi.csv"
     else
         echo "Warning: missing $src_csv" >&2
+        count_missing_files=$((count_missing_files + 1))
     fi
 
     src_mid="$dir/$subdir_name.mid"
@@ -87,6 +115,7 @@ for dir in */; do
         cp "$src_mid" "$tgt_dir/symbolic.midi"
     else
         echo "Warning: missing $src_mid" >&2
+        count_missing_files=$((count_missing_files + 1))
     fi
 
     src_musicxml="$dir/$subdir_name.musicxml"
@@ -96,32 +125,54 @@ for dir in */; do
         # Convert MusicXML to PDF
         if [[ -f "$tgt_dir/image.pdf" ]]; then
             log "PDF already exists for $subdir_name; skipping musicxml to pdf conversion."
+            count_xml2pdf_skip=$((count_xml2pdf_skip + 1))
         else
             log "Converting $subdir_name musicxml to pdf..."
-            "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2pdf.py" -i "$tgt_dir/symbolic.musicxml" -o "$tgt_dir/image.pdf" || echo "Warning: PDF conversion failed for $subdir_name" >&2
+            if "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2pdf.py" -i "$tgt_dir/symbolic.musicxml" -o "$tgt_dir/image.pdf"; then
+                count_xml2pdf_success=$((count_xml2pdf_success + 1))
+            else
+                echo "Warning: PDF conversion failed for $subdir_name" >&2
+                count_xml2pdf_error=$((count_xml2pdf_error + 1))
+            fi
         fi
         
         # Convert MusicXML to ABC
         if [[ -f "$tgt_dir/symbolic.abc.txt" ]]; then
             log "ABC already exists for $subdir_name; skipping musicxml to abc conversion."
+            count_xml2abc_skip=$((count_xml2abc_skip + 1))
         else
             log "Converting $subdir_name musicxml to abc..."
-            "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2abc.py" "$tgt_dir/symbolic.musicxml" "$tgt_dir/symbolic.abc.txt" || echo "Warning: ABC conversion failed for $subdir_name" >&2
+            if "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2abc.py" "$tgt_dir/symbolic.musicxml" "$tgt_dir/symbolic.abc.txt"; then
+                count_xml2abc_success=$((count_xml2abc_success + 1))
+            else
+                echo "Warning: ABC conversion failed for $subdir_name" >&2
+                count_xml2abc_error=$((count_xml2abc_error + 1))
+            fi
         fi
         
         # Convert PDF to PNG
         if [[ -f "$tgt_dir/image.pdf" ]]; then
             if [[ -f "$tgt_dir/image.png" ]]; then
                 log "PNG already exists for $subdir_name; skipping pdf to png conversion."
+                count_pdf2png_skip=$((count_pdf2png_skip + 1))
             else
                 log "Converting $subdir_name pdf to png..."
-                pdftoppm -png -singlefile "$tgt_dir/image.pdf" "$tgt_dir/image" || echo "Warning: PNG conversion failed for $subdir_name" >&2
+                if pdftoppm -png -singlefile "$tgt_dir/image.pdf" "$tgt_dir/image"; then
+                    count_pdf2png_success=$((count_pdf2png_success + 1))
+                else
+                    echo "Warning: PNG conversion failed for $subdir_name" >&2
+                    count_pdf2png_error=$((count_pdf2png_error + 1))
+                fi
             fi
         else
-            log "PDF not found for $subdir_name; skipping pdf to png conversion."
+            log "PDF not found for $subdir_name; recording as pdf to png error."
+            count_pdf2png_error=$((count_pdf2png_error + 1))
+
+            # We don't increment failure here since PDF creation was the actual point of failure.
         fi
     else
         echo "Warning: missing $src_musicxml" >&2
+        count_missing_files=$((count_missing_files + 1))
     fi
 
     src_mei="$dir/$subdir_name.mei"
@@ -129,11 +180,13 @@ for dir in */; do
         cp "$src_mei" "$tgt_dir/symbolic.mei"
     else
         echo "Warning: missing $src_mei" >&2
+        count_missing_files=$((count_missing_files + 1))
     fi
 
     audio_file=$(find "$MASTER_MIX_DIR" -maxdepth 1 -type f -name "${subdir_name}*.wav" -print -quit || true)
     if [[ -z "$audio_file" ]]; then
         echo "Warning: no master-mix WAV found for $subdir_name" >&2
+        count_missing_files=$((count_missing_files + 1))
     elif [[ -f "$tgt_dir/audio.mastermix.wav" ]]; then
         log "Master mix already copied for $subdir_name; skipping."
     else
@@ -142,3 +195,19 @@ for dir in */; do
 done
 
 log "Data preparation complete."
+
+# Print Statistics
+echo ""
+echo "=========================================================="
+echo "                   CONVERSION STATISTICS                  "
+echo "=========================================================="
+printf "%-20s | %-10s | %-10s | %-10s\n" "Task" "Successful" "Failed" "Skipped"
+echo "----------------------------------------------------------"
+printf "%-20s | %-10d | %-10d | %-10d\n" "M4A to WAV"   "$count_m4a2wav_success" "$count_m4a2wav_error" "$count_m4a2wav_skip"
+printf "%-20s | %-10d | %-10d | %-10d\n" "MusicXML to PDF" "$count_xml2pdf_success" "$count_xml2pdf_error" "$count_xml2pdf_skip"
+printf "%-20s | %-10d | %-10d | %-10d\n" "MusicXML to ABC" "$count_xml2abc_success" "$count_xml2abc_error" "$count_xml2abc_skip"
+printf "%-20s | %-10d | %-10d | %-10d\n" "PDF to PNG"      "$count_pdf2png_success" "$count_pdf2png_error" "$count_pdf2png_skip"
+echo "=========================================================="
+echo "Missing Source Files: $count_missing_files"
+echo "=========================================================="
+echo ""
