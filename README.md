@@ -27,3 +27,17 @@ The interesting ones in the preliminary experiments are audio.mastermix.wav, ima
   (and link it from the `meta-questions.tsv` file)
 
 
+
+
+## Our approach
+- come up with a question, e.g. "what is the pitch of the first note in the soprano part, expressed in scientific
+  notation?"
+- get Gemini 3.1 Pro Preview to improve the wording: "Reformulate this question and suggest pool of options to be used
+  in a benchmark for evaluating multimodal LLMs on understanding audio, image sheet music and symbolic scores:
+  <QUESTION>"
+- get the same model to generate the python method that would extract the ground truth: "And now, carefully implement a
+  python method, that would receive musicxml as the input file representing the music excerpt, and using music21 library
+  would extract the correct answer to this question (that is, extract the pitch of the first note in the soprano part in
+  scientific notation)."
+- decide which distractors to include in the pool
+- and put the question as a single row to the meta-questions.tsv
