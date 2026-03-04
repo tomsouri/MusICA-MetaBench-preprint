@@ -39,5 +39,6 @@ The interesting ones in the preliminary experiments are audio.mastermix.wav, ima
   python method, that would receive musicxml as the input file representing the music excerpt, and using music21 library
   would extract the correct answer to this question (that is, extract the pitch of the first note in the soprano part in
   scientific notation)."
+- decide to which modalities is it applicable
 - decide which distractors to include in the pool
 - and put the question as a single row to the meta-questions.tsv
