@@ -194,6 +194,13 @@ for dir in */; do
     fi
 done
 
+
+# Generate the list of pieces file (pieces.tsv)
+# (required for the benchmark generation step)
+cd $ROOT_DIR
+bash generate_pieces_list.sh
+log "List of pieces written to pieces.tsv"
+
 log "Data preparation complete."
 
 # Print Statistics
