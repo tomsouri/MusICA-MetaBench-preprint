@@ -1,3 +1,22 @@
+# Mine
+data/
+logs/
+venv/
+.venv/
+trash/
+outputs/
+deprecated-*
+others-projects/
+__pycache__/
+protobenchmark-logging-aa9418338494.json
+*outputs/
+*.err
+*.out
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
