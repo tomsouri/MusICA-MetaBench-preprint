@@ -6,6 +6,8 @@ script will dynamically load this file and call the appropriate function for eac
 benchmark with ground truth answers and distractors.
 """
 
+# TODO: create a directory for these methods, have single file per question, add dynamic loading of all methods in the directory, and add a template file for new questions to be added easily by future contributors.
+
 from music21 import converter, note, chord, stream
 import os
 from utils import get_musicxml_file_path

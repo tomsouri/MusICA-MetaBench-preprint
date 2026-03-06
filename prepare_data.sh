@@ -10,6 +10,9 @@
 
 # You also need to have window access to the machine you are running on (e.g., ssh -Y user@host) for the musicxml to pdf conversion step, since MuseScore requires a display.
 
+# TODO: do not use hardcoded symbolic.musicxml etc. paths, get them via utils.py methods
+
+
 set -euo pipefail
 
 ROOT_DIR="$(pwd)"
