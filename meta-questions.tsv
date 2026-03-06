@@ -1,2 +1,2 @@
-question_id	category	subcategory	task	question	shortened (opt)	difficulty	modality_in_question	options_modality	method_for_ground_truth_extraction
-2xxx	trial	subtrial	pitch recognition	What is the scientific pitch notation of the initial soprano note in the provided excerpt?	first soprano note	easy	audio,symbolic,visual	text	first_soprano_note_scientific_pitch
+question_id	category	subcategory	task	question	shortened (opt)	difficulty	modality_type	modality_in_question	options_modality	method_for_ground_truth_extraction
+2xxx	trial	subtrial	pitch recognition	What is the scientific pitch notation of the initial soprano note in the provided excerpt?	first soprano note	easy	uni-modal	audio,symbolic,visual	text	first_soprano_note_scientific_pitch
