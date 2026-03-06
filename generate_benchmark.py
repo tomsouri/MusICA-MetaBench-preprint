@@ -10,7 +10,7 @@ python generate_benchmark.py \
     --output final_benchmark.tsv
 
 
-.venv/bin/python3 generate_benchmark.py --meta meta-questions.tsv --pieces pieces.tsv --methods_path src/ground_truth_extractions.py --output benchmark_v1.tsv
+.venv/bin/python3 generate_benchmark.py --meta meta-questions.tsv --pieces pieces.tsv --methods_path src/ground_truth_and_distractor_pool_extractions.py --output benchmark_v2.tsv
 """
 
 
