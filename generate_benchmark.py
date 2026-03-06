@@ -60,6 +60,8 @@ def main():
         writer = csv.DictWriter(f_out, fieldnames=output_fields, delimiter='\t')
         writer.writeheader()
 
+        error_count = 0
+
         # Compute the product
         for meta in meta_questions:
             method_name = meta['method_for_ground_truth_extraction']
@@ -71,22 +73,29 @@ def main():
             extraction_func = getattr(methods_module, method_name)
 
             for piece in pieces:
-                musicxml_path = piece['musicxml_path']
+                piece_dir_path = piece['path']
                 
+                ground_truth = None
+
                 # Execute the extraction method
                 try:
-                    ground_truth = extraction_func(musicxml_path)
+                    ground_truth = extraction_func(piece_dir_path)
+
                 except Exception as e:
-                    print(f"Error computing GT for question '{meta['question_id']}' on piece '{piece['piece_id']}': {e}")
-                    ground_truth = "ERROR"
+                    print(f"Error computing GT for question '{meta['question_id']}' on piece '{piece['piece_id']}': {e}. Skipping the question-piece pair.")
+                    error_count += 1
 
-                # Combine the dictionaries and add ground truth
-                output_row = {**meta, **piece}
-                output_row['ground_truth'] = ground_truth
-                
-                writer.writerow(output_row)
+                if ground_truth is not None:
+                    output_row = {**meta, **piece, 'ground_truth': ground_truth}
+                    writer.writerow(output_row)
 
-    print(f"Successfully generated benchmark at {args.output}")
+
+    if error_count > 0:
+        print(f"WARNING: Encountered {error_count} errors during ground truth extraction. Check the logs for details.")
+
+    print(f"Finished generating benchmark with {error_count} errors.")
+    print(f"Benchmark saved to: {args.output}")
+    # print(f"Successfully generated benchmark at {args.output}")
 
 if __name__ == "__main__":
     main()

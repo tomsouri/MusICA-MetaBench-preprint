@@ -1,17 +1,21 @@
 from music21 import converter, note, chord, stream
 import os
+from utils import get_musicxml_file_path
 
-def first_soprano_note_scientific_pitch(musicxml_path: str) -> str:
+def first_soprano_note_scientific_pitch(path: str) -> str:
     """
     Parses a MusicXML file and returns the scientific pitch notation 
     of the first note in the Soprano part.
     
     Args:
-        musicxml_path (str): The file path to the MusicXML file.
+        path (str): The path to the directory of the piece, which contains the MusicXML file.
         
     Returns:
         str: The pitch in scientific notation (e.g., "G5", "Eb4").
     """
+    # Get the path to the MusicXML file
+    musicxml_path = get_musicxml_file_path(path)
+
     if not os.path.exists(musicxml_path):
         raise FileNotFoundError(f"Could not find file: {musicxml_path}")
 
