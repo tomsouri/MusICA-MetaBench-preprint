@@ -1,8 +1,24 @@
+"""
+Methods for automatic extraction of ground truth answers and pools of distractors for the benchmark questions.
+Each meta-question in the benchmark should be associated with a function in this file that implements the logic for
+extracting the ground truth answer and distractor pool from the symbolic score of a piece (or some other way). The generate_benchmark.py
+script will dynamically load this file and call the appropriate function for each question-piece pair to populate the
+benchmark with ground truth answers and distractors.
+"""
+
 from music21 import converter, note, chord, stream
 import os
 from utils import get_musicxml_file_path
 
-def first_soprano_note_scientific_pitch(path: str) -> str:
+def first_soprano_note_scientific_pitch_get_distractor_pool(path: str) -> list[str]:
+    """
+    Dummy implementation for generating a pool of distractor pitches.
+    """
+    return ["A4", "B4", "G4", "F4", "E4", "D4", "C4"]
+
+
+
+def first_soprano_note_scientific_pitch_get_ground_truth(path: str) -> str:
     """
     Parses a MusicXML file and returns the scientific pitch notation 
     of the first note in the Soprano part.
@@ -13,6 +29,7 @@ def first_soprano_note_scientific_pitch(path: str) -> str:
     Returns:
         str: The pitch in scientific notation (e.g., "G5", "Eb4").
     """
+
     # Get the path to the MusicXML file
     musicxml_path = get_musicxml_file_path(path)
 
@@ -67,6 +84,31 @@ def first_soprano_note_scientific_pitch(path: str) -> str:
     scientific_notation = target_pitch.nameWithOctave.replace('-', 'b')
     
     return scientific_notation
+
+
+def first_soprano_note_scientific_pitch(path: str) -> tuple[str, list[str]]:
+    """
+    question_id: 2xxx
+    question: What is the scientific pitch notation of the initial soprano note in the provided excerpt?
+
+    Logic: Parses a MusicXML file and returns the scientific pitch notation 
+    of the first note in the Soprano part.
+    
+    Args:
+        path (str): The path to the directory of the piece, which contains the MusicXML file.
+        
+    Returns:
+        str: The pitch in scientific notation (e.g., "G5", "Eb4").
+        list[str]: A list of distractor pitches in scientific notation with ground truth excluded.
+    """
+    ground_truth = first_soprano_note_scientific_pitch_get_ground_truth(path)
+    distractor_pool = first_soprano_note_scientific_pitch_get_distractor_pool(path)
+    
+    # Ensure the ground truth is not in the distractor pool
+    if ground_truth in distractor_pool:
+        distractor_pool.remove(ground_truth)
+    
+    return ground_truth, distractor_pool
 
 # --- Example Usage --- #
 if __name__ == "__main__":

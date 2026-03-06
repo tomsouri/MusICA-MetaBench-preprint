@@ -8,12 +8,16 @@ python generate_benchmark.py \
     --pieces pieces.tsv \
     --methods_path extraction_methods.py \
     --output final_benchmark.tsv
+
+
+.venv/bin/python3 generate_benchmark.py --meta meta-questions.tsv --pieces pieces.tsv --methods_path src/ground_truth_extractions.py --output benchmark_v1.tsv
 """
 
 
 import argparse
 import csv
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -54,7 +58,7 @@ def main():
         pieces_fields = pieces_reader.fieldnames
 
     # Prepare output fields
-    output_fields = meta_fields + pieces_fields + ['ground_truth']
+    output_fields = meta_fields + pieces_fields + ['ground_truth'] + ['distractor_pool']
 
     with open(args.output, 'w', encoding='utf-8', newline='') as f_out:
         writer = csv.DictWriter(f_out, fieldnames=output_fields, delimiter='\t')
@@ -79,14 +83,16 @@ def main():
 
                 # Execute the extraction method
                 try:
-                    ground_truth = extraction_func(piece_dir_path)
+                    ground_truth, distractor_pool = extraction_func(piece_dir_path)
 
                 except Exception as e:
                     print(f"Error computing GT for question '{meta['question_id']}' on piece '{piece['piece_id']}': {e}. Skipping the question-piece pair.")
                     error_count += 1
 
                 if ground_truth is not None:
-                    output_row = {**meta, **piece, 'ground_truth': ground_truth}
+                    output_row = {**meta, **piece}
+                    output_row['ground_truth'] = ground_truth
+                    output_row['distractor_pool'] = json.dumps(distractor_pool)  # Convert list to JSON string for TSV storage
                     writer.writerow(output_row)
 
 

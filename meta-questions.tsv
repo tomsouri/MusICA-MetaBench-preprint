@@ -1,0 +1,2 @@
+question_id	category	subcategory	task	question	shortened (opt)	difficulty	modalities	method_for_ground_truth_extraction
+2xxx	trial	subtrial	pitch recognition	What is the scientific pitch notation of the initial soprano note in the provided excerpt?	first soprano note	easy	all	first_soprano_note_scientific_pitch
