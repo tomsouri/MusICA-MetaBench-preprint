@@ -1,0 +1,19 @@
+# Step 0: Benchmark Configuration
+sorting_method: "dummy_shuffle"
+sorting_methods_path: "src/distractor_sorting.py" # Add this to specify the python file with sorting methods
+num_options: 5
+nota_text: "none of the other options is correct"
+add_nota: true
+submodalities:
+  - "audio.mastermix.wav"
+  - "visual.pdf"
+  - "symbolic.musicxml"
+nota_correct_percentage: 0.20 # e.g., 20%
+labels: ["A", "B", "C", "D", "E"]
+seed: 42
+
+cmdline_args:
+  meta: "meta-questions.tsv"
+  pieces: "pieces.tsv"
+  methods_path: "src/ground_truth_and_distractor_pool_extractions.py"
+  output: "final_benchmark.tsv"
