@@ -126,12 +126,12 @@ for dir in */; do
         cp "$src_musicxml" "$tgt_dir/symbolic.musicxml"
         
         # Convert MusicXML to PDF
-        if [[ -f "$tgt_dir/image.pdf" ]]; then
+        if [[ -f "$tgt_dir/visual.pdf" ]]; then
             log "PDF already exists for $subdir_name; skipping musicxml to pdf conversion."
             count_xml2pdf_skip=$((count_xml2pdf_skip + 1))
         else
             log "Converting $subdir_name musicxml to pdf..."
-            if "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2pdf.py" -i "$tgt_dir/symbolic.musicxml" -o "$tgt_dir/image.pdf"; then
+            if "$PYTHON" "$ROOT_DIR/src/conversions/musicxml2pdf.py" -i "$tgt_dir/symbolic.musicxml" -o "$tgt_dir/visual.pdf"; then
                 count_xml2pdf_success=$((count_xml2pdf_success + 1))
             else
                 echo "Warning: PDF conversion failed for $subdir_name" >&2
@@ -154,13 +154,13 @@ for dir in */; do
         fi
         
         # Convert PDF to PNG
-        if [[ -f "$tgt_dir/image.pdf" ]]; then
-            if [[ -f "$tgt_dir/image.png" ]]; then
+        if [[ -f "$tgt_dir/visual.pdf" ]]; then
+            if [[ -f "$tgt_dir/visual.png" ]]; then
                 log "PNG already exists for $subdir_name; skipping pdf to png conversion."
                 count_pdf2png_skip=$((count_pdf2png_skip + 1))
             else
                 log "Converting $subdir_name pdf to png..."
-                if pdftoppm -png -singlefile "$tgt_dir/image.pdf" "$tgt_dir/image"; then
+                if pdftoppm -png -singlefile "$tgt_dir/visual.pdf" "$tgt_dir/visual"; then
                     count_pdf2png_success=$((count_pdf2png_success + 1))
                 else
                     echo "Warning: PNG conversion failed for $subdir_name" >&2
