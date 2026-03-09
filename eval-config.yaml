@@ -8,7 +8,23 @@ models:
 url: "https://openrouter.ai/api/v1/chat/completions"
 env_api_key_name: "OPENROUTER_API_KEY"
 
-dry_run: false
+# Filter benchmark items by modality or submodality. Only items with the specified modality/submodality will be processed.
+# Leave as an empty list (or remove) to process all items.
+# ==========================================
+# FILTERING
+# Leave lists empty to skip filtering for that category.
+# ==========================================
+filters:
+  modalities: 
+    # - "symbolic"
+    # - "visual"
+    # - "audio"
+  submodalities:
+#
+
+
+
+dry_run: true
 logdir: "logs"
 # benchmark_file: "data/sample_benchmark.tsv" # Used if --output is not specified
 
@@ -29,9 +45,7 @@ user_prompt_template: |
 
   <POTENTIAL_TEXTFILE_PLACEHOLDER>
 
-  After any potential reasoning, end with your final answer in this format:
-  Final Answer: <answer>
-  where <answer> is the single correct letter choice <OPTION_LABELS>. Only include the letter.
+  After any potential reasoning, end with your final answer in this format: "<answer>", where <answer> is the single correct letter choice <OPTION_LABELS>. Only include the letter.
 
 musical_piece_format_info:
   audio:

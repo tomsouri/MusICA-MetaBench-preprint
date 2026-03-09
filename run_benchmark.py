@@ -476,10 +476,47 @@ def main():
         for row in reader:
             items.append(row)
 
-    print(f"Loaded benchmark with {len(items)} items.")
+
+    # =====================================================================
+    # Filter the benchmark items
+    # =====================================================================
+    print(f"\n--- Data Loading & Filtering ---")
+    initial_count = len(items)
+    print(f"Loaded initial benchmark with {initial_count} items.")
+
+    filters = config.get("filters", {})
+    allowed_modalities = filters.get("modalities", [])
+    allowed_submodalities = filters.get("submodalities", [])
+
+    # Filter by Modality
+    if allowed_modalities:
+        temp_items = [item for item in items if item.get("modality") in allowed_modalities]
+        print(f"Filter applied: Modalities {allowed_modalities}")
+        print(f"  -> Kept {len(temp_items)} items. Removed {len(items) - len(temp_items)} items.")
+        items = temp_items
+    else:
+        print("No modality filter specified. Keeping all modalities.")
+
+    # Filter by Submodality
+    if allowed_submodalities:
+        temp_items = [item for item in items if item.get("submodality") in allowed_submodalities]
+        print(f"Filter applied: Submodalities {allowed_submodalities}")
+        print(f"  -> Kept {len(temp_items)} items. Removed {len(items) - len(temp_items)} items.")
+        items = temp_items
+    else:
+        print("No submodality filter specified. Keeping all submodalities.")
+
+    print(f"Final benchmark items to process: {len(items)}\n--------------------------------\n")
+    
+    if len(items) == 0:
+        print("No items match the required filters. Exiting.")
+        sys.exit(0)
+
     print(f"Models to evaluate: {len(config['models'])}")
     total_runs = len(items) * len(config['models'])
-    print(f"Total question/model loops to perform: {total_runs}")
+    print(f"Total question/model loops to perform: {total_runs}\n")
+
+
 
     # Prepare the log TSV headers
     log_headers = headers + [
