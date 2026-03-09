@@ -90,6 +90,7 @@ import time
 from typing import Dict, Tuple
 
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
+from eval import evaluate_results
 
 import requests
 import yaml
@@ -365,6 +366,9 @@ def main():
         writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
         writer.writeheader()
 
+    # Track all log rows to pass to the evaluator later
+    all_executed_logs = []
+
     run_count = 0
     for model in config['models']:
         for item in items:
@@ -431,6 +435,10 @@ def main():
                 "is_correct": is_correct
             })
 
+            # Save line into memory
+            all_executed_logs.append(log_row)
+
+
             # 1. Log to local TSV
             with open(log_tsv_path, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
@@ -439,10 +447,19 @@ def main():
             # 2. Log to Google Sheets
             if config.get('log_to_google_sheet'):
                 row_list = [log_row.get(h, "") for h in log_headers]
-                append_to_google_sheet(config, row_list, header=log_headers)
+                append_to_google_sheet(config, row_list, header=log_headers, force_header_print=config.get("force_header_print", False))
+                # Enforce the header print only for the first item
+                config["force_header_print"] = False
 
             # 3. Print concise log
             print(f"  -> Extracted: {extracted_answer} | Expected: {correct_label} | Correct: {is_correct} | Time: {time_taken:.2f}s | Cost: ${cost:.6f}")
+    
+    # =====================================================================
+    # Trigger final evaluation logic
+    # =====================================================================
+    evaluation_criteria = config.get("evaluation_criteria", [])
+    evaluate_results(all_executed_logs, evaluation_criteria, output_tsv=config.get("evaluation_output_file", None))
+
 
 if __name__ == "__main__":
     main()
