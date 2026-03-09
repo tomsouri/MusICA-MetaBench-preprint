@@ -107,6 +107,7 @@ import sys
 from pathlib import Path
 import yaml
 import uuid
+from utils import load_methods_module
 
 stats = {
     "errors": 0,
@@ -122,18 +123,7 @@ def deterministic_uuid(data):
     normalized = json.dumps(data, sort_keys=True)
     return uuid.uuid5(PROJECT_NAMESPACE, normalized)
 
-def load_methods_module(file_path: str):
-    """Dynamically loads a python module from a given file path."""
-    path = Path(file_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Methods file not found: {file_path}")
-    
-    module_name = path.stem
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
+
 
 def save_intermediate(data, filename, fieldnames):
     filepath = os.path.join(INTERMEDIATE_DIR, filename)
