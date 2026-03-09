@@ -1,13 +1,22 @@
 # Step 0: Benchmark Configuration
+
+# How to sort distractors:
+# simplification for draft: use random distractors, do not employ RUListening methodology (to be applied after Mar 30)
 sorting_method: "dummy_shuffle"
 sorting_methods_path: "src/distractor_sorting.py" # Add this to specify the python file with sorting methods
+
+# simplification, use 5 always (including NOTA)
 num_options: 5
 nota_text: "none of the other options is correct"
 add_nota: true
+
+# simplification for draft: only use final mix recordings, high-quality rendered PDF, and musicxml
 submodalities:
   - "audio.mastermix.wav"
   - "visual.pdf"
   - "symbolic.musicxml"
+
+# simplification: for the draft, pre-decided percentage of such questions (those that do not contain ground truth among the options), e.g. 20% if we use 5 options (then NOTA is correct as frequently as any other option), only focus on it on evaluation (discussion of results)
 nota_correct_percentage: 0.20 # e.g., 20%
 labels: ["A", "B", "C", "D", "E"]
 seed: 42

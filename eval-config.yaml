@@ -26,6 +26,7 @@ filters:
 
 dry_run: true
 logdir: "logs"
+
 # benchmark_file: "data/sample_benchmark.tsv" # Used if --output is not specified
 
 # Extraction configuration
