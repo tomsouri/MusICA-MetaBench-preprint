@@ -13,8 +13,10 @@ logdir: "logs"
 # benchmark_file: "data/sample_benchmark.tsv" # Used if --output is not specified
 
 # Extraction configuration
-path_to_extraction_file: "src/extraction_methods.py"
-extraction_method: "regex_final_answer_extractor"
+# path_to_extraction_file: "src/extraction_methods.py"
+# extraction_method: "regex_final_answer_extractor"
+path_to_extraction_file: "src/mmmu_eval_utils.py"
+extraction_method: "parse_multi_choice_response"
 
 system_prompt: "You are an AI assistant specialized in advanced musicological analysis."
 
