@@ -81,17 +81,13 @@ where <answer> is the single correct letter choice <OPTION_LABELS>. Only include
 
 
 import argparse
-import base64
 import csv
 import datetime
-import importlib.util
 import json
 import os
-import re
 import sys
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Dict, Tuple
 
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
 
@@ -120,8 +116,13 @@ def set_logdir(config: dict) -> str:
 # Core LLM Call & Payload Builder
 # =========================================================================
 
-def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str) -> Tuple[Dict, str]:
-    """Generates the messages payload based on the modality and files."""
+def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False) -> Tuple[Dict, str]:
+    """
+    Generates the messages payload based on the modality and files.
+
+    If no_content_file is True, it will prepare a payload but will exclude the content (musical) file. To be used as
+    "text-onlyLLM" baseline.    
+    """
     messages = []
     plugins = None
     
@@ -130,61 +131,71 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
 
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
+
     
-    if modality == "visual" and submodality in ["png"]:
-        base64_image = encode_file_to_base64(content_file)
-        data_url = f"data:image/jpeg;base64,{base64_image}"
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_prompt_clean},
-                {"type": "image_url", "image_url": {"url": data_url}}
-            ]
-        })
-        
-    elif modality == "visual" and submodality in ["pdf"]: 
-        base64_pdf = encode_file_to_base64(content_file)
-        data_url = f"data:application/pdf;base64,{base64_pdf}"
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_prompt_clean},
-                {"type": "file", "file": {"filename": "document.pdf", "file_data": data_url}},
-            ]
-        })
-        plugins = [{"id": "file-parser", "pdf": {"engine": "native"}}]
-        
-    elif modality == "audio":
-        base64_audio = encode_file_to_base64(content_file)
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_prompt_clean},
-                {"type": "input_audio", "input_audio": {"data": base64_audio, "format": "wav"}}
-            ]
-        })
-        
-    elif modality == "symbolic":
-        try:
-            with open(content_file, 'r', encoding="utf-8", errors="replace") as f:
-                file_content = f.read()
-        except FileNotFoundError:
-            file_content = "[FILE NOT FOUND]"
-            
-        # Add the explicit data block separately from the instruction text block
-        messages.append({
-            "role": "user",
-            "content": [
-                {"type": "text", "text": user_prompt_clean},
-                {"type": "text", "text": f"--- Attached Symbolic Data ---\n{file_content}"}
-            ]
-        })
-        
-    else:
+    if no_content_file:
+        # Ignore the content file and just send the user prompt (question and options) as text.
+        # To be used as "text-only LLM" baseline, to see how well the model can do without seeing the actual musical
+        # material. (How well it can guess the correct answer from distractor set.)
         messages.append({
             "role": "user",
             "content": [{"type": "text", "text": user_prompt_clean}]
-        }) 
+        })
+    else:
+        if modality == "visual" and submodality in ["png"]:
+            base64_image = encode_file_to_base64(content_file)
+            data_url = f"data:image/jpeg;base64,{base64_image}"
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_prompt_clean},
+                    {"type": "image_url", "image_url": {"url": data_url}}
+                ]
+            })
+            
+        elif modality == "visual" and submodality in ["pdf"]: 
+            base64_pdf = encode_file_to_base64(content_file)
+            data_url = f"data:application/pdf;base64,{base64_pdf}"
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_prompt_clean},
+                    {"type": "file", "file": {"filename": "document.pdf", "file_data": data_url}},
+                ]
+            })
+            plugins = [{"id": "file-parser", "pdf": {"engine": "native"}}]
+            
+        elif modality == "audio":
+            base64_audio = encode_file_to_base64(content_file)
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_prompt_clean},
+                    {"type": "input_audio", "input_audio": {"data": base64_audio, "format": "wav"}}
+                ]
+            })
+            
+        elif modality == "symbolic":
+            try:
+                with open(content_file, 'r', encoding="utf-8", errors="replace") as f:
+                    file_content = f.read()
+            except FileNotFoundError:
+                file_content = "[FILE NOT FOUND]"
+                
+            # Add the explicit data block separately from the instruction text block
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_prompt_clean},
+                    {"type": "text", "text": f"--- Attached Symbolic Data ---\n{file_content}"}
+                ]
+            })
+            
+        else:
+            messages.append({
+                "role": "user",
+                "content": [{"type": "text", "text": user_prompt_clean}]
+            }) 
 
     payload = {
         "model": model,
@@ -382,13 +393,16 @@ def main():
 
             # Build Payload
             content_file = item['path_to_question_context_file']
+            text_only_baseline = config.get('text_only_baseline', False)
+
             payload, final_prompt = prepare_llm_payload(
                 model=model, 
                 user_prompt=prompt, 
                 system_prompt=config['system_prompt'], 
                 content_file=content_file, 
                 modality=modality, 
-                submodality=submodality
+                submodality=submodality,
+                no_content_file=text_only_baseline
             )
 
             # Execute Request
@@ -409,7 +423,7 @@ def main():
                 "model": model,
                 "full_json_response": json.dumps(full_json),
                 "extracted_response": resp_text,
-                "config_info": json.dumps({"dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),
+                "config_info": json.dumps({"text-only-baseline": text_only_baseline, "dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),
                 "label_of_answer": extracted_answer,
                 "price": cost,
                 "time_taken": time_taken,

@@ -23,8 +23,16 @@ filters:
 #
 
 
+# If true, nothing is sent to the models.
+dry_run: false
 
-dry_run: true
+
+# If true, the model will not receive the actual content file (musical material) and will have
+# to rely solely on the question and options text. To be used as a baseline to evaluate how well the model can guess the
+# correct answer without seeing the musical material.
+text_only_baseline: false
+
+
 logdir: "logs"
 
 # benchmark_file: "data/sample_benchmark.tsv" # Used if --output is not specified
