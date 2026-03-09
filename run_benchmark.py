@@ -416,14 +416,15 @@ def main():
 
             # Logging Logic
             log_row = item.copy()
+            model_str = "text-only-" + model if text_only_baseline else model
             log_row.update({
                 "datetime": datetime.datetime.now().isoformat(),
                 "full_prompt": final_prompt,
                 "parameters": json.dumps(sanitize_payload_for_logging(payload=payload)),
-                "model": model,
+                "model": model_str,
                 "full_json_response": json.dumps(full_json),
                 "extracted_response": resp_text,
-                "config_info": json.dumps({"text-only-baseline": text_only_baseline, "dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),
+                "config_info": json.dumps({"text-only-baseline": text_only_baseline, "dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),                
                 "label_of_answer": extracted_answer,
                 "price": cost,
                 "time_taken": time_taken,
