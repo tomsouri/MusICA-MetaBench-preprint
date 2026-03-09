@@ -533,7 +533,8 @@ def main():
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
             # Extract Response and Check Correctness
-            extracted_answer = extraction_func(resp_text)
+            # extracted_answer = extraction_func(resp_text)
+            extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
 
