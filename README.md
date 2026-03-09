@@ -7,8 +7,20 @@ Multimodal music understanding benchmark for LLMs on music in audio (recording),
 	- ffmpeg, pdftoppm, MuseScore, display access (e.g. by ssh -Y user@account)
 	- musescore path needs to be passed to src/musicxml2pdf.py converter (as default value of the path to musescore)
 
+Prepare virtual env:
 `bash prepare_venv.sh`
+
+Prepare data to the desired format:
 `bash prepare_data.sh`
+
+Generate the benchmark items:
+`.venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml`
+
+Run LLMs on the benchmark:
+`.venv/bin/python3 run_benchmark.py --config eval-config.yaml`
+
+Evaluate:
+TODO TBA
 
 Then, the data is in
 data/$DATASET/$PIECE_ID/{audio.mastermix.wav, image.pdf, image.png, symbolic.musicxml, symbolic.abc.txt, symbolic.mei, symbolic.midi}
