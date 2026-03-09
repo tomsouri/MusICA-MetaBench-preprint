@@ -223,45 +223,122 @@ def encode_file_to_base64(file_path: str) -> str:
 # Core LLM Call & Payload Builder
 # =========================================================================
 
+# def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str) -> Tuple[Dict, str]:
+#     """Generates the messages payload based on the modality and files."""
+#     messages = []
+#     plugins = None
+#     original_user_prompt = user_prompt
+
+#     if system_prompt:
+#         messages.append({"role": "system", "content": system_prompt})
+    
+#     if modality == "visual" and submodality in ["visual.png"]:
+#         base64_image = encode_file_to_base64(content_file)
+#         data_url = f"data:image/jpeg;base64,{base64_image}"
+#         messages.append({
+#             "role": "user",
+#             "content": [
+#                 {"type": "text", "text": user_prompt},
+#                 {"type": "image_url", "image_url": {"url": data_url}}
+#             ]
+#         })
+#     elif modality == "visual" and submodality in ["visual.pdf"]: 
+#         base64_pdf = encode_file_to_base64(content_file)
+#         data_url = f"data:application/pdf;base64,{base64_pdf}"
+#         messages.append({
+#             "role": "user",
+#             "content": [
+#                 {"type": "text", "text": user_prompt},
+#                 {"type": "file", "file": {"filename": "document.pdf", "file_data": data_url}},
+#             ]
+#         })
+#         plugins = [{"id": "file-parser", "pdf": {"engine": "native"}}]
+#     elif modality == "audio":
+#         base64_audio = encode_file_to_base64(content_file)
+#         messages.append({
+#             "role": "user",
+#             "content": [
+#                 {"type": "text", "text": user_prompt},
+#                 {"type": "input_audio", "input_audio": {"data": base64_audio, "format": "wav"}}
+#             ]
+#         })
+#     elif modality == "symbolic":
+#         try:
+#             with open(content_file, 'r', encoding="utf-8", errors="replace") as f:
+#                 file_content = f.read()
+#         except FileNotFoundError:
+#             file_content = "[FILE NOT FOUND]"
+            
+#         user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", file_content)
+#         messages.append({
+#             "role": "user",
+#             "content": [{"type": "text", "text": user_prompt}]
+#         })
+#     else:
+#         user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "")
+#         messages.append({
+#             "role": "user",
+#             "content": [{"type": "text", "text": user_prompt}]
+#         }) 
+
+#     payload = {
+#         "model": model,
+#         "messages": messages,
+#         "provider": { 
+#              "require_parameters": True,
+#              "zdr": True,
+#              "data_collection": "deny",
+#         }
+#     }
+#     if plugins:
+#         payload["plugins"] = plugins
+        
+#     return payload, user_prompt
+
 def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str) -> Tuple[Dict, str]:
     """Generates the messages payload based on the modality and files."""
     messages = []
     plugins = None
-    original_user_prompt = user_prompt
+    
+    # We remove the placeholder from the textual prompt since we'll append data separately
+    user_prompt_clean = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "").strip()
 
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
     
-    if modality == "visual" and submodality in ["visual.png"]:
+    if modality == "visual" and submodality in ["png"]:
         base64_image = encode_file_to_base64(content_file)
         data_url = f"data:image/jpeg;base64,{base64_image}"
         messages.append({
             "role": "user",
             "content": [
-                {"type": "text", "text": user_prompt},
+                {"type": "text", "text": user_prompt_clean},
                 {"type": "image_url", "image_url": {"url": data_url}}
             ]
         })
-    elif modality == "visual" and submodality in ["visual.pdf"]: 
+        
+    elif modality == "visual" and submodality in ["pdf"]: 
         base64_pdf = encode_file_to_base64(content_file)
         data_url = f"data:application/pdf;base64,{base64_pdf}"
         messages.append({
             "role": "user",
             "content": [
-                {"type": "text", "text": user_prompt},
+                {"type": "text", "text": user_prompt_clean},
                 {"type": "file", "file": {"filename": "document.pdf", "file_data": data_url}},
             ]
         })
         plugins = [{"id": "file-parser", "pdf": {"engine": "native"}}]
+        
     elif modality == "audio":
         base64_audio = encode_file_to_base64(content_file)
         messages.append({
             "role": "user",
             "content": [
-                {"type": "text", "text": user_prompt},
+                {"type": "text", "text": user_prompt_clean},
                 {"type": "input_audio", "input_audio": {"data": base64_audio, "format": "wav"}}
             ]
         })
+        
     elif modality == "symbolic":
         try:
             with open(content_file, 'r', encoding="utf-8", errors="replace") as f:
@@ -269,16 +346,19 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
         except FileNotFoundError:
             file_content = "[FILE NOT FOUND]"
             
-        user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", file_content)
+        # Add the explicit data block separately from the instruction text block
         messages.append({
             "role": "user",
-            "content": [{"type": "text", "text": user_prompt}]
+            "content": [
+                {"type": "text", "text": user_prompt_clean},
+                {"type": "text", "text": f"--- Attached Symbolic Data ---\n{file_content}"}
+            ]
         })
+        
     else:
-        user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "")
         messages.append({
             "role": "user",
-            "content": [{"type": "text", "text": user_prompt}]
+            "content": [{"type": "text", "text": user_prompt_clean}]
         }) 
 
     payload = {
@@ -293,7 +373,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
     if plugins:
         payload["plugins"] = plugins
         
-    return payload, user_prompt
+    return payload, user_prompt_clean
 
 def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: bool = False) -> Tuple[float, float, dict, str]:
     """Runs the API request and returns (price, time_taken, full_json_response, response_text)."""
@@ -353,6 +433,8 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
                     part['input_audio']['data'] = '[BASE64_AUDIO_STRIPPED]'
                 elif part.get('type') == 'file':
                     part['file']['file_data'] = '[BASE64_FILE_STRIPPED]'
+                elif part.get('type') == 'text' and part.get('text').startswith("--- Attached Symbolic Data ---"):
+                    part['text'] = '[SYMBOLIC_FILE_STRIPPED]'
     return sanitized
 
 # =========================================================================
@@ -464,7 +546,7 @@ def main():
                 "model": model,
                 "full_json_response": json.dumps(full_json),
                 "extracted_response": resp_text,
-                "config_info": json.dumps({"dry_run": config['dry_run'], "url": config['url']}),
+                "config_info": json.dumps({"dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),
                 "label_of_answer": extracted_answer,
                 "price": cost,
                 "time_taken": time_taken,
