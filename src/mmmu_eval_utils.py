@@ -15,8 +15,12 @@ def parse_multi_choice_response(response, all_choices, index2ans):
     Parse the prediction from the generated response.
     Return the predicted index e.g., A, B, C, D.
     """
-    for char in [',', '.', '!', '?', ';', ':', "'"]:
-        response = response.strip(char)
+    # EDIT (do not remove the characters in specific order, but rather at once):
+    # for char in [',', '.', '!', '?', ';', ':', "'", "\n", " "]:
+    #     response = response.strip(char)
+    characters_to_remove = ",.!?:;'\n "
+    response = response.strip(characters_to_remove)
+
     response = " " + response + " " # add space to avoid partial match
 
     index_ans = True
@@ -40,7 +44,10 @@ def parse_multi_choice_response(response, all_choices, index2ans):
                 index_ans = False # it's content ans.
 
     if len(candidates) == 0:  # still not get answer, randomly choose one.
-        pred_index = random.choice(all_choices)
+        # pred_index = random.choice(all_choices)
+        # EDITED:
+        pred_index = "UNPARSABLE"
+
     elif len(candidates) > 1:
         start_indexes = []
         if index_ans:
