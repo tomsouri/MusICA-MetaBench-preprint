@@ -93,7 +93,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from utils import load_methods_module
+from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
 
 import requests
 import yaml
@@ -102,109 +102,8 @@ import yaml
 # Utilities and Helper Functions
 # =========================================================================
 
-
-
-try:
-    import gspread
-except ImportError:
-    gspread = None
-
 API_KEY = None
 
-
-def append_to_google_sheet(config: dict, row_data: list, header: list = None):
-    """Append a single row to a Google Sheet"""
-    if gspread is None:
-        print("⚠ gspread not installed; Google Sheets logging disabled.")
-        return
-
-    required = ['sheet_id', 'sheet_name', 'credentials_location']
-    missing = [k for k in required if not config.get(k)]
-    if missing:
-        print(f"⚠ Google Sheets logging skipped: missing config fields: {', '.join(missing)}")
-        return
-
-    cred_path = config['credentials_location']
-    if not os.path.exists(cred_path):
-        print(f"⚠ Google Sheets logging skipped: credentials file not found at {cred_path}")
-        return
-
-    # Check and crop cells exceeding 50,000 character limit
-    MAX_CELL_CHARS = 50000
-    cropped_row = []
-    for cell_value in row_data:
-        cell_str = str(cell_value)
-        if len(cell_str) > MAX_CELL_CHARS:
-            cropped_row.append(cell_str[:MAX_CELL_CHARS - 4] + "...")
-        else:
-            cropped_row.append(cell_value)
-
-    try:
-        from google.oauth2.service_account import Credentials
-        scope = ['https://www.googleapis.com/auth/spreadsheets']
-        creds = Credentials.from_service_account_file(cred_path, scopes=scope)
-        client = gspread.authorize(creds)
-        
-        sheet = client.open_by_key(config['sheet_id']).worksheet(config['sheet_name'])
-
-        # Get only the first column to check if the sheet is empty (much faster than get_all_values)
-        col_a_values = sheet.col_values(1)
-
-        # If Column A is completely empty, insert the header first
-        if header and len(col_a_values) == 0:
-            # table_range="A:A" forces it to anchor strictly to Column A
-            sheet.append_row(header, table_range="A:A", value_input_option="USER_ENTERED")
-        
-        # Append the new row data
-        sheet.append_row(cropped_row, table_range="A:A", value_input_option="USER_ENTERED")
-        
-        print("✓ Logged to Google Sheet")
-    except Exception as e:
-        print(f"⚠ Failed to log to Google Sheet: {e}")
-
-# def append_to_google_sheet(config: dict, row_data: list, header: list = None):
-#     """Append a single row to a Google Sheet"""
-#     if gspread is None:
-#         print("⚠ gspread not installed; Google Sheets logging disabled.")
-#         return
-
-#     required = ['sheet_id', 'sheet_name', 'credentials_location']
-#     missing = [k for k in required if not config.get(k)]
-#     if missing:
-#         print(f"⚠ Google Sheets logging skipped: missing config fields: {', '.join(missing)}")
-#         return
-
-#     cred_path = config['credentials_location']
-#     if not os.path.exists(cred_path):
-#         print(f"⚠ Google Sheets logging skipped: credentials file not found at {cred_path}")
-#         return
-
-#     # Check and crop cells exceeding 50,000 character limit
-#     MAX_CELL_CHARS = 50000
-#     cropped_row = []
-#     for cell_value in row_data:
-#         cell_str = str(cell_value)
-#         if len(cell_str) > MAX_CELL_CHARS:
-#             cropped_row.append(cell_str[:MAX_CELL_CHARS - 4] + "...")
-#         else:
-#             cropped_row.append(cell_value)
-
-#     try:
-#         from google.oauth2.service_account import Credentials
-#         scope = ['https://www.googleapis.com/auth/spreadsheets']
-#         creds = Credentials.from_service_account_file(cred_path, scopes=scope)
-#         client = gspread.authorize(creds)
-#         sheet = client.open_by_key(config['sheet_id']).worksheet(config['sheet_name'])
-
-#         if header:
-#             existing_values = sheet.get_all_values()
-#             if len(existing_values) == 0 or (len(existing_values) == 1 and len(existing_values[0]) == 0):
-#                 sheet.append_row(header, table_range="A1")
-        
-#         sheet.append_row(cropped_row, table_range="A1")
-#         print("✓ Logged to Google Sheet")
-#     except Exception as e:
-#         print(f"⚠ Failed to log to Google Sheet: {e}")
 
 def set_logdir(config: dict) -> str:
     """Sets up a unique logging directory based on the run."""
@@ -215,85 +114,11 @@ def set_logdir(config: dict) -> str:
     os.makedirs(unique_logdir, exist_ok=True)
     return unique_logdir
 
-def encode_file_to_base64(file_path: str) -> str:
-    with open(file_path, "rb") as file:
-        return base64.b64encode(file.read()).decode('utf-8')
+
 
 # =========================================================================
 # Core LLM Call & Payload Builder
 # =========================================================================
-
-# def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str) -> Tuple[Dict, str]:
-#     """Generates the messages payload based on the modality and files."""
-#     messages = []
-#     plugins = None
-#     original_user_prompt = user_prompt
-
-#     if system_prompt:
-#         messages.append({"role": "system", "content": system_prompt})
-    
-#     if modality == "visual" and submodality in ["visual.png"]:
-#         base64_image = encode_file_to_base64(content_file)
-#         data_url = f"data:image/jpeg;base64,{base64_image}"
-#         messages.append({
-#             "role": "user",
-#             "content": [
-#                 {"type": "text", "text": user_prompt},
-#                 {"type": "image_url", "image_url": {"url": data_url}}
-#             ]
-#         })
-#     elif modality == "visual" and submodality in ["visual.pdf"]: 
-#         base64_pdf = encode_file_to_base64(content_file)
-#         data_url = f"data:application/pdf;base64,{base64_pdf}"
-#         messages.append({
-#             "role": "user",
-#             "content": [
-#                 {"type": "text", "text": user_prompt},
-#                 {"type": "file", "file": {"filename": "document.pdf", "file_data": data_url}},
-#             ]
-#         })
-#         plugins = [{"id": "file-parser", "pdf": {"engine": "native"}}]
-#     elif modality == "audio":
-#         base64_audio = encode_file_to_base64(content_file)
-#         messages.append({
-#             "role": "user",
-#             "content": [
-#                 {"type": "text", "text": user_prompt},
-#                 {"type": "input_audio", "input_audio": {"data": base64_audio, "format": "wav"}}
-#             ]
-#         })
-#     elif modality == "symbolic":
-#         try:
-#             with open(content_file, 'r', encoding="utf-8", errors="replace") as f:
-#                 file_content = f.read()
-#         except FileNotFoundError:
-#             file_content = "[FILE NOT FOUND]"
-            
-#         user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", file_content)
-#         messages.append({
-#             "role": "user",
-#             "content": [{"type": "text", "text": user_prompt}]
-#         })
-#     else:
-#         user_prompt = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "")
-#         messages.append({
-#             "role": "user",
-#             "content": [{"type": "text", "text": user_prompt}]
-#         }) 
-
-#     payload = {
-#         "model": model,
-#         "messages": messages,
-#         "provider": { 
-#              "require_parameters": True,
-#              "zdr": True,
-#              "data_collection": "deny",
-#         }
-#     }
-#     if plugins:
-#         payload["plugins"] = plugins
-        
-#     return payload, user_prompt
 
 def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str) -> Tuple[Dict, str]:
     """Generates the messages payload based on the modality and files."""
