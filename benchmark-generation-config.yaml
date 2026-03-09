@@ -16,4 +16,4 @@ cmdline_args:
   meta: "meta-questions.tsv"
   pieces: "pieces.tsv"
   methods_path: "src/ground_truth_and_distractor_pool_extractions.py"
-  output: "final_benchmark.tsv"
+  output: "benchmark_v1.tsv"
