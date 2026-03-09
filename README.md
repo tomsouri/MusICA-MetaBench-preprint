@@ -18,9 +18,10 @@ Generate the benchmark items:
 
 Run LLMs on the benchmark:
 `.venv/bin/python3 run_benchmark.py --config eval-config.yaml`
+- print logs to `logs/run_<datetime>/benchmark_results.tsv` and appends them to Google sheet
 
 Evaluate:
-TODO TBA
+- is performed already by `run_benchmark.py`, with output in `evaluation_summary.tsv`
 
 Then, the data is in
 data/$DATASET/$PIECE_ID/{audio.mastermix.wav, image.pdf, image.png, symbolic.musicxml, symbolic.abc.txt, symbolic.mei, symbolic.midi}
