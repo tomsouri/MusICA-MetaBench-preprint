@@ -16,11 +16,25 @@ env_api_key_name: "OPENROUTER_API_KEY"
 # ==========================================
 filters:
   modalities: 
-    # - "symbolic"
-    # - "visual"
-    # - "audio"
+    - "symbolic"
+    - "visual"
+    - "audio"
   submodalities:
 #
+
+# ==========================================
+# EVALUATION CRITERIA
+# Columns to group the final statistics by
+# ==========================================
+evaluation_criteria:
+  - "modality"
+  - "submodality"
+  - "piece_id"
+
+# Specify where to save the tabular evaluation summary
+evaluation_output_file: "evaluation_summary.tsv"
+
+
 
 
 # If true, nothing is sent to the models.
@@ -69,6 +83,7 @@ musical_piece_format_info:
 
 # Google Sheets Logging
 log_to_google_sheet: true
-sheet_id: "1cYg3U_MPDx1fzLNnWnR9Xg2epi2eaUA_4JF5Bo8Xbro"
-sheet_name: "List 1"
+sheet_id: "1finPSQLuOs6aDdbmtf3S4Pmq5wzjbwLi9Gl-UINkce4"
+sheet_name: "original-do-not-modify-nor-hide-columns"
 credentials_location: "logs/protobenchmark-logging-aa9418338494.json"
+force_header_print: false
