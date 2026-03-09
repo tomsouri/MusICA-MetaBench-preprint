@@ -1,4 +1,9 @@
 """
+To run:
+.venv/bin/python3 run_benchmark.py --config eval-config.yaml
+
+
+
 Prompt used to generate the script, which tells precisely what the script does.
 
 Generate the python script with functionality as described below, using the code snippets provided. When the snippets
