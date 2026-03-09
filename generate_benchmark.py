@@ -237,9 +237,18 @@ def is_submodality_part_of_modality(submodality, modality):
     # TODO: Return true if modality is the substring of submodality
     return modality in submodality
 
+def modality_from_submodality(submodality):
+    if "audio" in submodality:
+        return "audio"
+    if "visual" in submodality:
+        return "visual"
+    if "symbolic" in submodality:
+        return "symbolic"
+    return "UNDEFINED_MODALITY"
+
 def step_3_submodalities(data, config, fields):
 
-    out_fields = fields + ['submodality', 'path_to_question_context_file']
+    out_fields = fields + ['modality', 'submodality', 'path_to_question_context_file']
     out_data = []
     for row in data:
         question_modalities = row['modality_in_question'].split(',') # Assuming modalities are comma-separated in the input
@@ -248,6 +257,7 @@ def step_3_submodalities(data, config, fields):
             # Only include the submodality, if it is a part of a modality that is supported by the question.
             if any(is_submodality_part_of_modality(sub, mod) for mod in question_modalities):
                 new_row = dict(row)
+                new_row['modality'] = modality_from_submodality(sub)
                 new_row['submodality'] = sub
                 new_row['path_to_question_context_file'] = os.path.join(row['path'], sub)
                 out_data.append(new_row)
@@ -320,7 +330,7 @@ def step_5_nota_correct(data, config, fields):
     return out_data, fields
 
 def step_6_formatting(data, config, fields):
-    out_fields = ['item_id'] + fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option']
+    out_fields = ['item_id'] + fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option', 'label_of_final_correct_option']
     labels = config['labels']
     
     for row in data:
@@ -346,7 +356,8 @@ def step_6_formatting(data, config, fields):
         row['all_choices'] = json.dumps(all_choices)
         row['index2ans'] = json.dumps(index2ans)
         row['labeled_final_options'] = json.dumps(labeled_final_options)
-        row['labeled_final_correct_option'] = labeled_correct
+        row['labeled_final_correct_option'] = f"({labeled_correct}) {correct_opt}"
+        row['label_of_final_correct_option'] = labeled_correct
 
         # For item_id, use a unique string identifier
         row['item_id'] = str(deterministic_uuid(row))
