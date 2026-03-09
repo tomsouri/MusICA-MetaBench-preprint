@@ -1,5 +1,18 @@
 import re
-def regex_final_answer_extractor(response_text: str) -> str:
+"""
+Every answer extraction method should accept the same input and output format:
+Input:
+- response_text: the raw text response from the model (string)
+- all_choices: a list of all the answer choices (e.g., ["A", "
+B", "C", "D"])
+- index2ans: a dictionary mapping from choice index to the actual answer content (e.g., {"A": "Paris", "B": "London",
+"C": "Berlin", "D": "Rome"})
+Output:
+- The extracted answer choice (e.g., "A", "B", "C", or "D"). 
+If the answer cannot be parsed, return "UNPARSABLE".
+"""
+
+def regex_final_answer_extractor(response_text: str, all_choices: list, index2ans: dict) -> str:
     """
     Dummy extraction function specified in the requirements.
     Extracts purely the single letter labeled as the final answer.
@@ -13,4 +26,4 @@ def regex_final_answer_extractor(response_text: str) -> str:
     if match:
         return match.group(1).upper()
         
-    return "UNKNOWN"
+    return "UNPARSABLE"
