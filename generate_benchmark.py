@@ -1,7 +1,7 @@
 """
 Sample run:
 
-.venv/bin/python3 new_generate_benchmark.py --config benchmark-generation-config.yaml 
+.venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml 
 
 --- Starting Pipeline ---
 Step  1  [Product & Extraction]                    Items:       10  Errors:    0
@@ -98,6 +98,7 @@ be saved in an intermediate benchmark file named "benchmark_with_submodalities.t
 
 import argparse
 import csv
+import datetime
 import importlib.util
 import json
 import os
@@ -105,11 +106,21 @@ import random
 import sys
 from pathlib import Path
 import yaml
+import uuid
 
 stats = {
     "errors": 0,
     "step_counts": {}
 }
+
+
+PROJECT_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_DNS, "benchmark-generation")
+INTERMEDIATE_DIR = None
+
+def deterministic_uuid(data):
+    """Generates a deterministic UUID based on the input data dictionary."""
+    normalized = json.dumps(data, sort_keys=True)
+    return uuid.uuid5(PROJECT_NAMESPACE, normalized)
 
 def load_methods_module(file_path: str):
     """Dynamically loads a python module from a given file path."""
@@ -125,7 +136,7 @@ def load_methods_module(file_path: str):
     return module
 
 def save_intermediate(data, filename, fieldnames):
-    filepath = os.path.join("intermediate_benchmarks", filename)
+    filepath = os.path.join(INTERMEDIATE_DIR, filename)
     with open(filepath, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
@@ -256,7 +267,7 @@ def step_3_submodalities(data, config, fields):
     return out_data, out_fields
 
 def step_4_final_options(data, config, fields):
-    out_fields = fields + ['final_correct_option', 'final_options']
+    out_fields = fields + ['final_correct_option', 'final_options', 'random_guess_performance_accuracy', 'is_nota_correct']
     num_opt = config['num_options']
     nota_text = config['nota_text']
     add_nota = config['add_nota']
@@ -273,9 +284,15 @@ def step_4_final_options(data, config, fields):
             distractors_needed = num_opt - 1
             
         options.extend(distractors[:distractors_needed])
+
+        if len(options) < num_opt:
+            print(f"Warning: Not enough distractors for item. Needed {num_opt - 1} distractors, but only {len(distractors)} available.")
+            stats["errors"] += 1
         
         row['final_correct_option'] = gt
         row['final_options'] = json.dumps(options)
+        row['random_guess_performance_accuracy'] = 1.0 / len(options) if options else 0.0
+        row['is_nota_correct'] = 0
 
     save_intermediate(data, "04_benchmark_with_final_options.tsv", out_fields)
     print_checkpoint(4, "Generate Initial Final Options", "04_benchmark_with_final_options.tsv")
@@ -302,6 +319,7 @@ def step_5_nota_correct(data, config, fields):
                 options = [nota_text] + distractors[:N-1]
                 new_row['final_correct_option'] = nota_text
                 new_row['final_options'] = json.dumps(options)
+                new_row['is_nota_correct'] = 1
                 
                 out_data.append(new_row)
     else:
@@ -312,7 +330,7 @@ def step_5_nota_correct(data, config, fields):
     return out_data, fields
 
 def step_6_formatting(data, config, fields):
-    out_fields = fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option']
+    out_fields = ['item_id'] + fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option']
     labels = config['labels']
     
     for row in data:
@@ -340,9 +358,13 @@ def step_6_formatting(data, config, fields):
         row['labeled_final_options'] = json.dumps(labeled_final_options)
         row['labeled_final_correct_option'] = labeled_correct
 
+        # For item_id, use a unique string identifier
+        row['item_id'] = str(deterministic_uuid(row))
+
     save_intermediate(data, "06_benchmark_with_labeled_sorted_final_options.tsv", out_fields)
     print_checkpoint(6, "Labels & Sorting Options", "06_benchmark_with_labeled_sorted_final_options.tsv")
     return data, out_fields
+
 
 def step_7_final_save(data, config, fields):
     out_path = config['cmdline_args']['output']
@@ -360,9 +382,12 @@ def main():
     # Step 0: Load Config
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
+
+    global INTERMEDIATE_DIR
+    INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         
     random.seed(config.get('seed', 42))
-    os.makedirs("intermediate_benchmarks", exist_ok=True)
+    os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
