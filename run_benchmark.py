@@ -318,36 +318,20 @@ def main():
     # Filter the benchmark items
     # =====================================================================
     print(f"\n--- Data Loading & Filtering ---")
-    initial_count = len(items)
-    print(f"Loaded initial benchmark with {initial_count} items.")
+    print(f"Loaded initial benchmark with {len(items)} items.")
 
     filters = config.get("filters", {})
-    allowed_modalities = filters.get("modalities", [])
-    allowed_submodalities = filters.get("submodalities", [])
+    if filters:
+        for column, allowed_values in filters.items():
+            if allowed_values:  # If list is empty, ignore this filter
+                temp_items = [i for i in items if i.get(column) in allowed_values]
+                print(f"Filter applied: Column '{column}' {allowed_values} -> Kept {len(temp_items)}")
+                items = temp_items
 
-    # Filter by Modality
-    if allowed_modalities:
-        temp_items = [item for item in items if item.get("modality") in allowed_modalities]
-        print(f"Filter applied: Modalities {allowed_modalities}")
-        print(f"  -> Kept {len(temp_items)} items. Removed {len(items) - len(temp_items)} items.")
-        items = temp_items
-    else:
-        print("No modality filter specified. Keeping all modalities.")
-
-    # Filter by Submodality
-    if allowed_submodalities:
-        temp_items = [item for item in items if item.get("submodality") in allowed_submodalities]
-        print(f"Filter applied: Submodalities {allowed_submodalities}")
-        print(f"  -> Kept {len(temp_items)} items. Removed {len(items) - len(temp_items)} items.")
-        items = temp_items
-    else:
-        print("No submodality filter specified. Keeping all submodalities.")
-
-    print(f"Final benchmark items to process: {len(items)}\n--------------------------------\n")
-    
     if len(items) == 0:
         print("No items match the required filters. Exiting.")
         sys.exit(0)
+
 
     print(f"Models to evaluate: {len(config['models'])}")
     total_runs = len(items) * len(config['models'])
