@@ -22,7 +22,7 @@ filters:
     - "symbolic"
     # - "visual"
   piece_id:
-    - "Anonymous_AusMeinesHerzensGrunde"
+    # - "Anonymous_AusMeinesHerzensGrunde"
     # - "Crueger_AufAufMeinHerzMitFreuden"
   # submodality: 
     # - "symbolic.musicxml"
@@ -82,7 +82,7 @@ user_prompt_template: |
 
   <POTENTIAL_TEXTFILE_PLACEHOLDER>
 
-  Answer with the option letter from the given choices directly. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of options.
+  Answer with the option letter from the given choices. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of options.
 
 musical_piece_format_info:
   audio:
