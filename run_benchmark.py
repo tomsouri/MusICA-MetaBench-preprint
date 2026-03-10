@@ -143,7 +143,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
             "content": [{"type": "text", "text": user_prompt_clean}]
         })
     else:
-        if modality == "visual" and submodality in ["png"]:
+        if modality == "visual" and submodality in ["visual.png"]:
             base64_image = encode_file_to_base64(content_file)
             data_url = f"data:image/jpeg;base64,{base64_image}"
             messages.append({
@@ -154,7 +154,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
                 ]
             })
             
-        elif modality == "visual" and submodality in ["pdf"]: 
+        elif modality == "visual" and submodality in ["visual.pdf"]: 
             base64_pdf = encode_file_to_base64(content_file)
             data_url = f"data:application/pdf;base64,{base64_pdf}"
             messages.append({
