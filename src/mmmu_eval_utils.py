@@ -15,9 +15,20 @@ def parse_multi_choice_response(response, all_choices, index2ans):
     Parse the prediction from the generated response.
     Return the predicted index e.g., A, B, C, D.
     """
-    # EDIT (do not remove the characters in specific order, but rather at once):
-    # for char in [',', '.', '!', '?', ';', ':', "'", "\n", " "]:
-    #     response = response.strip(char)
+
+    # EDIT: first, look if the last character is one of the choices, if so, directly use it as the answer (this is to handle the case where the model directly outputs "The answer is (A)." or "The answer is A.")
+    import re
+    # [^a-zA-Z] matches any non-alphabetical character
+    # + matches one or more of them
+    # $ anchors the match to the very end of the string
+    stripped_response = re.sub(r'[^a-zA-Z()]+$', '', response)
+    last_char = stripped_response[-1] if len(stripped_response) > 0 else ''
+    for choice in all_choices:
+        if last_char == choice:
+            return last_char
+        
+    # If this did not work, fallback to the original MMMU implementation
+
     characters_to_remove = ",.!?:;'\n "
     response = response.strip(characters_to_remove)
 
