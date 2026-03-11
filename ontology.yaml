@@ -9,3 +9,27 @@ voice:
   - A: "alto"
   - T: "tenor"
   - B: "bass"
+
+pitch:
+  - A: "A"
+  - B: "B"
+  - C: "C"
+  - D: "D"
+  - E: "E"
+  - F: "F"
+  - G: "G"
+
+accidental:
+  - natural: ""
+  - sharp: "sharp"
+  - flat: "flat"
+
+quantity:
+  - max: "most"
+  - min: "least"
+
+modality:
+  - major: "major"
+  - minor: "minor"
+
+
