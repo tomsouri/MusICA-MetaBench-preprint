@@ -1,0 +1,11 @@
+order:
+  - 1: "first"
+  - 2: "second"
+  - 3: "third"
+  - end: "last"
+
+voice:
+  - S: "soprano"
+  - A: "alto"
+  - T: "tenor"
+  - B: "bass"
