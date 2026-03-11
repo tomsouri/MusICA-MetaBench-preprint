@@ -381,6 +381,8 @@ def main():
 
             # Build Payload
             content_file = item['path_to_question_context_file']
+            # TODO: if empty/noise file should be used, replace with the corresponding path from item
+
             text_only_baseline = config.get('text_only_baseline', False)
 
             payload, final_prompt = prepare_llm_payload(
