@@ -260,6 +260,7 @@ def step_3_submodalities(data, config, fields):
                 new_row['modality'] = modality_from_submodality(sub)
                 new_row['submodality'] = sub
                 new_row['path_to_question_context_file'] = os.path.join(row['path'], sub)
+                # add column with path to corresponding empty/noise file, pomocí utils.get_path_to_empty_file(modality, submodality))
                 out_data.append(new_row)
 
     save_intermediate(out_data, "03_benchmark_with_submodalities.tsv", out_fields)
