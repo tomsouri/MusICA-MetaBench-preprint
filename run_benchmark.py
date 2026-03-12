@@ -370,7 +370,8 @@ def main():
             submodality = item.get('submodality')
             format_desc = fmt_info.get(modality, {}).get(submodality, "a musical excerpt")
 
-            print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['shortened (opt)']}")
+            # print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['shortened (opt)']}")
+            print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['question']}")
             print(f"Options:" + ", ".join(options))
 
             prompt = config['user_prompt_template']
