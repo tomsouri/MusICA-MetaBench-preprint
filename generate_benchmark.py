@@ -141,6 +141,25 @@ Further, suggest a way to automatically control the number final benchmark items
 """
 
 
+
+# TODO:
+# This needs to be re-implemented to:
+# - use huggingface dataset instead of tsv files for intermediate steps
+# - first generate full populated benchmark with all possible options, and after then randomly sample from the full
+#   benchmark with desired settings
+#       - desired percentage of NOTA-correct questions
+#       - desired amount of (question-piece pairs)_per_skill 
+# - generating full benchmark means:
+#       - no sampling when generating questions from meta-questions
+#       - generating NOTA-correct version for every question
+# - subsampling at the end is then performed in the following setting:
+#       - every question-piece that is selected, is selected in all submodalities
+#       - number of question-piece pairs per skill is controlled
+#           - but if the desired number exceeds the maximum possible number, the actual amount is kept lower  
+#       - for each NOTA-correct version, the NOTA-incorrect question is also sampled
+#       - this can be performed with different random seeds and different size settings, to obtain multiple different versions of the benchmark, both of the same size and differing in size
+
+
 import argparse
 import ast
 import csv
