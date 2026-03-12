@@ -120,7 +120,12 @@ def nth_voice_note_scientific_pitch_get_ground_truth(path: str, values: dict) ->
     Args:
         path (str): The path to the directory of the piece, which contains the MusicXML file.
         values (dict): A dictionary containing the value for {order} and {voice}, e.g., {"order": 1, "voice": "S"}
+    
+        
+    Chords: The current implementation extracts music21.note.Note objects. If your vocal parts contain instances of music21.chord.Chord (e.g., divisi sections), they will be skipped. If you need to handle choral divisi, you would extract music21.note.GeneralNote and handle the multi-pitch logic accordingly.    
+    
     """
+
     # Get the path to the MusicXML file
     musicxml_path = get_musicxml_file_path(path)
 
