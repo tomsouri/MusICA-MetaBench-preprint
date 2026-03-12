@@ -1,4 +1,4 @@
-order:
+target_indeces:
   - 1: "first"
   - 2: "second"
   - 3: "third"
@@ -31,5 +31,4 @@ quantity:
 modality:
   - major: "major"
   - minor: "minor"
-
 
