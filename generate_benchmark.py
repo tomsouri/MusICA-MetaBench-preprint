@@ -302,12 +302,12 @@ def step_1_generate_product(meta_questions, config, fields):
         for piece in pieces:
             try:
                 breakpoint()
+                row = {**meta, **piece}
                 ground_truth, distractor_pool, new_values_dict = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
                 row['values']  = json.dumps(new_values_dict)
                 row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_dict})
                 
                 if distractor_pool is not None:
-                    row = {**meta, **piece}
                     row['ground_truth'] = ground_truth
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
