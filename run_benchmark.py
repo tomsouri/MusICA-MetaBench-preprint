@@ -87,6 +87,7 @@ import json
 import os
 import sys
 import time
+import uuid
 from typing import Dict, Tuple
 
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
@@ -101,13 +102,24 @@ import yaml
 
 API_KEY = None
 
+PROJECT_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_DNS, "benchmark-run")
+
+def deterministic_uuid(data):
+    """Generates a deterministic UUID based on the input data dictionary."""
+    normalized = json.dumps(data, sort_keys=True)
+    return uuid.uuid5(PROJECT_NAMESPACE, normalized)
+
+def random_uuid():
+    """Generates a random UUID."""
+    return uuid.uuid4()
+
 
 def set_logdir(config: dict) -> str:
     """Sets up a unique logging directory based on the run."""
     dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
     base_log_dir = config.get("logdir", "logs")
     
-    unique_logdir = os.path.join(base_log_dir, f"run_{dt_string}")
+    unique_logdir = os.path.join(base_log_dir, f"run_{dt_string}_{config.get('benchmark_run_uuid', '')}")
     os.makedirs(unique_logdir, exist_ok=True)
     return unique_logdir
 
@@ -287,6 +299,10 @@ def main():
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
 
+    benchmark_run_uuid = random_uuid()
+
+    config["benchmark_run_uuid"] = benchmark_run_uuid
+
     # Allow cmdline override of output parameter
     target_benchmark_file = config.get('benchmark_file')
     if not target_benchmark_file:
@@ -298,7 +314,8 @@ def main():
 
     # Prepare logdir
     logdir = set_logdir(config)
-    log_tsv_path = os.path.join(logdir, "benchmark_results.tsv")
+    log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
+    results_tsv_path = os.path.join(logdir, "results.tsv")
     
     # Check API key presence 
     api_key_name = config.get("env_api_key_name", "OPENROUTER_API_KEY")
@@ -341,7 +358,7 @@ def main():
 
     # Prepare the log TSV headers
     log_headers = headers + [
-        "datetime", "full_prompt", "parameters" , "model", "full_json_response",
+        "benchmark_run_uuid", "datetime", "full_prompt", "parameters" , "model", "full_json_response",
         "extracted_response", "config_info", "label_of_answer", 
         "price", "time_taken", "is_correct"
     ]
@@ -409,6 +426,7 @@ def main():
             log_row = item.copy()
             model_str = "text-only-" + model if text_only_baseline else model
             log_row.update({
+                "benchmark_run_uuid": benchmark_run_uuid,
                 "datetime": datetime.datetime.now().isoformat(),
                 "full_prompt": final_prompt,
                 "parameters": json.dumps(sanitize_payload_for_logging(payload=payload)),
@@ -445,7 +463,12 @@ def main():
     # Trigger final evaluation logic
     # =====================================================================
     evaluation_criteria = config.get("evaluation_criteria", [])
-    evaluate_results(all_executed_logs, evaluation_criteria, output_tsv=config.get("evaluation_output_file", None))
+    output_tsvs = [results_tsv_path]
+    results_path = config.get("evaluation_output_file", None)
+    if results_path:
+        output_tsvs += [results_path]
+
+    evaluate_results(all_executed_logs, evaluation_criteria, output_tsvs=output_tsvs)
 
 
 if __name__ == "__main__":
