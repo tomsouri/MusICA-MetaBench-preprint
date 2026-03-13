@@ -124,6 +124,9 @@ for dir in */; do
     src_musicxml="$dir/$subdir_name.musicxml"
     if [[ -f "$src_musicxml" ]]; then
         cp "$src_musicxml" "$tgt_dir/symbolic.musicxml"
+
+        # TODO: after anonymization of mxml, generate also anonymized other
+        "$PYTHON" "$ROOT_DIR/src/conversions/anonymize_musicxml.py" --src "$tgt_dir/symbolic.musicxml" --tgt "$tgt_dir/anonymized.symbolic.musicxml"
         
         # Convert MusicXML to PDF
         if [[ -f "$tgt_dir/visual.pdf" ]]; then
