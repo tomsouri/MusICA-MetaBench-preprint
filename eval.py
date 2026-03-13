@@ -10,6 +10,9 @@ import json
 import sys
 import time
 
+from pathlib import Path
+
+
 
 import requests
 import yaml
@@ -140,3 +143,46 @@ def evaluate_results(logs: List[Dict[str, Any]], criteria: List[str], output_tsv
                 print(f"\n✓ Saved evaluation tabular stats to: {output_tsv}")
             except Exception as e:
                 print(f"\n⚠ Could not save evaluation stats to {output_tsv}. Error: {e}")
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Evaluate benchmark runs.")
+    parser.add_argument('--run_uuids', nargs='+', required=True)
+    parser.add_argument('--logdir', default="logs")
+    parser.add_argument('--config', required=True, help="Path to config.yaml")
+    parser.add_argument('--output', required=True, help="Path for output tsv")
+    
+    args = parser.parse_args()
+
+    # 1. Load criteria from YAML
+    with open(args.config, 'r') as f:
+        config = yaml.safe_load(f)
+        criteria = config.get("evaluation_criteria", [])
+
+    # 2. Find matching subdirectories and collect TSV data
+    all_logs = []
+    log_path = Path(args.logdir)
+    
+    if log_path.exists():
+        # Iterate over subdirectories
+        for subdir in [d for d in log_path.iterdir() if d.is_dir()]:
+            # Check if any UUID is in the directory name
+            if any(uuid in subdir.name for uuid in args.run_uuids):
+                tsv_file = subdir / "benchmark_logs.tsv"
+                
+                if tsv_file.exists():
+                    with open(tsv_file, mode='r', encoding='utf-8') as f:
+                        reader = csv.DictReader(f, delimiter='\t')
+                        all_logs.extend(list(reader))
+
+    # 3. Pass to evaluation function
+    evaluate_results(all_logs, criteria, output_tsvs=[args.output])
+
+if __name__ == "__main__":
+    main()
+
+
+# Example run:
+# .venv/bin/python3 eval.py --config eval-config.yaml --output res.tsv --run_uuids 184930_068a164a-de63-4339-8b1a-df40377cdebb
+
