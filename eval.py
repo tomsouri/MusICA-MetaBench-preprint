@@ -85,7 +85,7 @@ def generate_stat_dict(model_name: str, crit_name: str, crit_value: str, total: 
     }
 
 
-def evaluate_results(logs: List[Dict[str, Any]], criteria: List[str], output_tsv: str = None):
+def evaluate_results(logs: List[Dict[str, Any]], criteria: List[str], output_tsvs: list[str] = []):
     """Processes full logs and calculates overall & partial accuracy/unparsable-rate per criteria."""
     print("\n" + "="*50)
     print("📈 EVALUATION STATISTICS")
@@ -128,13 +128,15 @@ def evaluate_results(logs: List[Dict[str, Any]], criteria: List[str], output_tsv
                 tabular_data.append(generate_stat_dict(model, criterion, val, v_total, v_correct, v_incorrect, v_unparsable))
 
     # Save to TSV Table
-    if output_tsv and tabular_data:
-        try:
-            # os.makedirs(os.path.dirname(output_tsv), exist_ok=True)
-            with open(output_tsv, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.DictWriter(f, fieldnames=tabular_data[0].keys(), delimiter='\t')
-                writer.writeheader()
-                writer.writerows(tabular_data)
-            print(f"\n✓ Saved evaluation tabular stats to: {output_tsv}")
-        except Exception as e:
-            print(f"\n⚠ Could not save evaluation stats to {output_tsv}. Error: {e}")
+    # if output_tsv and tabular_data:
+    if tabular_data:
+        for output_tsv in output_tsvs:
+            try:
+                # os.makedirs(os.path.dirname(output_tsv), exist_ok=True)
+                with open(output_tsv, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=tabular_data[0].keys(), delimiter='\t')
+                    writer.writeheader()
+                    writer.writerows(tabular_data)
+                print(f"\n✓ Saved evaluation tabular stats to: {output_tsv}")
+            except Exception as e:
+                print(f"\n⚠ Could not save evaluation stats to {output_tsv}. Error: {e}")
