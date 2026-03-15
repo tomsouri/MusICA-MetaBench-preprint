@@ -298,10 +298,10 @@ def step_1_generate_product(meta_questions, config, fields):
             stats["errors"] += 1
             continue
         values_dict = json.loads(meta['values']) if meta.get('values') else {}
-
+        # breakpoint()
         for piece in pieces:
             try:
-                breakpoint()
+                
                 row = {**meta, **piece}
                 ground_truth, distractor_pool, new_values_dict = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
                 row['values']  = json.dumps(new_values_dict)
@@ -311,6 +311,8 @@ def step_1_generate_product(meta_questions, config, fields):
                     row['ground_truth'] = ground_truth
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
+                print(row)
+                print(new_values_dict)
             except Exception as e:
                 print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
                 stats["errors"] += 1
@@ -525,8 +527,8 @@ def main():
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
     # Pipeline Execution
-    print("--- Starting Pipeline ---")
-    breakpoint()
+    print("--- Starting Pipelinen ---")
+    # breakpoint()
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
     data, fields = step_0_instantiate_questions(config, ontology)
