@@ -10,9 +10,11 @@
 
 .venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
     --benchmark_file "benchmark_v3.tsv" \
-    --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.pdf" \
+    --submodalities "symbolic.musicxml" \
     --questions_per_subcategory_count 10 \
-    --seed 42
+    --seed 44
+    # --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.pdf" \
+
 
 .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
     --models "google/gemini-2.0-flash-lite-001" \
@@ -20,7 +22,7 @@
     --api-key-env "OPENROUTER_API_KEY" \
     --benchmark_file "benchmark_v3.tsv" \
     --sheet_name "trial" \
-    --modalities "audio" "symbolic" "visual" \
+    --modalities "symbolic" \
     --run_id "trial01" \
     # --text_only_baseline
 
