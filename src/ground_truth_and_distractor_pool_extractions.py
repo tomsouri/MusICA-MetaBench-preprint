@@ -183,17 +183,21 @@ class AnswerDistractorExtractors:
         target_note = notes[note_index]
         #ground_truth_pool = [np.random.choice([n.name for n in notes if n.name != target_note.name]) for _ in range(self.distractor_pool_size)]
         
+        # Build a set of candidate distractor notes (exclude the true note)
         distractor_pool_set = set(n.name for n in notes) 
         distractor_pool_set.discard(target_note.name)
+        distractor_pool = list(distractor_pool_set)
+
+        #...sampling from the ontology instead of the notes in the piece
         #distractor_pool_set.remove(target_note)
-        distractor_pool_list= [a for a in distractor_pool_set if a in self.dict_note_ontology.keys()]
+        # distractor_pool_list= [a for a in distractor_pool_set if a in self.dict_note_ontology.keys()]
         
-        if len(distractor_pool_list) < self.distractor_pool_size:
-            #while len(distractor_pool_list) < self.distractor_pool_size:
-            distractor_pool = np.random.choice(list(self.dict_note_ontology.keys()), self.distractor_pool_size-len(distractor_pool_list), replace=False).tolist()
-            distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
-        else:
-            distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+        # # if len(distractor_pool_list) < self.distractor_pool_size:
+        # #     #while len(distractor_pool_list) < self.distractor_pool_size:
+        # #     distractor_pool = np.random.choice(list(self.dict_note_ontology.keys()), self.distractor_pool_size-len(distractor_pool_list), replace=False).tolist()
+        # #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+        # # else:
+        #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
         distractor_pool = [self.dict_note_ontology[sample] for sample in distractor_pool]
         
         return target_note.name, distractor_pool, values
@@ -253,17 +257,17 @@ class AnswerDistractorExtractors:
         # Build a set of candidate distractor counts (exclude the true count)
         distractor_pool_set = set(tmp_pool)
         distractor_pool_set.discard(count)
-        distractor_pool = []
-        if len(distractor_pool_set) < self.distractor_pool_size:
-            distractor_pool = np.random.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
-            len_diff = self.distractor_pool_size-len(distractor_pool_set)
-           # if (max(distractor_pool_set)-min(distractor_pool_set) ) < len_diff:
-            distractor_pool += np.random.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=False).tolist()
-           # else:
+        distractor_pool = list(distractor_pool_set)
+        # if len(distractor_pool_set) < self.distractor_pool_size:
+        #     distractor_pool = np.random.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
+        #     len_diff = self.distractor_pool_size-len(distractor_pool_set)
+        #    # if (max(distractor_pool_set)-min(distractor_pool_set) ) < len_diff:
+        #     distractor_pool += np.random.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=True).tolist()
+        #    # else:
                 
-            #     distractor_pool += np.random.choice(distractor_pool_set, self.distractor_pool_size-len(distractor_pool), replace=True).tolist()
-        else:
-            distractor_pool = np.random.choice(list(distractor_pool_set), self.distractor_pool_size, replace=False).tolist()
+        #     #     distractor_pool += np.random.choice(distractor_pool_set, self.distractor_pool_size-len(distractor_pool), replace=True).tolist()
+        # else:
+        #     distractor_pool = np.random.choice(list(distractor_pool_set), self.distractor_pool_size, replace=False).tolist()
 
         return count, distractor_pool, question_values
     
@@ -329,16 +333,16 @@ class AnswerDistractorExtractors:
         all_possible_interval_keys = set([_ for _ in self.dict_interval_ontology.keys() if _ != interval_name])
         distractor_pool_set = set(all_interval_keys)
         distractor_pool_set.discard(interval_name)
-        distractor_pool_list = list(distractor_pool_set)
+        distractor_pool = list(distractor_pool_set)
     
-        if len(distractor_pool_list) < self.distractor_pool_size:
-            #while len(distractor_pool_list) < self.distractor_pool_size:
-            distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
+        # if len(distractor_pool_list) < self.distractor_pool_size:
+        #     #while len(distractor_pool_list) < self.distractor_pool_size:
+        #     distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
             
-            distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
-        else:
-            distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
-        print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
+        #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+        # else:
+        #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+        # print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
         distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
      
         try:
@@ -362,7 +366,7 @@ class AnswerDistractorExtractors:
                 str: The voice part with the most/least number of the specified interval (e.g., "Soprano").
                 list[str]: A list of distractor voice parts with ground truth excluded.
         """
-       # breakpoint()
+        # breakpoint()
                 # Get the path to the MusicXML file
         musicxml_path = get_musicxml_file_path(path)
 
@@ -462,5 +466,8 @@ class AnswerDistractorExtractors:
         if ground_truth in ground_truth_pool:
             ground_truth_pool.remove(ground_truth)
         if len(set(ground_truth_pool))< 4:
-            raise ValueError("less then 4 distractors generated, bug!")
+            #TODO: implement smarter distractor generation in this case, e.g., by using the ontology to find similar notes/intervals to the ground truth and sampling from those.
+            print(f"Warning: Only {len(set(ground_truth_pool))} unique distractors generated for question {path}.")
+
+            #raise ValueError("less then 4 distractors generated, bug!")
         return ground_truth, ground_truth_pool, new_values
