@@ -299,7 +299,7 @@ def main():
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
 
-    benchmark_run_uuid = random_uuid()
+    benchmark_run_uuid = str(random_uuid())
 
     config["benchmark_run_uuid"] = benchmark_run_uuid
 
