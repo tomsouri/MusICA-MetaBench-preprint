@@ -16,6 +16,9 @@ def parse_multi_choice_response(response, all_choices, index2ans):
     Return the predicted index e.g., A, B, C, D.
     """
 
+    if response == "ERROR":
+        return "MODEL_ERROR"
+
     # EDIT: first, look if the last character is one of the choices, if so, directly use it as the answer (this is to handle the case where the model directly outputs "The answer is (A)." or "The answer is A.")
     import re
     # [^a-zA-Z] matches any non-alphabetical character

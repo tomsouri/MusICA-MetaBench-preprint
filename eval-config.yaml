@@ -9,13 +9,16 @@ models:
   # - "openai/gpt-4o-audio-preview"
   # - "openai/gpt-4o-mini"
   # - "google/gemini-2.5-flash"
-  - "google/gemini-2.0-flash-lite-001"
+  # - "google/gemini-2.0-flash-lite-001"
 
 url: "https://openrouter.ai/api/v1/chat/completions"
 env_api_key_name: "OPENROUTER_API_KEY"
 
 # url: "https://llm.ai.e-infra.cz/v1/chat/completions"
 # env_api_key_name: "EINFRA_KEY"
+
+
+max_waiting_time_per_request: 60 # in seconds, after which the request will be considered failed and logged as such
 
 
 # Filter benchmark items by any column. Only items with the specified values will be processed.
@@ -27,13 +30,14 @@ env_api_key_name: "OPENROUTER_API_KEY"
 
 filters:
   modality: 
-    # - "audio"
+    - "audio"
     - "symbolic"
     # - "visual"
   piece_id:
-    - "Anonymous_AusMeinesHerzensGrunde"
+    # - "Anonymous_AusMeinesHerzensGrunde"
     # - "Crueger_AufAufMeinHerzMitFreuden"
-  # submodality: 
+  submodality: 
+    # - "visual.png"
     # - "symbolic.musicxml"
   # You can add any generic column here, e.g.:
   # question_type:
@@ -53,6 +57,7 @@ evaluation_criteria:
   - "question_id"
   - "category"
   - "subcategory"
+  - "skill"
 
 # Specify where to save the tabular evaluation summary
 evaluation_output_file: "evaluation_summary.tsv"
@@ -67,7 +72,7 @@ dry_run: false
 # If true, the model will not receive the actual content file (musical material) and will have
 # to rely solely on the question and options text. To be used as a baseline to evaluate how well the model can guess the
 # correct answer without seeing the musical material.
-text_only_baseline: true
+text_only_baseline: false
 
 
 logdir: "logs"

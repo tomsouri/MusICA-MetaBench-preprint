@@ -1,4 +1,4 @@
-order:
+target_index:
   - 1: "first"
   - 2: "second"
   - 3: "third"
@@ -9,3 +9,18 @@ voice:
   - A: "alto"
   - T: "tenor"
   - B: "bass"
+
+
+accidental:
+  - natural: ""
+  - sharp: "sharp"
+  - flat: "flat"
+
+quantity:
+  - max: "most"
+  - min: "least"
+
+modality:
+  - major: "major"
+  - minor: "minor"
+
