@@ -168,6 +168,7 @@ import importlib.util
 import json
 import os
 import random
+import numpy as np
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -556,6 +557,8 @@ def main():
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         
     random.seed(config.get('seed', 42))
+    np.random.seed(config.get('seed', 42))
+
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
     # Pipeline Execution
