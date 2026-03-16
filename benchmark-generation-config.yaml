@@ -30,7 +30,7 @@ seed: 42
 distractor_pool_size: 20
 
 cmdline_args:
-  meta: "meta-questions-K2.tsv"
+  meta: "meta-questions-K.tsv"
   pieces: "pieces.tsv"
   methods_path: "src/ground_truth_and_distractor_pool_extractions.py"
   output: "benchmark_v1.tsv"
