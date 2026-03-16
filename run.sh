@@ -9,18 +9,18 @@
 # sbatch -p cpu-ms -c2 --mem=4G run.sh
 
 .venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
-    --benchmark_file "benchmark_v1.tsv" \
+    --benchmark_file "benchmark_v3.tsv" \
     --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.pdf" \
-    --questions_per_subcategory_count 5 \
+    --questions_per_subcategory_count 10 \
     --seed 42
 
-.venv/bin/python3 run_benchmark.py --config benchmark-run-config.yaml \
+.venv/bin/python3 run_benchmark.py --config eval-config.yaml \
     --models "google/gemini-2.0-flash-lite-001" \
     --url "https://openrouter.ai/api/v1/chat/completions" \
     --api-key-env "OPENROUTER_API_KEY" \
-    --benchmark_file "benchmark_v1.tsv" \
-    --sheet_name "experiment-branch-01" \
+    --benchmark_file "benchmark_v3.tsv" \
+    --sheet_name "trial" \
     --modalities "audio" "symbolic" "visual" \
-    --run_id "experiment-branch-01-run-01" \
-    --text_only_baseline
+    --run_id "trial01" \
+    # --text_only_baseline
 
