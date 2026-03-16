@@ -4,5 +4,5 @@ meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	me
 2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
 3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
 4	perception	rhythm	note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
-5	perception	rhythm	time signature	what is the main time signature of the piece?	[''time_signature'']	get_time_signature		signature
+5	perception	rhythm	time signature	what is the time signature of the piece?	[]	get_time_signature		signature
 6	perception	rhythm	rhythmic statistics	How many times is the rhythmic notation {rhythm} present in the {voice} line?	["voice", "rhythm"]	get_rhythm_quantity		rhythm

@@ -153,7 +153,8 @@ class AnswerDistractorExtractors:
         # if if target_index is not specified in the config, or if use_all_inds is set to True, then we will sample from all possible indices in the piece for each question, instead of using a fixed index across all pieces. This allows for more variability in the questions and answers across different pieces.
         if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
             self.use_all_inds = True
-    
+            self.ontology['target_index'] = [{str(i):str(i)+"th"} for i in range(0,100)]
+            
         else:
             self.use_all_inds = False 
         self.min_num_distractors = self.config['min_num_distractors']
@@ -534,9 +535,21 @@ class AnswerDistractorExtractors:
         # print(method)
 
         ground_truth, ground_truth_pool, new_values = method(path, question_values) # self.get_nth_note_ground_truth(path, question_values)
-        #distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
+        #new values look like this 
+        #{'target_index': 38, 'voice': 'S'}
+        # i need: new_words = {"target_index": 38, "voice": "soprano"}
+        new_words = {}
+        for var_name, value_symbol in new_values.items():
+            value_symbol = str(value_symbol)
+            if var_name in self.ontology:
+                possible_dicts = self.ontology[var_name]
+                for dict_item in possible_dicts:
+                    if value_symbol in dict_item:
+                        new_words[var_name] = dict_item[value_symbol]             
+
+       # distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
        # breakpoint()
-        # additional, just safety reasons: Ensure the ground truth is not in the distractor pool
+       # additional, just safety reasons: Ensure the ground truth is not in the distractor pool
         if ground_truth in ground_truth_pool:
             ground_truth_pool.remove(ground_truth)
         if len(set(ground_truth_pool))< self.min_num_distractors:
@@ -562,7 +575,7 @@ class AnswerDistractorExtractors:
             ground_truth_pool += additional_distractors
         else:
             ground_truth_pool = list(set(ground_truth_pool))
-        return ground_truth, ground_truth_pool, new_values
+        return ground_truth, ground_truth_pool, new_values, new_words
 
     def get_nth_rhythm(self, path: str, values: dict) -> str:
         """
