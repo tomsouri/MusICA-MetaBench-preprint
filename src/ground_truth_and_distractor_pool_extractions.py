@@ -338,9 +338,19 @@ class AnswerDistractorExtractors:
         n2 = notes[note_index + 1]
         iv = interval.Interval(n1, n2)
         interval_name = iv.simpleName
-        all_interval_keys = [interval.Interval(notes[i], notes[i + 1]).simpleName for i in range(len(notes)-1)]
-       # all_interval_keys = [iv for iv in all_intervals if iv in self.dict_interval_ontology.keys()]
-        all_possible_interval_keys = set([_ for _ in self.dict_interval_ontology.keys() if _ != interval_name])
+
+        all_interval_keys = []
+        for vv in self.voice_mapping.keys():
+            other_part = score.parts[self.voice_mapping[vv]]
+            other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+            for note_idx in range(len(other_notes)-1):
+                n1 = other_notes[note_idx]
+                n2 = other_notes[note_idx + 1]
+                iv = interval.Interval(n1, n2)
+                interval_name = iv.simpleName
+                all_interval_keys.append(interval_name)
+        # all_interval_keys = [interval.Interval(notes[i], notes[i + 1]).simpleName for i in range(len(notes)-1)]
+
         distractor_pool_set = set(all_interval_keys)
         distractor_pool_set.discard(interval_name)
         distractor_pool = list(distractor_pool_set)
@@ -419,7 +429,6 @@ class AnswerDistractorExtractors:
         tmp_pool = []
       
         for vv in self.voice_mapping.keys():
-         
             other_part = score.parts[self.voice_mapping[vv]]
             other_notes = list(other_part.flatten().getElementsByClass(note.Note))
             for note_idx in range(len(other_notes)-1):
