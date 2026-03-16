@@ -161,7 +161,7 @@ class AnswerDistractorExtractors:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
             
         if self.use_all_inds:
-            note_index = np.random.choice(range(len(notes)-1))
+            note_index = int(np.random.choice(range(len(notes)-1)))
             values['target_index'] = int(note_index)
         else:
             note_index = values.get('target_index')
@@ -176,18 +176,25 @@ class AnswerDistractorExtractors:
         #         raise ValueError(f"Invalid target_index specified: {target_index}. Expected integer or 'end'.")
                 
         # Check if the target_index is out of bounds
-        if note_index >= len(notes) or note_index < -len(notes):
+        if note_index >= len(notes) or int(note_index) < -len(notes):
             raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(notes)} notes.")
         
         # Get the target note and return its scientific pitch notation
         target_note = notes[note_index]
         #ground_truth_pool = [np.random.choice([n.name for n in notes if n.name != target_note.name]) for _ in range(self.distractor_pool_size)]
-        distractor_pool = []
-        distractor_pool_set = copy.deepcopy(notes)
-        distractor_pool_set.remove(target_note)
-        distractor_pool = np.random.choice(distractor_pool_set, self.distractor_pool_size, replace=False)
-
-        distractor_pool = [self.dict_note_ontology[sample.name] for sample in distractor_pool]
+        
+        distractor_pool_set = set(n.name for n in notes) 
+        distractor_pool_set.discard(target_note.name)
+        #distractor_pool_set.remove(target_note)
+        distractor_pool_list= [a for a in distractor_pool_set if a in self.dict_note_ontology.keys()]
+        
+        if len(distractor_pool_list) < self.distractor_pool_size:
+            #while len(distractor_pool_list) < self.distractor_pool_size:
+            distractor_pool = np.random.choice(list(self.dict_note_ontology.keys()), self.distractor_pool_size-len(distractor_pool_list), replace=False).tolist()
+            distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+        else:
+            distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+        distractor_pool = [self.dict_note_ontology[sample] for sample in distractor_pool]
         
         return target_note.name, distractor_pool, values
 
@@ -238,33 +245,31 @@ class AnswerDistractorExtractors:
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'")           
         
-        #for test_note in score.parts[0].flatten().getElementsByClass(note.Note):
-        count = sum(1 for n in notes if n.name == target_pitch)
+        # Count occurrences of the target pitch in the selected part
+        count = int(sum(1 for n in notes if n.name == target_pitch))
         notes_set = set(n.name for n in notes)
-        tmp_pool = []
-        for nn in notes_set:
-            tmp_pool.append(sum(1 for n in notes if n.name == nn))
-        
-        #distractor_pool = np.random.choice([v for _,v in dist_pool.items() if v != count], size=len(distractor_keys), replace=True).tolist()
-        distractor_pool_set = copy.deepcopy(tmp_pool)
-        if count in distractor_pool_set:
-            distractor_pool_set.remove(count)
+        tmp_pool = [int(sum(1 for n in notes if n.name == nn)) for nn in notes_set]
+
+        # Build a set of candidate distractor counts (exclude the true count)
+        distractor_pool_set = set(tmp_pool)
+        distractor_pool_set.discard(count)
         distractor_pool = []
         if len(distractor_pool_set) < self.distractor_pool_size:
-            
+            distractor_pool = np.random.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
             len_diff = self.distractor_pool_size-len(distractor_pool_set)
-            if (max(distractor_pool_set)-min(distractor_pool_set) ) < len_diff:
-                distractor_pool += np.random.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=False).tolist()
-            else:
-                distractor_pool = np.random.choice(distractor_pool_set, len(distractor_pool_set), replace=False).tolist()
+           # if (max(distractor_pool_set)-min(distractor_pool_set) ) < len_diff:
+            distractor_pool += np.random.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=False).tolist()
+           # else:
+                
             #     distractor_pool += np.random.choice(distractor_pool_set, self.distractor_pool_size-len(distractor_pool), replace=True).tolist()
         else:
-            distractor_pool = np.random.choice(distractor_pool_set, self.distractor_pool_size, replace=False).tolist()
+            distractor_pool = np.random.choice(list(distractor_pool_set), self.distractor_pool_size, replace=False).tolist()
 
         return count, distractor_pool, question_values
     
 
     def get_nth_interval(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+        breakpoint()
         """
             meta-question_id: 0
             meta-question: What is the {target_index} {voice} interval in the provided excerpt?
@@ -279,7 +284,7 @@ class AnswerDistractorExtractors:
                 str: The specified interval (e.g., "major third").
                 list[str]: A list of distractor intervals with ground truth excluded.
         """
-        breakpoint()
+        
         musicxml_path = get_musicxml_file_path(path)
 
         if not os.path.exists(musicxml_path):
@@ -305,7 +310,7 @@ class AnswerDistractorExtractors:
         notes = list(target_part.flatten().getElementsByClass(note.Note))
 
         if self.use_all_inds:
-            note_index = np.random.choice(range(len(notes)-1))
+            note_index = int(np.random.choice(range(len(notes)-1)))
             question_values['target_index'] = note_index
         else:
             note_index = question_values.get('target_index')
@@ -319,23 +324,28 @@ class AnswerDistractorExtractors:
         n2 = notes[note_index + 1]
         iv = interval.Interval(n1, n2)
         interval_name = iv.simpleName
-
-        distractor_pool = []
-        while True:
-            sample = np.random.choice([i for i in range(len(notes)-1)], None)
-            if sample!= note_index and sample not in distractor_pool:
-                distractor_pool.append(sample)
-            if len(distractor_pool) > self.distractor_pool_size:
-                break
-
-        intervals_pool = [interval.Interval(notes[i], notes[i + 1]) for i in distractor_pool]
-        interval_names_pool = [self.dict_interval_ontology[iv.simpleName] for iv in intervals_pool]
-        
+        all_interval_keys = [interval.Interval(notes[i], notes[i + 1]).simpleName for i in range(len(notes)-1)]
+       # all_interval_keys = [iv for iv in all_intervals if iv in self.dict_interval_ontology.keys()]
+        all_possible_interval_keys = set([_ for _ in self.dict_interval_ontology.keys() if _ != interval_name])
+        distractor_pool_set = set(all_interval_keys)
+        distractor_pool_set.discard(interval_name)
+        distractor_pool_list = list(distractor_pool_set)
+    
+        if len(distractor_pool_list) < self.distractor_pool_size:
+            #while len(distractor_pool_list) < self.distractor_pool_size:
+            distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
+            breakpoint()
+            distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+        else:
+            distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+        print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
+        distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
+        breakpoint()
         try:
-            return self.dict_interval_ontology[interval_name], interval_names_pool, question_values
+            return self.dict_interval_ontology[interval_name], distractor_pool, question_values
         
         except KeyError:
-            return None, interval_names_pool, question_values
+            return None, distractor_pool, question_values
 
     def get_interval_quantity(self, path: str, question_values: dict, distractor_keys: list[str]) -> tuple[str, list[str]]:
         """

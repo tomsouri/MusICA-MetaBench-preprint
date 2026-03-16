@@ -229,6 +229,7 @@ def step_0_instantiate_questions(config, ontology):
     output_data = []
 
     for skill, questions in questions_by_skill.items():
+
         for _ in range(q_count):
             meta_q = random.choice(questions)
             
