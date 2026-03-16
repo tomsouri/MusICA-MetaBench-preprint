@@ -10,7 +10,7 @@ num_options: 5
 nota_text: "none of the other options is correct"
 add_nota: true
 
-questions_per_skill_count: 16 # number of questions to generate per skill (for the draft, we can keep it small, e.g. 10, and then scale up after analyzing the results and iterating on the question templates)
+questions_per_subcategory_count: 20 # number of questions to generate per subcategory (for the draft, we can keep it small, e.g. 10, and then scale up after analyzing the results and iterating on the question templates)
 
 ontology_path: "ontology.yaml" # Add this to specify the path to the ontology file
 
@@ -21,6 +21,7 @@ ontology_path: "ontology.yaml" # Add this to specify the path to the ontology fi
 submodalities:
   - "audio.mastermix.wav"
   - "visual.pdf"
+  # - "visual.png"
   - "symbolic.musicxml"
 
 # simplification: for the draft, pre-decided percentage of such questions (those that do not contain ground truth among the options), e.g. 20% if we use 5 options (then NOTA is correct as frequently as any other option), only focus on it on evaluation (discussion of results)

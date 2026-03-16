@@ -168,11 +168,14 @@ import importlib.util
 import json
 import os
 import random
+import numpy as np
 import sys
 from collections import defaultdict
 from pathlib import Path
 import yaml
 import uuid
+import itertools
+
 from utils import load_methods_module
 
 stats = {
@@ -207,85 +210,81 @@ def print_checkpoint(step_num, title, filename):
         f"Errors: {stats['errors']:>4}"
     )
 
-def step_0_instantiate_questions(config, ontology):
-    args = config['cmdline_args']
-    
-    q_count = config.get('questions_per_skill_count', 10)
-    # ontology_path = config.get('ontology_path', 'ontology.yaml')
 
-    # # Load Ontology
-    # with open(ontology_path, 'r', encoding='utf-8') as f_ont:
-    #     ontology = yaml.safe_load(f_ont)
-    # Load meta-questions
+def step_0_minus_2_load_meta(config):
+    """Loads all raw meta-questions from the source file."""
+    args = config['cmdline_args']
     with open(args['meta'], 'r', encoding='utf-8') as f_meta:
         meta_questions = list(csv.DictReader(f_meta, delimiter='\t'))
+    
+    fields = list(meta_questions[0].keys())
+    save_intermediate(meta_questions, "00_minus_2_raw_meta.tsv", fields)
+    print_checkpoint(-2, "Load Raw Meta", "00_minus_2_raw_meta.tsv")
+    return meta_questions, fields
 
-    #
-    # filter out meta-questions that do not have `meta-question_id` in config['allowed_metaq_ids']
+def step_0_minus_1_filter_meta(meta_questions, config, fields):
+    """Filters the meta-questions list based on config."""
     if 'allowed_metaq_ids' in config:
         allowed_ids = [str(id) for id in config['allowed_metaq_ids']]
-        # print(allowed_ids)
         if len(allowed_ids) > 0:
             meta_questions = [q for q in meta_questions if str(q.get('meta-question_id')) in allowed_ids]
 
-    # Group meta-questions by skill
+    save_intermediate(meta_questions, "00_minus_1_filtered_meta.tsv", fields)
+    print_checkpoint(-1, "Filter Meta", "00_minus_1_filtered_meta.tsv")
+    return meta_questions, fields
+
+
+def step_0_instantiate_questions(meta_questions, config, ontology):
     questions_by_skill = defaultdict(list)
     for q in meta_questions:
         questions_by_skill[q['skill']].append(q)
 
     output_data = []
-
+    
     for skill, questions in questions_by_skill.items():
-
-        for _ in range(q_count):
-            meta_q = random.choice(questions)
-            
-            # Identify variables needed for this question
+        for meta_q in questions:
             try:
-                # Use ast.literal_eval in case single quotes are used in TSV (e.g., "['order', 'voice']")
                 var_names = ast.literal_eval(meta_q.get('question_keys', '[]'))
             except (ValueError, SyntaxError):
                 var_names = []
 
-            keys_dict = {}
-            words_dict = {}
-            # print(ontology)
-            # Sample each required variable from the ontology
+            # 1. Prepare lists for each variable based on the ontology
+            variable_options = []
+            ordered_keys = []
+            
             for v in var_names:
                 if v in ontology:
-                    # print(v)
-                    # Ontology stores lists of single-key dicts: e.g., [{1: "first"}, {2: "second"}]
-                    sampled_pair = random.choice(ontology[v])
-                   
-                    # Extract the key and value
-                    k = list(sampled_pair.keys())[0]
-                    word = list(sampled_pair.values())[0]
-                    keys_dict[v] = k
-                    words_dict[v] = word
+                    ordered_keys.append(v)
+                    # We create a list of (key, word) tuples for each variable
+                    options = [(list(entry.keys())[0], list(entry.values())[0]) for entry in ontology[v]]
+                    variable_options.append(options)
+            
+            # 2. Use itertools.product to generate every combination
+            for combination in itertools.product(*variable_options):
+                keys_dict = {}
+                words_dict = {}
+                
+                for i, (k, word) in enumerate(combination):
+                    v_name = ordered_keys[i]
+                    keys_dict[v_name] = k
+                    words_dict[v_name] = word
 
-            # Create the final row
-            row = dict(meta_q)
-            # TODO CHECK    if same question (same quedstion id) is not in output_data with exactly same keys and values 
-            # for _k,_v in keys_dict.items():
-            #     if _k not in json.loads(output_data['values']).keys():
-            #         row[_k] = _v
-            row['values'] = json.dumps(keys_dict)
+                # 3. Create the row
+                row = dict(meta_q)
+                row['values'] = json.dumps(keys_dict)
+                try:
+                    row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
+                except KeyError:
+                    row['question'] = meta_q['text_with_wildcards']
+                
+                output_data.append(row)
 
-            try:
-                row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
-            except KeyError as e:
-                print(f"Error formatting wildcards for question: {e}")
-                stats["errors"] += 1
-                row['question'] = meta_q['text_with_wildcards']
-
-            output_data.append(row)
-
-    # Define fields
     fields = list(meta_questions[0].keys()) + ['values', 'question']
     save_intermediate(output_data, "00_benchmark_step0_instantiated_questions.tsv", fields)
     print_checkpoint(0, "Instantiate Questions", "00_benchmark_step0_instantiated_questions.tsv")
-    
+    # save_intermediate and print_checkpoint logic remains the same
     return output_data, fields
+
 
 def step_1_generate_product(meta_questions, config, fields):
     args = config['cmdline_args']
@@ -369,6 +368,47 @@ def step_2_sort_distractors(data, config, fields):
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
+def step_2_3_remove_duplicates(data, config, fields):
+    """Removes duplicate questions based on question text and piece path."""
+    seen = set()
+    unique_data = []
+    for row in data:
+        identifier = (row['question'], row['path'])
+        if identifier not in seen:
+            seen.add(identifier)
+            unique_data.append(row)
+
+    save_intermediate(unique_data, "02_3_benchmark_deduplicated.tsv", fields)
+    print_checkpoint(2.3, "Remove Duplicates", "02_3_benchmark_deduplicated.tsv")
+    return unique_data, fields
+
+def step_2_5_subsample(data, config, fields):
+    """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
+
+    q_count = config.get('questions_per_subcategory_count', 10)
+
+    questions_by_subcategory = defaultdict(list)
+    for q in data:
+        questions_by_subcategory[q['subcategory']].append(q)
+
+    out_data = []
+    
+    for subcategory, questions in questions_by_subcategory.items():
+        # TODO: for each subcategory, subsample only the specified number of items
+
+        # Subsample if there are more questions than the limit
+        if len(questions) > q_count:
+            sampled_questions = random.sample(questions, q_count)
+            out_data.extend(sampled_questions)
+        else:
+            print("Warning: Subcategory '{}' has only {} questions, which is less than the desired count of {}. Keeping all questions for this subcategory.".format(subcategory, len(questions), q_count))
+            out_data.extend(questions)
+
+        
+    save_intermediate(out_data, "02_5_benchmark_subsampled.tsv", fields)
+    print_checkpoint(2.5, "Subsample Benchmark", "02_5_benchmark_subsampled.tsv")
+    return out_data, fields
+
 def is_submodality_part_of_modality(submodality, modality):
     return modality in submodality
 
@@ -398,21 +438,6 @@ def step_3_submodalities(data, config, fields):
     save_intermediate(out_data, "03_benchmark_with_submodalities.tsv", out_fields)
     print_checkpoint(3, "Submodalities Product", "03_benchmark_with_submodalities.tsv")
     return out_data, out_fields
-
-def step_3_5_subsample(data, config, fields):
-    """Samples down the benchmark size to `max_benchmark_items` if instructed by the config."""
-    max_items = config.get('max_benchmark_items', None)
-    
-    if max_items is not None and len(data) > max_items:
-        # random.sample extracts n unique elements, preventing duplicates
-        out_data = random.sample(data, max_items)
-        print(f"        -> Subsampled dataset from {len(data)} down to {max_items} items.")
-    else:
-        out_data = data
-        
-    save_intermediate(out_data, "03_5_benchmark_subsampled.tsv", fields)
-    print_checkpoint(3.5, "Subsample Benchmark", "03_5_benchmark_subsampled.tsv")
-    return out_data, fields
 
 def step_4_final_options(data, config, fields):
     out_fields = fields + ['final_correct_option', 'final_options', 'random_guess_performance_accuracy', 'is_nota_correct']
@@ -523,19 +548,37 @@ def step_7_final_save(data, config, fields):
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
+    parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
+    parser.add_argument("--submodalities", nargs='+', help="Override submodalities filter in config")
+    parser.add_argument("--questions_per_subcategory_count", type=int, help="Override questions per subcategory count for subsampling")
+    parser.add_argument("--seed", type=int, help="Override random seed for reproducibility")
 
     args = parser.parse_args()
 
     # Step 0 loading
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
-        
+
+    if args.benchmark_file:
+        config['cmdline_args']['output'] = args.benchmark_file
+    if args.submodalities:
+        config['submodalities'] = args.submodalities
+    if args.questions_per_subcategory_count is not None:
+        config['questions_per_subcategory_count'] = args.questions_per_subcategory_count
+    if args.seed is not None:
+        config['seed'] = args.seed
 
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         
     random.seed(config.get('seed', 42))
+    np.random.seed(config.get('seed', 42))
+
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
+
+        # 2. Save modified config to log directory
+    with open(os.path.join(INTERMEDIATE_DIR, "config_snapshot.yaml"), 'w') as f:
+        yaml.dump(config, f)
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
@@ -544,11 +587,20 @@ def main():
     # TODO: is it strange that the AnswerQG is instantiated but not used after that?
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
-    data, fields = step_0_instantiate_questions(config, ontology)
+
+        # 1. Load raw
+    raw_meta, meta_fields = step_0_minus_2_load_meta(config)
+    
+    # 2. Filter raw
+    filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
+
+    data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
+    # data, fields = step_0_instantiate_questions(config, ontology)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
+    data, fields = step_2_3_remove_duplicates(data, config, fields)
+    data, fields = step_2_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_3_submodalities(data, config, fields)
-    # data, fields = step_3_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_4_final_options(data, config, fields)
     data, fields = step_5_nota_correct(data, config, fields)
     data, fields = step_6_formatting(data, config, fields)

@@ -89,6 +89,7 @@ import sys
 import time
 import uuid
 from typing import Dict, Tuple
+import random
 
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
 from eval import evaluate_results
@@ -238,37 +239,54 @@ def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: b
         dummy_json = {"choices": [{"message": {"content": "Dry run response. Final Answer: A"}}], "usage": {"cost": 0.0}}
         return 0.0, time_taken, dummy_json, dummy_json['choices'][0]['message']['content']
 
-    retries = 0
-    max_retries = 5
-    response_json = {}
-    
-    while 'choices' not in response_json:
-        try:
-            response = requests.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            response_json = response.json()
-        except Exception as e:
-            print(f"Error calling API: {e}")
-            
-        if 'choices' in response_json:
-            break
-            
-        retries += 1
-        if retries >= max_retries:
-            print("ERROR Max retries reached. Returning empty.")
-            response_json = {"error": "Max retries reached."}
-            break
-            
-        print("Waiting for 60 seconds before retrying...")
-        time.sleep(60)
+    max_waiting_time = config.get("max_waiting_time_per_request", 10)
+    response_json = call_api_with_backoff(url, headers, payload, max_waiting_time=max_waiting_time)
         
     end_time = datetime.datetime.now()
     time_taken = (end_time - start_time).total_seconds()
     
-    response_text = response_json.get('choices', [{}])[0].get('message', {}).get('content', '')
+    response_text = response_json.get('choices', [{}])[0].get('message', {}).get('content', 'ERROR')
     cost = float(response_json.get('usage', {}).get('cost', 0.0))
     
     return cost, time_taken, response_json, response_text
+
+
+def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
+    """
+    Calls an API with exponential backoff and jitter.
+    
+    :param max_waiting_time: Total maximum seconds to wait before giving up.
+    """
+    start_time = time.time()
+    base_delay = 1  # Initial delay in seconds
+    attempt = 0
+    
+    while time.time() - start_time < max_waiting_time:
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+            
+        except requests.exceptions.RequestException as e:
+            # Check if we should stop for non-transient errors (e.g., 400 Bad Request)
+            if hasattr(e.response, 'status_code') and 400 <= e.response.status_code < 500:
+                print(f"Fatal error: {e}. Not retrying.")
+                return {"error": str(e)}
+            
+            # Calculate exponential backoff with jitter
+            # Formula: min(max_delay, base * 2^attempt)
+            delay = min(64, base_delay * (2 ** attempt))
+            jitter = random.uniform(0, delay)
+            
+            remaining_time = max_waiting_time - (time.time() - start_time)
+            if jitter > remaining_time:
+                break
+                
+            print(f"Error encountered: {e}. Retrying in {jitter:.2f}s...")
+            time.sleep(jitter)
+            attempt += 1
+            
+    return {"error": "Max waiting time exceeded."}
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
     """Removes base64 data streams from logs."""
@@ -290,30 +308,72 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
 # Main Benchmark Loop
 # =========================================================================
 
+import shutil
+
 def main():
     parser = argparse.ArgumentParser(description="Run LLM benchmark.")
     parser.add_argument("--config", required=True, help="Path to config yaml file")
+    # New command line arguments
+    parser.add_argument("--models", nargs='+', help="Override models in config")
+    parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
+    parser.add_argument("--url", help="Override API endpoint URL in config")
+    parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
+    parser.add_argument("--sheet_name", help="Override Google Sheet name in config")
+    parser.add_argument("--text_only_baseline", help="Override text_only_baseline flag in config", action='store_true')
+    parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
+    parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
+
     cmdline_args = parser.parse_args()
 
-    # Load Config
+    # 1. Load and Override Config
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
+    
+    if cmdline_args.models:
+        config['models'] = cmdline_args.models
+    if cmdline_args.api_key_env:
+        config['env_api_key_name'] = cmdline_args.api_key_env
+    if cmdline_args.url:
+        config['url'] = cmdline_args.url
+    if cmdline_args.benchmark_file:
+        config['benchmark_file'] = cmdline_args.benchmark_file
+    if cmdline_args.sheet_name:
+        config['sheet_name'] = cmdline_args.sheet_name
+    if cmdline_args.text_only_baseline:
+        config['text_only_baseline'] = True
+    if cmdline_args.modalities:
+        config['filters'] = config.get('filters', {})
+        config['filters']['modality'] = cmdline_args.modalities
 
-    benchmark_run_uuid = random_uuid()
-
+    if cmdline_args.run_id:
+        benchmark_run_uuid = cmdline_args.run_id
+    else:
+        benchmark_run_uuid = str(random_uuid())
+        
     config["benchmark_run_uuid"] = benchmark_run_uuid
-
-    # Allow cmdline override of output parameter
+    
+    # ... (Prepare logdir) ...
+    logdir = set_logdir(config)
+    
+    # 2. Save modified config to log directory
+    with open(os.path.join(logdir, "config_snapshot.yaml"), 'w') as f:
+        yaml.dump(config, f)
+        
+    # 3. Copy benchmark file to log directory
     target_benchmark_file = config.get('benchmark_file')
-    if not target_benchmark_file:
-         raise ValueError("Benchmark file must be specified in config.")
+    if target_benchmark_file and os.path.exists(target_benchmark_file):
+        shutil.copy2(target_benchmark_file, os.path.join(logdir, os.path.basename(target_benchmark_file)))
+    else:
+        raise ValueError("Benchmark file must be specified and exist.")
+    
+
          
     # Load extraction method
     methods_module = load_methods_module(config['path_to_extraction_file'])
     extraction_func = getattr(methods_module, config['extraction_method'])
 
     # Prepare logdir
-    logdir = set_logdir(config)
+    # logdir = set_logdir(config)
     log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
     
