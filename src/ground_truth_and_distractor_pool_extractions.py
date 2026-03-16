@@ -72,7 +72,7 @@ def get_tonal_notes():
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
         self.config = config_yaml
-        print(self.config)
+        # print(self.config)
         music_config = self.config['music_ontology_settings']
         if "harmonic_system" in self.config:
             system = self.config["harmonic_system"]
@@ -284,7 +284,7 @@ class AnswerDistractorExtractors:
                 str: The specified interval (e.g., "major third").
                 list[str]: A list of distractor intervals with ground truth excluded.
         """
-        
+        # breakpoint()
         musicxml_path = get_musicxml_file_path(path)
 
         if not os.path.exists(musicxml_path):
@@ -453,7 +453,7 @@ class AnswerDistractorExtractors:
         """
         # This function can be extended to handle different types of questions by checking the question type and calling the appropriate extraction method.
         # For now, it directly calls get_nth_note as an example.
-        print(method)
+        # print(method)
 
         ground_truth, ground_truth_pool, new_values = method(path, question_values) # self.get_nth_note_ground_truth(path, question_values)
         #distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
