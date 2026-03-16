@@ -220,6 +220,14 @@ def step_0_instantiate_questions(config, ontology):
     with open(args['meta'], 'r', encoding='utf-8') as f_meta:
         meta_questions = list(csv.DictReader(f_meta, delimiter='\t'))
 
+    #
+    # filter out meta-questions that do not have `meta-question_id` in config['allowed_metaq_ids']
+    if 'allowed_metaq_ids' in config:
+        allowed_ids = [str(id) for id in config['allowed_metaq_ids']]
+        # print(allowed_ids)
+        if len(allowed_ids) > 0:
+            meta_questions = [q for q in meta_questions if str(q.get('meta-question_id')) in allowed_ids]
+
     # Group meta-questions by skill
     questions_by_skill = defaultdict(list)
     for q in meta_questions:
@@ -240,11 +248,11 @@ def step_0_instantiate_questions(config, ontology):
 
             keys_dict = {}
             words_dict = {}
-            print(ontology)
+            # print(ontology)
             # Sample each required variable from the ontology
             for v in var_names:
                 if v in ontology:
-                    print(v)
+                    # print(v)
                     # Ontology stores lists of single-key dicts: e.g., [{1: "first"}, {2: "second"}]
                     sampled_pair = random.choice(ontology[v])
                    
@@ -310,8 +318,8 @@ def step_1_generate_product(meta_questions, config, fields):
                     row['ground_truth'] = ground_truth
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
-                print(row)
-                print(new_values_dict)
+                # print(row)
+                # print(new_values_dict)
             except Exception as e:
                 print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
                 stats["errors"] += 1
@@ -526,7 +534,7 @@ def main():
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
     # Pipeline Execution
-    print("--- Starting Pipelinen ---")
+    print("--- Starting Pipeline ---")
     # breakpoint()
 
     # TODO: is it strange that the AnswerQG is instantiated but not used after that?
