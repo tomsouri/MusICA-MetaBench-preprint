@@ -319,6 +319,9 @@ def main():
 
     benchmark_run_uuid = str(random_uuid())
 
+    print(f"Starting benchmark run with UUID: {benchmark_run_uuid}")
+    print()
+
     config["benchmark_run_uuid"] = benchmark_run_uuid
 
     # Allow cmdline override of output parameter
