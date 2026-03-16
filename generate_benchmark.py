@@ -119,7 +119,7 @@ Adjust the following script, such that before step 1, it would perform step 0 as
     - meta-question_id
     - skill
     - text_with_wildcards (e.g., "What is the scientific pitch notation of the {order} {voice} note in the provided excerpt?")
-    - "variable samples" (e.g. ["order", "voice"])
+    - question_keys (e.g. ["order", "voice"])
 
 - for each unique skill, generate the desired number of question instances (as configured in questions_per_skill_count):
     - iteratively sample a random meta-question corresponding to the given skill, until the desired number is reached
@@ -179,6 +179,7 @@ stats = {
     "errors": 0,
     "step_counts": {}
 }
+from src import ground_truth_and_distractor_pool_extractions
 
 PROJECT_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_DNS, "benchmark-generation")
 INTERMEDIATE_DIR = None
@@ -206,19 +207,26 @@ def print_checkpoint(step_num, title, filename):
         f"Errors: {stats['errors']:>4}"
     )
 
-def step_0_instantiate_questions(config):
+def step_0_instantiate_questions(config, ontology):
     args = config['cmdline_args']
     
     q_count = config.get('questions_per_skill_count', 10)
-    ontology_path = config.get('ontology_path', 'ontology.yaml')
+    # ontology_path = config.get('ontology_path', 'ontology.yaml')
 
-    # Load Ontology
-    with open(ontology_path, 'r', encoding='utf-8') as f_ont:
-        ontology = yaml.safe_load(f_ont)
-
+    # # Load Ontology
+    # with open(ontology_path, 'r', encoding='utf-8') as f_ont:
+    #     ontology = yaml.safe_load(f_ont)
     # Load meta-questions
     with open(args['meta'], 'r', encoding='utf-8') as f_meta:
         meta_questions = list(csv.DictReader(f_meta, delimiter='\t'))
+
+    #
+    # filter out meta-questions that do not have `meta-question_id` in config['allowed_metaq_ids']
+    if 'allowed_metaq_ids' in config:
+        allowed_ids = [str(id) for id in config['allowed_metaq_ids']]
+        # print(allowed_ids)
+        if len(allowed_ids) > 0:
+            meta_questions = [q for q in meta_questions if str(q.get('meta-question_id')) in allowed_ids]
 
     # Group meta-questions by skill
     questions_by_skill = defaultdict(list)
@@ -226,39 +234,43 @@ def step_0_instantiate_questions(config):
         questions_by_skill[q['skill']].append(q)
 
     output_data = []
-    
+
     for skill, questions in questions_by_skill.items():
+
         for _ in range(q_count):
             meta_q = random.choice(questions)
             
             # Identify variables needed for this question
             try:
                 # Use ast.literal_eval in case single quotes are used in TSV (e.g., "['order', 'voice']")
-                var_names = ast.literal_eval(meta_q.get('variable samples', '[]'))
+                var_names = ast.literal_eval(meta_q.get('question_keys', '[]'))
             except (ValueError, SyntaxError):
                 var_names = []
 
             keys_dict = {}
             words_dict = {}
-
+            # print(ontology)
             # Sample each required variable from the ontology
             for v in var_names:
                 if v in ontology:
+                    # print(v)
                     # Ontology stores lists of single-key dicts: e.g., [{1: "first"}, {2: "second"}]
                     sampled_pair = random.choice(ontology[v])
+                   
                     # Extract the key and value
                     k = list(sampled_pair.keys())[0]
                     word = list(sampled_pair.values())[0]
-                    
                     keys_dict[v] = k
                     words_dict[v] = word
-                else:
-                    print(f"Warning: Variable '{v}' not found in ontology.yaml")
 
             # Create the final row
             row = dict(meta_q)
+            # TODO CHECK    if same question (same quedstion id) is not in output_data with exactly same keys and values 
+            # for _k,_v in keys_dict.items():
+            #     if _k not in json.loads(output_data['values']).keys():
+            #         row[_k] = _v
             row['values'] = json.dumps(keys_dict)
-            
+
             try:
                 row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
             except KeyError as e:
@@ -277,33 +289,39 @@ def step_0_instantiate_questions(config):
 
 def step_1_generate_product(meta_questions, config, fields):
     args = config['cmdline_args']
-    methods_module = load_methods_module(args['methods_path'])
-
+    #methods_module = load_methods_module(args['methods_path'])
+    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     with open(args['pieces'], 'r', encoding='utf-8') as f_pieces:
         pieces = list(csv.DictReader(f_pieces, delimiter='\t'))
 
     output_data = []
     
     for meta in meta_questions:
-        method_name = meta['method_for_ground_truth_extraction']
-        if not hasattr(methods_module, method_name):
+        method_name = meta['method_for_ground_truth_extraction'] 
+        method_func = getattr(AnswerDistractorExtractors, method_name)
+        # Parse values dict safely
+        if not hasattr(AnswerDistractorExtractors, method_name):
             print(f"Error: Method '{method_name}' not found.")
+
             stats["errors"] += 1
             continue
-        
-        extraction_func = getattr(methods_module, method_name)
-        # Parse values dict safely
         values_dict = json.loads(meta['values']) if meta.get('values') else {}
-
+        # breakpoint()
         for piece in pieces:
             try:
-                # Update extraction function to include piece path AND values dict
-                ground_truth, distractor_pool = extraction_func(piece['path'], values_dict)
-                if ground_truth is not None:
-                    row = {**meta, **piece}
-                    row['ground_truth'] = ground_truth
+                
+                row = {**meta, **piece}
+                ground_truth, distractor_pool, new_values_dict = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
+                row['values']  = json.dumps(new_values_dict)
+                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_dict})
+                
+                if distractor_pool is not None:
+                    row['ground_truth'] = str(ground_truth)
+                    distractor_pool = [str(d) for d in distractor_pool]
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
+                # print(row)
+                # print(new_values_dict)
             except Exception as e:
                 print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
                 stats["errors"] += 1
@@ -465,6 +483,8 @@ def step_6_formatting(data, config, fields):
         options = json.loads(row['final_options'])
         correct_opt = row['final_correct_option']
         
+        # print(options)
+
         options.sort()
         random.shuffle(options)
         
@@ -519,7 +539,12 @@ def main():
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
-    data, fields = step_0_instantiate_questions(config)
+    # breakpoint()
+
+    # TODO: is it strange that the AnswerQG is instantiated but not used after that?
+    AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+    ontology = AnswerQuestionGenerator.ontology
+    data, fields = step_0_instantiate_questions(config, ontology)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
     data, fields = step_3_submodalities(data, config, fields)
