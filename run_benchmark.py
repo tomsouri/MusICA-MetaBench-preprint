@@ -317,7 +317,12 @@ def main():
     parser.add_argument("--models", nargs='+', help="Override models in config")
     parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
     parser.add_argument("--url", help="Override API endpoint URL in config")
-    
+    parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
+    parser.add_argument("--sheet_name", help="Override Google Sheet name in config")
+    parser.add_argument("--text_only_baseline", help="Override text_only_baseline flag in config", action='store_true')
+    parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
+    parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
+
     cmdline_args = parser.parse_args()
 
     # 1. Load and Override Config
@@ -330,8 +335,21 @@ def main():
         config['env_api_key_name'] = cmdline_args.api_key_env
     if cmdline_args.url:
         config['url'] = cmdline_args.url
+    if cmdline_args.benchmark_file:
+        config['benchmark_file'] = cmdline_args.benchmark_file
+    if cmdline_args.sheet_name:
+        config['sheet_name'] = cmdline_args.sheet_name
+    if cmdline_args.text_only_baseline:
+        config['text_only_baseline'] = True
+    if cmdline_args.modalities:
+        config['filters'] = config.get('filters', {})
+        config['filters']['modality'] = cmdline_args.modalities
 
-    benchmark_run_uuid = str(random_uuid())
+    if cmdline_args.run_id:
+        benchmark_run_uuid = cmdline_args.run_id
+    else:
+        benchmark_run_uuid = str(random_uuid())
+        
     config["benchmark_run_uuid"] = benchmark_run_uuid
     
     # ... (Prepare logdir) ...
