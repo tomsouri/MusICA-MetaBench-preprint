@@ -269,7 +269,7 @@ class AnswerDistractorExtractors:
     
 
     def get_nth_interval(self, path: str, question_values: dict) -> tuple[str, list[str]]:
-        breakpoint()
+      #  breakpoint()
         """
             meta-question_id: 0
             meta-question: What is the {target_index} {voice} interval in the provided excerpt?
@@ -334,13 +334,13 @@ class AnswerDistractorExtractors:
         if len(distractor_pool_list) < self.distractor_pool_size:
             #while len(distractor_pool_list) < self.distractor_pool_size:
             distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
-            breakpoint()
+          #  breakpoint()
             distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
         else:
             distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
         print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
         distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
-        breakpoint()
+      #  breakpoint()
         try:
             return self.dict_interval_ontology[interval_name], distractor_pool, question_values
         
