@@ -173,6 +173,8 @@ from collections import defaultdict
 from pathlib import Path
 import yaml
 import uuid
+import itertools
+
 from utils import load_methods_module
 
 stats = {
@@ -231,43 +233,55 @@ def step_0_minus_1_filter_meta(meta_questions, config, fields):
     return meta_questions, fields
 
 
-
 def step_0_instantiate_questions(meta_questions, config, ontology):
-    q_count = config.get('questions_per_skill_count', 10)
     questions_by_skill = defaultdict(list)
     for q in meta_questions:
         questions_by_skill[q['skill']].append(q)
 
     output_data = []
+    
     for skill, questions in questions_by_skill.items():
-        for _ in range(q_count):
-            meta_q = random.choice(questions)
+        for meta_q in questions:
             try:
                 var_names = ast.literal_eval(meta_q.get('question_keys', '[]'))
             except (ValueError, SyntaxError):
                 var_names = []
 
-            keys_dict, words_dict = {}, {}
+            # 1. Prepare lists for each variable based on the ontology
+            variable_options = []
+            ordered_keys = []
+            
             for v in var_names:
                 if v in ontology:
-                    sampled_pair = random.choice(ontology[v])
-                    k = list(sampled_pair.keys())[0]
-                    word = list(sampled_pair.values())[0]
-                    keys_dict[v] = k
-                    words_dict[v] = word
+                    ordered_keys.append(v)
+                    # We create a list of (key, word) tuples for each variable
+                    options = [(list(entry.keys())[0], list(entry.values())[0]) for entry in ontology[v]]
+                    variable_options.append(options)
+            
+            # 2. Use itertools.product to generate every combination
+            for combination in itertools.product(*variable_options):
+                keys_dict = {}
+                words_dict = {}
+                
+                for i, (k, word) in enumerate(combination):
+                    v_name = ordered_keys[i]
+                    keys_dict[v_name] = k
+                    words_dict[v_name] = word
 
-            row = dict(meta_q)
-            row['values'] = json.dumps(keys_dict)
-            try:
-                row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
-            except KeyError as e:
-                stats["errors"] += 1
-                row['question'] = meta_q['text_with_wildcards']
-            output_data.append(row)
+                # 3. Create the row
+                row = dict(meta_q)
+                row['values'] = json.dumps(keys_dict)
+                try:
+                    row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
+                except KeyError:
+                    row['question'] = meta_q['text_with_wildcards']
+                
+                output_data.append(row)
 
     fields = list(meta_questions[0].keys()) + ['values', 'question']
     save_intermediate(output_data, "00_benchmark_step0_instantiated_questions.tsv", fields)
     print_checkpoint(0, "Instantiate Questions", "00_benchmark_step0_instantiated_questions.tsv")
+    # save_intermediate and print_checkpoint logic remains the same
     return output_data, fields
 
 
@@ -352,6 +366,33 @@ def step_2_sort_distractors(data, config, fields):
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
+def step_2_5_subsample(data, config, fields):
+    """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
+
+    q_count = config.get('questions_per_subcategory_count', 10)
+
+    questions_by_subcategory = defaultdict(list)
+    for q in data:
+        questions_by_subcategory[q['subcategory']].append(q)
+
+    out_data = []
+    
+    for subcategory, questions in questions_by_subcategory.items():
+        # TODO: for each subcategory, subsample only the specified number of items
+
+        # Subsample if there are more questions than the limit
+        if len(questions) > q_count:
+            sampled_questions = random.sample(questions, q_count)
+            out_data.extend(sampled_questions)
+        else:
+            print("Warning: Subcategory '{}' has only {} questions, which is less than the desired count of {}. Keeping all questions for this subcategory.".format(subcategory, len(questions), q_count))
+            out_data.extend(questions)
+
+        
+    save_intermediate(out_data, "02_5_benchmark_subsampled.tsv", fields)
+    print_checkpoint(2.5, "Subsample Benchmark", "02_5_benchmark_subsampled.tsv")
+    return out_data, fields
+
 def is_submodality_part_of_modality(submodality, modality):
     return modality in submodality
 
@@ -381,21 +422,6 @@ def step_3_submodalities(data, config, fields):
     save_intermediate(out_data, "03_benchmark_with_submodalities.tsv", out_fields)
     print_checkpoint(3, "Submodalities Product", "03_benchmark_with_submodalities.tsv")
     return out_data, out_fields
-
-def step_3_5_subsample(data, config, fields):
-    """Samples down the benchmark size to `max_benchmark_items` if instructed by the config."""
-    max_items = config.get('max_benchmark_items', None)
-    
-    if max_items is not None and len(data) > max_items:
-        # random.sample extracts n unique elements, preventing duplicates
-        out_data = random.sample(data, max_items)
-        print(f"        -> Subsampled dataset from {len(data)} down to {max_items} items.")
-    else:
-        out_data = data
-        
-    save_intermediate(out_data, "03_5_benchmark_subsampled.tsv", fields)
-    print_checkpoint(3.5, "Subsample Benchmark", "03_5_benchmark_subsampled.tsv")
-    return out_data, fields
 
 def step_4_final_options(data, config, fields):
     out_fields = fields + ['final_correct_option', 'final_options', 'random_guess_performance_accuracy', 'is_nota_correct']
@@ -536,8 +562,8 @@ def main():
     # data, fields = step_0_instantiate_questions(config, ontology)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
+    data, fields = step_2_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_3_submodalities(data, config, fields)
-    # data, fields = step_3_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_4_final_options(data, config, fields)
     data, fields = step_5_nota_correct(data, config, fields)
     data, fields = step_6_formatting(data, config, fields)
