@@ -207,84 +207,69 @@ def print_checkpoint(step_num, title, filename):
         f"Errors: {stats['errors']:>4}"
     )
 
-def step_0_instantiate_questions(config, ontology):
-    args = config['cmdline_args']
-    
-    q_count = config.get('questions_per_skill_count', 10)
-    # ontology_path = config.get('ontology_path', 'ontology.yaml')
 
-    # # Load Ontology
-    # with open(ontology_path, 'r', encoding='utf-8') as f_ont:
-    #     ontology = yaml.safe_load(f_ont)
-    # Load meta-questions
+def step_0_minus_2_load_meta(config):
+    """Loads all raw meta-questions from the source file."""
+    args = config['cmdline_args']
     with open(args['meta'], 'r', encoding='utf-8') as f_meta:
         meta_questions = list(csv.DictReader(f_meta, delimiter='\t'))
+    
+    fields = list(meta_questions[0].keys())
+    save_intermediate(meta_questions, "00_minus_2_raw_meta.tsv", fields)
+    print_checkpoint(-2, "Load Raw Meta", "00_minus_2_raw_meta.tsv")
+    return meta_questions, fields
 
-    #
-    # filter out meta-questions that do not have `meta-question_id` in config['allowed_metaq_ids']
+def step_0_minus_1_filter_meta(meta_questions, config, fields):
+    """Filters the meta-questions list based on config."""
     if 'allowed_metaq_ids' in config:
         allowed_ids = [str(id) for id in config['allowed_metaq_ids']]
-        # print(allowed_ids)
         if len(allowed_ids) > 0:
             meta_questions = [q for q in meta_questions if str(q.get('meta-question_id')) in allowed_ids]
 
-    # Group meta-questions by skill
+    save_intermediate(meta_questions, "00_minus_1_filtered_meta.tsv", fields)
+    print_checkpoint(-1, "Filter Meta", "00_minus_1_filtered_meta.tsv")
+    return meta_questions, fields
+
+
+
+def step_0_instantiate_questions(meta_questions, config, ontology):
+    q_count = config.get('questions_per_skill_count', 10)
     questions_by_skill = defaultdict(list)
     for q in meta_questions:
         questions_by_skill[q['skill']].append(q)
 
     output_data = []
-
     for skill, questions in questions_by_skill.items():
         for _ in range(q_count):
             meta_q = random.choice(questions)
-            
-            # Identify variables needed for this question
             try:
-                # Use ast.literal_eval in case single quotes are used in TSV (e.g., "['order', 'voice']")
                 var_names = ast.literal_eval(meta_q.get('question_keys', '[]'))
             except (ValueError, SyntaxError):
                 var_names = []
 
-            keys_dict = {}
-            words_dict = {}
-            # print(ontology)
-            # Sample each required variable from the ontology
+            keys_dict, words_dict = {}, {}
             for v in var_names:
                 if v in ontology:
-                    # print(v)
-                    # Ontology stores lists of single-key dicts: e.g., [{1: "first"}, {2: "second"}]
                     sampled_pair = random.choice(ontology[v])
-                   
-                    # Extract the key and value
                     k = list(sampled_pair.keys())[0]
                     word = list(sampled_pair.values())[0]
                     keys_dict[v] = k
                     words_dict[v] = word
 
-            # Create the final row
             row = dict(meta_q)
-            # TODO CHECK    if same question (same quedstion id) is not in output_data with exactly same keys and values 
-            # for _k,_v in keys_dict.items():
-            #     if _k not in json.loads(output_data['values']).keys():
-            #         row[_k] = _v
             row['values'] = json.dumps(keys_dict)
-
             try:
                 row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
             except KeyError as e:
-                print(f"Error formatting wildcards for question: {e}")
                 stats["errors"] += 1
                 row['question'] = meta_q['text_with_wildcards']
-
             output_data.append(row)
 
-    # Define fields
     fields = list(meta_questions[0].keys()) + ['values', 'question']
     save_intermediate(output_data, "00_benchmark_step0_instantiated_questions.tsv", fields)
     print_checkpoint(0, "Instantiate Questions", "00_benchmark_step0_instantiated_questions.tsv")
-    
     return output_data, fields
+
 
 def step_1_generate_product(meta_questions, config, fields):
     args = config['cmdline_args']
@@ -540,7 +525,15 @@ def main():
     # TODO: is it strange that the AnswerQG is instantiated but not used after that?
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
-    data, fields = step_0_instantiate_questions(config, ontology)
+
+        # 1. Load raw
+    raw_meta, meta_fields = step_0_minus_2_load_meta(config)
+    
+    # 2. Filter raw
+    filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
+
+    data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
+    # data, fields = step_0_instantiate_questions(config, ontology)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
     data, fields = step_3_submodalities(data, config, fields)
