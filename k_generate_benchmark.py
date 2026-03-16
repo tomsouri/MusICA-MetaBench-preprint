@@ -119,7 +119,7 @@ Adjust the following script, such that before step 1, it would perform step 0 as
     - meta-question_id
     - skill
     - text_with_wildcards (e.g., "What is the scientific pitch notation of the {order} {voice} note in the provided excerpt?")
-    - question_keys (e.g. ["order", "voice"])
+    - "variable samples" (e.g. ["order", "voice"])
 
 - for each unique skill, generate the desired number of question instances (as configured in questions_per_skill_count):
     - iteratively sample a random meta-question corresponding to the given skill, until the desired number is reached
@@ -179,7 +179,7 @@ stats = {
     "errors": 0,
     "step_counts": {}
 }
-from src import ground_truth_and_distractor_pool_extractions
+
 
 PROJECT_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_DNS, "benchmark-generation")
 INTERMEDIATE_DIR = None
@@ -188,6 +188,8 @@ def deterministic_uuid(data):
     """Generates a deterministic UUID based on the input data dictionary."""
     normalized = json.dumps(data, sort_keys=True)
     return uuid.uuid5(PROJECT_NAMESPACE, normalized)
+
+
 
 def save_intermediate(data, filename, fieldnames):
     filepath = os.path.join(INTERMEDIATE_DIR, filename)
@@ -206,16 +208,18 @@ def print_checkpoint(step_num, title, filename):
         f"Items: {count:>8}  "
         f"Errors: {stats['errors']:>4}"
     )
+    # print(f"Step {step_num} [{title}] complete. Current items: {count}. Errors so far: {stats['errors']}.")
 
-def step_0_instantiate_questions(config, ontology):
+def step_0_instantiate_questions(config):
     args = config['cmdline_args']
     
     q_count = config.get('questions_per_skill_count', 10)
-    # ontology_path = config.get('ontology_path', 'ontology.yaml')
+    ontology_path = config.get('ontology_path', 'ontology.yaml')
 
-    # # Load Ontology
-    # with open(ontology_path, 'r', encoding='utf-8') as f_ont:
-    #     ontology = yaml.safe_load(f_ont)
+    # Load Ontology
+    with open(ontology_path, 'r', encoding='utf-8') as f_ont:
+        ontology = yaml.safe_load(f_ont)
+
     # Load meta-questions
     with open(args['meta'], 'r', encoding='utf-8') as f_meta:
         meta_questions = list(csv.DictReader(f_meta, delimiter='\t'))
@@ -226,7 +230,7 @@ def step_0_instantiate_questions(config, ontology):
         questions_by_skill[q['skill']].append(q)
 
     output_data = []
-
+    
     for skill, questions in questions_by_skill.items():
         for _ in range(q_count):
             meta_q = random.choice(questions)
@@ -234,34 +238,31 @@ def step_0_instantiate_questions(config, ontology):
             # Identify variables needed for this question
             try:
                 # Use ast.literal_eval in case single quotes are used in TSV (e.g., "['order', 'voice']")
-                var_names = ast.literal_eval(meta_q.get('question_keys', '[]'))
+                var_names = ast.literal_eval(meta_q.get('variable samples', '[]'))
             except (ValueError, SyntaxError):
                 var_names = []
 
             keys_dict = {}
             words_dict = {}
-            print(ontology)
+
             # Sample each required variable from the ontology
             for v in var_names:
                 if v in ontology:
-                    print(v)
                     # Ontology stores lists of single-key dicts: e.g., [{1: "first"}, {2: "second"}]
                     sampled_pair = random.choice(ontology[v])
-                   
                     # Extract the key and value
                     k = list(sampled_pair.keys())[0]
                     word = list(sampled_pair.values())[0]
+                    
                     keys_dict[v] = k
                     words_dict[v] = word
+                else:
+                    print(f"Warning: Variable '{v}' not found in ontology.yaml")
 
             # Create the final row
             row = dict(meta_q)
-            # TODO CHECK    if same question (same quedstion id) is not in output_data with exactly same keys and values 
-            # for _k,_v in keys_dict.items():
-            #     if _k not in json.loads(output_data['values']).keys():
-            #         row[_k] = _v
             row['values'] = json.dumps(keys_dict)
-
+            
             try:
                 row['question'] = meta_q['text_with_wildcards'].format(**words_dict)
             except KeyError as e:
@@ -280,38 +281,33 @@ def step_0_instantiate_questions(config, ontology):
 
 def step_1_generate_product(meta_questions, config, fields):
     args = config['cmdline_args']
-    #methods_module = load_methods_module(args['methods_path'])
-    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+    methods_module = load_methods_module(args['methods_path'])
+
     with open(args['pieces'], 'r', encoding='utf-8') as f_pieces:
         pieces = list(csv.DictReader(f_pieces, delimiter='\t'))
 
     output_data = []
     
     for meta in meta_questions:
-        method_name = meta['method_for_ground_truth_extraction'] 
-        method_func = getattr(AnswerDistractorExtractors, method_name)
-        # Parse values dict safely
-        if not hasattr(AnswerDistractorExtractors, method_name):
+        method_name = meta['method_for_ground_truth_extraction']
+        if not hasattr(methods_module, method_name):
             print(f"Error: Method '{method_name}' not found.")
-
             stats["errors"] += 1
             continue
+        
+        extraction_func = getattr(methods_module, method_name)
+        # Parse values dict safely
         values_dict = json.loads(meta['values']) if meta.get('values') else {}
-        # breakpoint()
+
         for piece in pieces:
             try:
-                
-                row = {**meta, **piece}
-                ground_truth, distractor_pool, new_values_dict = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
-                row['values']  = json.dumps(new_values_dict)
-                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_dict})
-                
-                if distractor_pool is not None:
+                # Update extraction function to include piece path AND values dict
+                ground_truth, distractor_pool = extraction_func(piece['path'], values_dict)
+                if ground_truth is not None:
+                    row = {**meta, **piece}
                     row['ground_truth'] = ground_truth
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
-                print(row)
-                print(new_values_dict)
             except Exception as e:
                 print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
                 stats["errors"] += 1
@@ -326,6 +322,9 @@ def step_1_generate_product(meta_questions, config, fields):
 
 
 def step_2_sort_distractors(data, config, fields):
+    # TODO: if the sorting of distractors depends on the modality of the content file in the question, this should be
+    # moved after step 3.
+
     out_fields = fields + ['sorted_distractors']
     method_name = config.get('sorting_method')
     methods_path = config.get('sorting_methods_path')
@@ -348,18 +347,21 @@ def step_2_sort_distractors(data, config, fields):
     for row in data:
         pool = json.loads(row['distractor_pool'])
         try:
+            # We pass the pool and the current row data to the sorting method context
             sorted_pool = sort_func(pool, row)
             row['sorted_distractors'] = json.dumps(sorted_pool)
         except Exception as e:
             print(f"Error sorting distractors for item: {e}")
             stats["errors"] += 1
-            row['sorted_distractors'] = json.dumps(pool)
+            row['sorted_distractors'] = json.dumps(pool) # Fallback to unsorted if error occurs
     
     save_intermediate(data, "02_benchmark_distractors_sorted.tsv", out_fields)
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
 def is_submodality_part_of_modality(submodality, modality):
+    """Each submodality should have the modality in the name"""
+    # TODO: Return true if modality is the substring of submodality
     return modality in submodality
 
 def modality_from_submodality(submodality):
@@ -372,12 +374,14 @@ def modality_from_submodality(submodality):
     return "UNDEFINED_MODALITY"
 
 def step_3_submodalities(data, config, fields):
+
     out_fields = fields + ['modality', 'submodality', 'path_to_question_context_file']
     out_data = []
     for row in data:
-        question_modalities = row.get('modality_in_question', '').split(',')
+        question_modalities = row['modality_in_question'].split(',') # Assuming modalities are comma-separated in the input
         
-        for sub in config.get('submodalities', []):
+        for sub in config['submodalities']:
+            # Only include the submodality, if it is a part of a modality that is supported by the question.
             if any(is_submodality_part_of_modality(sub, mod) for mod in question_modalities):
                 new_row = dict(row)
                 new_row['modality'] = modality_from_submodality(sub)
@@ -388,21 +392,6 @@ def step_3_submodalities(data, config, fields):
     save_intermediate(out_data, "03_benchmark_with_submodalities.tsv", out_fields)
     print_checkpoint(3, "Submodalities Product", "03_benchmark_with_submodalities.tsv")
     return out_data, out_fields
-
-def step_3_5_subsample(data, config, fields):
-    """Samples down the benchmark size to `max_benchmark_items` if instructed by the config."""
-    max_items = config.get('max_benchmark_items', None)
-    
-    if max_items is not None and len(data) > max_items:
-        # random.sample extracts n unique elements, preventing duplicates
-        out_data = random.sample(data, max_items)
-        print(f"        -> Subsampled dataset from {len(data)} down to {max_items} items.")
-    else:
-        out_data = data
-        
-    save_intermediate(out_data, "03_5_benchmark_subsampled.tsv", fields)
-    print_checkpoint(3.5, "Subsample Benchmark", "03_5_benchmark_subsampled.tsv")
-    return out_data, fields
 
 def step_4_final_options(data, config, fields):
     out_fields = fields + ['final_correct_option', 'final_options', 'random_guess_performance_accuracy', 'is_nota_correct']
@@ -446,12 +435,14 @@ def step_5_nota_correct(data, config, fields):
         nota_text = config['nota_text']
         
         for row in data:
-            out_data.append(dict(row)) 
+            out_data.append(dict(row)) # Keep original item
             
+            # Inject NOTA Correct randomly
             if random.random() < P:
                 new_row = dict(row)
                 distractors = json.loads(row['sorted_distractors'])
                 
+                # Top N-1 distractors + NOTA
                 options = [nota_text] + distractors[:N-1]
                 new_row['final_correct_option'] = nota_text
                 new_row['final_options'] = json.dumps(options)
@@ -473,6 +464,7 @@ def step_6_formatting(data, config, fields):
         options = json.loads(row['final_options'])
         correct_opt = row['final_correct_option']
         
+        # Sort alphabetically, then randomly
         options.sort()
         random.shuffle(options)
         
@@ -486,7 +478,7 @@ def step_6_formatting(data, config, fields):
             index2ans[label] = opt
             labeled_final_options.append(f"({label}) {opt}")
             if opt == correct_opt:
-                labeled_correct = label
+                labeled_correct = label # Assign label letter as correct answer (e.g., 'C')
                 
         row['all_choices'] = json.dumps(all_choices)
         row['index2ans'] = json.dumps(index2ans)
@@ -494,11 +486,13 @@ def step_6_formatting(data, config, fields):
         row['labeled_final_correct_option'] = f"({labeled_correct}) {correct_opt}"
         row['label_of_final_correct_option'] = labeled_correct
 
+        # For item_id, use a unique string identifier
         row['item_id'] = str(deterministic_uuid(row))
 
     save_intermediate(data, "06_benchmark_with_labeled_sorted_final_options.tsv", out_fields)
     print_checkpoint(6, "Labels & Sorting Options", "06_benchmark_with_labeled_sorted_final_options.tsv")
     return data, out_fields
+
 
 def step_7_final_save(data, config, fields):
     out_path = config['cmdline_args']['output']
@@ -511,13 +505,11 @@ def step_7_final_save(data, config, fields):
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
-
     args = parser.parse_args()
 
-    # Step 0 loading
+    # Step 0: Load Config
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
-        
 
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -526,28 +518,22 @@ def main():
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
     # Pipeline Execution
-    print("--- Starting Pipelinen ---")
-    # breakpoint()
-
-    # TODO: is it strange that the AnswerQG is instantiated but not used after that?
-    AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
-    ontology = AnswerQuestionGenerator.ontology
-    data, fields = step_0_instantiate_questions(config, ontology)
+    print("--- Starting Pipeline ---")
+    data, fields = step_0_instantiate_questions(config)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
     data, fields = step_3_submodalities(data, config, fields)
-    # data, fields = step_3_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_4_final_options(data, config, fields)
     data, fields = step_5_nota_correct(data, config, fields)
     data, fields = step_6_formatting(data, config, fields)
     step_7_final_save(data, config, fields)
 
-    # Final Statistics
+    # Step 8: Final Statistics
     total_items = len(data)
-    nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
+    nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config['nota_text'])
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
-    print("\n--- Final Statistics ---")
+    print("\n--- Step 8: Final Statistics ---")
     print(f"Total Benchmark Items : {total_items}")
     print(f"NOTA Correct Items    : {nota_correct_count} ({nota_percent:.2f}%)")
     print(f"Total Errors Recorded : {stats['errors']}")
