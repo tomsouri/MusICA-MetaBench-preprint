@@ -10,6 +10,13 @@ num_options: 5
 nota_text: "none of the other options is correct"
 add_nota: true
 
+questions_per_skill_count: 16 # number of questions to generate per skill (for the draft, we can keep it small, e.g. 10, and then scale up after analyzing the results and iterating on the question templates)
+
+ontology_path: "ontology.yaml" # Add this to specify the path to the ontology file
+
+# If you specify a number here, the total number of 
+# max_benchmark_items: 
+
 # simplification for draft: only use final mix recordings, high-quality rendered PDF, and musicxml
 submodalities:
   - "audio.mastermix.wav"
@@ -27,6 +34,9 @@ cmdline_args:
   pieces: "pieces.tsv"
   methods_path: "src/ground_truth_and_distractor_pool_extractions.py"
   output: "benchmark_v1.tsv"
+
+allowed_metaq_ids:
+  - 0
 
 music_ontology_settings:
   ontology_path: "ontology.yaml"
