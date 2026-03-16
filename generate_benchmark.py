@@ -545,13 +545,25 @@ def step_7_final_save(data, config, fields):
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
+    parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
+    parser.add_argument("--submodalities", nargs='+', help="Override submodalities filter in config")
+    parser.add_argument("--questions_per_subcategory_count", type=int, help="Override questions per subcategory count for subsampling")
+    parser.add_argument("--seed", type=int, help="Override random seed for reproducibility")
 
     args = parser.parse_args()
 
     # Step 0 loading
     with open(args.config, 'r') as f:
         config = yaml.safe_load(f)
-        
+
+    if args.benchmark_file:
+        config['cmdline_args']['output'] = args.benchmark_file
+    if args.submodalities:
+        config['submodalities'] = args.submodalities
+    if args.questions_per_subcategory_count is not None:
+        config['questions_per_subcategory_count'] = args.questions_per_subcategory_count
+    if args.seed is not None:
+        config['seed'] = args.seed
 
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -560,6 +572,10 @@ def main():
     np.random.seed(config.get('seed', 42))
 
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
+
+        # 2. Save modified config to log directory
+    with open(os.path.join(INTERMEDIATE_DIR, "config_snapshot.yaml"), 'w') as f:
+        yaml.dump(config, f)
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
