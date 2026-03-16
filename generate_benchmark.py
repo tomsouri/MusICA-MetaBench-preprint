@@ -366,6 +366,20 @@ def step_2_sort_distractors(data, config, fields):
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
+def step_2_3_remove_duplicates(data, config, fields):
+    """Removes duplicate questions based on question text and piece path."""
+    seen = set()
+    unique_data = []
+    for row in data:
+        identifier = (row['question'], row['path'])
+        if identifier not in seen:
+            seen.add(identifier)
+            unique_data.append(row)
+
+    save_intermediate(unique_data, "02_3_benchmark_deduplicated.tsv", fields)
+    print_checkpoint(2.3, "Remove Duplicates", "02_3_benchmark_deduplicated.tsv")
+    return unique_data, fields
+
 def step_2_5_subsample(data, config, fields):
     """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
 
@@ -562,6 +576,7 @@ def main():
     # data, fields = step_0_instantiate_questions(config, ontology)
     data, fields = step_1_generate_product(data, config, fields)
     data, fields = step_2_sort_distractors(data, config, fields)
+    data, fields = step_2_3_remove_duplicates(data, config, fields)
     data, fields = step_2_5_subsample(data, config, fields) # Automatically controls footprint
     data, fields = step_3_submodalities(data, config, fields)
     data, fields = step_4_final_options(data, config, fields)
