@@ -30,25 +30,34 @@ import copy
 #     }
 def get_tonal_intervals():
 
-    intervals = {
-            "P1": "perfect unison",
-            "m2": "minor second",
-            "M2": "major second",
-            "m3": "minor third",
-            "M3": "major third",
-            "P4": "perfect fourth",
-            "A4": "augmented fourth",
-            "d5": "diminished fifth",
-            "P5": "perfect fifth",
-            "m6": "minor sixth",
-            "M6": "major sixth",
-            "m7": "minor seventh",
-            "M7": "major seventh",
-            "P8": "perfect octave"
-        }
+    perfect_numbers = [1,4,5,8]
+    major_numbers = [2,3,6,7]
 
-    return intervals
+    ontology = {}
 
+    # perfect-type intervals
+    for n in perfect_numbers:
+        for q in ["P","A","d"]:
+            name = f"{q}{n}"
+            try:
+                iv = interval.Interval(name)
+                #possible also to use iv.niceName or iv.name, but simpleName is more concise and still recognizable
+                ontology[name] = iv.niceName
+            except:
+                pass
+
+    # major/minor-type intervals
+    for n in major_numbers:
+        for q in ["M","m","A","d"]:
+            name = f"{q}{n}"
+            try:
+                iv = interval.Interval(name)
+                ontology[name] = iv.niceName
+            except:
+                pass
+
+    return ontology
+   
 def get_tonal_notes():
     notes = {}
     for pc in range(12):
@@ -98,13 +107,15 @@ class AnswerDistractorExtractors:
                     'T': 2, # Tenor
                     'B': 3  # Bass
                 }
-        
-        if self.ontology.get('target_index', None) or self.config.get('use_all_inds',False):
+        # if self.config.get('use_all_inds', None) and self.ontology.get('target_index') is not None:
+        #     print("Warning: Both 'target_index' and 'use_all_inds' are specified in the config. 'use_all_inds' will take precedence and 'target_index' will be ignored.")
+        # if if target_index is not specified in the config, or if use_all_inds is set to True, then we will sample from all possible indices in the piece for each question, instead of using a fixed index across all pieces. This allows for more variability in the questions and answers across different pieces.
+        if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
             self.use_all_inds = True
     
         else:
             self.use_all_inds = False 
-        self.distractor_pool_size = self.config['distractor_pool_size']
+        self.min_num_distractors = self.config['min_num_distractors']
         
     
     def build_interval_ontology(self,system):
@@ -228,7 +239,7 @@ class AnswerDistractorExtractors:
         score = converter.parse(musicxml_path)
         target_pitch = question_values.get('pitch')
 
-        if target_pitch not in self.dict_note_ontology.values():
+        if target_pitch not in self.dict_note_ontology.keys():
             raise ValueError(f"Invalid pitch specified: {target_pitch}. Expected one of {self.dict_note_ontology}.")
 
         voice_key = question_values.get('voice')
@@ -273,7 +284,6 @@ class AnswerDistractorExtractors:
     
 
     def get_nth_interval(self, path: str, question_values: dict) -> tuple[str, list[str]]:
- 
         """
             meta-question_id: 0
             meta-question: What is the {target_index} {voice} interval in the provided excerpt?
@@ -344,14 +354,11 @@ class AnswerDistractorExtractors:
         #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
         # print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
         distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
-     
-        try:
-            return self.dict_interval_ontology[interval_name], distractor_pool, question_values
         
-        except KeyError:
-            return None, distractor_pool, question_values
+        return self.dict_interval_ontology[interval_name], distractor_pool, question_values
 
-    def get_interval_quantity(self, path: str, question_values: dict, distractor_keys: list[str]) -> tuple[str, list[str]]:
+
+    def get_interval_quantity(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         """
             meta-question_id: 0
             meta-question: Which voice part has the {quantity} number of {interval} intervals in the provided excerpt?
@@ -376,8 +383,9 @@ class AnswerDistractorExtractors:
         # Parse the MusicXML file into a music21 Stream
         score = converter.parse(musicxml_path)
         target_interval = question_values.get('interval')
-        if target_interval not in self.interval_ontology.values():
-            raise ValueError(f"Invalid pitch specified: {target_interval}. Expected one of {self.interval_ontology}.")
+       
+        if target_interval not in self.dict_interval_ontology.keys():
+            raise ValueError(f"Invalid pitch specified: {target_interval}. Expected one of {self.dict_interval_ontology}.")
 
         voice_key = question_values.get('voice')
         if voice_key not in self.voice_mapping:
@@ -399,49 +407,42 @@ class AnswerDistractorExtractors:
         
         #for test_note in score.parts[0].flatten().getElementsByClass(note.Note):
         intervals = []
-        for note_idx in range(len(notes)):
+        for note_idx in range(len(notes)-1):
             n1 = notes[note_idx]
             n2 = notes[note_idx + 1]
             iv = interval.Interval(n1, n2)
             interval_name = iv.simpleName
             intervals.append(interval_name)
 
-        count = sum(1 for n in intervals if n == target_interval)
-        intervals_set = set(intervals)
-        tmp_pool = []
-        for nn in intervals_set:
-            tmp_pool.append(sum(1 for n in intervals if n == target_interval))
+        count = int(sum(1 for n in intervals if n == target_interval))
         
-        distractor_pool = []
-        while True:
-            sample = np.random.choice(tmp_pool, None)
-            if sample!= count and sample not in distractor_pool:
-                distractor_pool.append(int(sample))
-            if len(distractor_pool) > self.distractor_pool_size:
-                break
+        tmp_pool = []
+      
+        for vv in self.voice_mapping.keys():
+         
+            other_part = score.parts[self.voice_mapping[vv]]
+            other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+            for note_idx in range(len(other_notes)-1):
+                n1 = other_notes[note_idx]
+                n2 = other_notes[note_idx + 1]
+                iv = interval.Interval(n1, n2)
+                interval_name = iv.simpleName
+                intervals.append(interval_name)
+        intervals_set = set(intervals)
+        intervals_set.discard(target_interval)
+        for nn in intervals_set:
+            tmp_pool.append(int(sum(1 for _ in intervals if _ == nn)))
+        
+        # distractor_pool = []
+        # while True:
+        #     sample = int(np.random.choice(tmp_pool, None))
+        #     if sample != count and sample not in distractor_pool:
+        #         distractor_pool.append(int(sample))
+        #     if len(distractor_pool) > self.distractor_pool_size:
+        #         break
 
-        return count, distractor_pool, question_values
+        return count, tmp_pool, question_values
 
-            # def get_distractors(self, distractor_keys: list[str], ground_truth_pool: list[str]) -> list[str]:
-            #     """
-            #     Returns a list of distractor pitches based on the provided keys.
-                
-            #     Args:
-            #         distractor_keys (list[str]): A list of keys corresponding to distractors in the ontology.
-                    
-            #     Returns:
-            #         list[str]: A list of distractor pitches.
-            #     """
-            #     distractors = []
-            #     dist_pools = {}
-            #     for key in distractor_keys:
-            #         if isinstance(ground_truth_pool, dict):
-            #             if ground_truth_pool[key]:
-            #                 dist_pools[key] = np.random.choice(ground_truth_pool, size=self.distractor_pool_size, replace=False).tolist()
-            #         else:
-            #             dist_pools[key] = np.random.choice(self.ontology[key], size=self.distractor_pool_size, replace=False).tolist()
-            #     distractors = ["".join(pool) for pool in zip(*dist_pools.values())]
-            #     return distractors
     
     def extract_answer_and_distractors(self, method, path: str, question_values: dict) -> tuple[str, list[str]]:
         """
@@ -461,13 +462,27 @@ class AnswerDistractorExtractors:
 
         ground_truth, ground_truth_pool, new_values = method(path, question_values) # self.get_nth_note_ground_truth(path, question_values)
         #distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
-        
+       # breakpoint()
         # additional, just safety reasons: Ensure the ground truth is not in the distractor pool
         if ground_truth in ground_truth_pool:
             ground_truth_pool.remove(ground_truth)
-        if len(set(ground_truth_pool))< 4:
+        if len(set(ground_truth_pool))< self.min_num_distractors:
             #TODO: implement smarter distractor generation in this case, e.g., by using the ontology to find similar notes/intervals to the ground truth and sampling from those.
             print(f"Warning: Only {len(set(ground_truth_pool))} unique distractors generated for question {path}.")
-
-            #raise ValueError("less then 4 distractors generated, bug!")
+            
+            ground_truth_pool = list(set(ground_truth_pool))
+            len_diff = self.min_num_distractors - len(ground_truth_pool)
+            
+            method_name = method.__name__
+            if "interval" in method_name:
+                sample_space = copy.deepcopy(set(self.dict_interval_ontology.values()))
+                sample_space.discard(ground_truth)
+                additional_distractors = np.random.choice(list(sample_space), len_diff, replace=False).tolist()
+            elif "note" in method_name:
+                sample_space = copy.deepcopy(set(self.dict_note_ontology.values()))
+                sample_space.discard(ground_truth)
+                additional_distractors = np.random.choice(list(sample_space), len_diff, replace=False).tolist()
+            ground_truth_pool += additional_distractors
+        else:
+            ground_truth_pool = list(set(ground_truth_pool))
         return ground_truth, ground_truth_pool, new_values

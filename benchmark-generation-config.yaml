@@ -27,7 +27,7 @@ submodalities:
 nota_correct_percentage: 0.20 # e.g., 20%
 labels: ["A", "B", "C", "D", "E"]
 seed: 42
-distractor_pool_size: 20
+min_num_distractors: 4
 
 cmdline_args:
   meta: "meta-questions-K.tsv"

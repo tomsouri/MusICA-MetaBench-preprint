@@ -1,5 +1,5 @@
 meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires
 0	perception	pitch	pitch recognition	What is the scientific pitch notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml
-	perception	pitch	pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity	
-	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval	
-	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity	
+1	perception	pitch	pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity	
+2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval	
+3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity	
