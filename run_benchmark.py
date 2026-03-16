@@ -308,33 +308,54 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
 # Main Benchmark Loop
 # =========================================================================
 
+import shutil
+
 def main():
     parser = argparse.ArgumentParser(description="Run LLM benchmark.")
     parser.add_argument("--config", required=True, help="Path to config yaml file")
+    # New command line arguments
+    parser.add_argument("--models", nargs='+', help="Override models in config")
+    parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
+    parser.add_argument("--url", help="Override API endpoint URL in config")
+    
     cmdline_args = parser.parse_args()
 
-    # Load Config
+    # 1. Load and Override Config
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
+    
+    if cmdline_args.models:
+        config['models'] = cmdline_args.models
+    if cmdline_args.api_key_env:
+        config['env_api_key_name'] = cmdline_args.api_key_env
+    if cmdline_args.url:
+        config['url'] = cmdline_args.url
 
     benchmark_run_uuid = str(random_uuid())
-
-    print(f"Starting benchmark run with UUID: {benchmark_run_uuid}")
-    print()
-
     config["benchmark_run_uuid"] = benchmark_run_uuid
-
-    # Allow cmdline override of output parameter
+    
+    # ... (Prepare logdir) ...
+    logdir = set_logdir(config)
+    
+    # 2. Save modified config to log directory
+    with open(os.path.join(logdir, "config_snapshot.yaml"), 'w') as f:
+        yaml.dump(config, f)
+        
+    # 3. Copy benchmark file to log directory
     target_benchmark_file = config.get('benchmark_file')
-    if not target_benchmark_file:
-         raise ValueError("Benchmark file must be specified in config.")
+    if target_benchmark_file and os.path.exists(target_benchmark_file):
+        shutil.copy2(target_benchmark_file, os.path.join(logdir, os.path.basename(target_benchmark_file)))
+    else:
+        raise ValueError("Benchmark file must be specified and exist.")
+    
+
          
     # Load extraction method
     methods_module = load_methods_module(config['path_to_extraction_file'])
     extraction_func = getattr(methods_module, config['extraction_method'])
 
     # Prepare logdir
-    logdir = set_logdir(config)
+    # logdir = set_logdir(config)
     log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
     
