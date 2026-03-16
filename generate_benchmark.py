@@ -316,7 +316,8 @@ def step_1_generate_product(meta_questions, config, fields):
                 row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_dict})
                 
                 if distractor_pool is not None:
-                    row['ground_truth'] = ground_truth
+                    row['ground_truth'] = str(ground_truth)
+                    distractor_pool = [str(d) for d in distractor_pool]
                     row['distractor_pool'] = json.dumps(distractor_pool)
                     output_data.append(row)
                 # print(row)
@@ -482,6 +483,8 @@ def step_6_formatting(data, config, fields):
         options = json.loads(row['final_options'])
         correct_opt = row['final_correct_option']
         
+        # print(options)
+
         options.sort()
         random.shuffle(options)
         
