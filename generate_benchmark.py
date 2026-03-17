@@ -287,50 +287,77 @@ def step_0_instantiate_questions(meta_questions, config, ontology):
 
 
 def step_1_generate_product(meta_questions, config, fields):
+    """Generates the product of meta-questions and pieces."""
     args = config['cmdline_args']
-    #methods_module = load_methods_module(args['methods_path'])
-    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+    
     with open(args['pieces'], 'r', encoding='utf-8') as f_pieces:
         pieces = list(csv.DictReader(f_pieces, delimiter='\t'))
 
     output_data = []
     
-    for meta in meta_questions:
-        method_name = meta['method_for_ground_truth_extraction'] 
+    for meta in meta_questions:        
+        for piece in pieces:
+            try:
+                row = {**meta, **piece}
+                output_data.append(row)
+            except Exception as e:
+                print(f"Error on Q '{meta.get('meta-question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
+                stats["errors"] += 1
+
+    # Combination of original fields from meta-questions and pieces, without duplicates
+    out_fields = fields + list(pieces[0].keys())
+
+    # Deduplicate fields in case of identical column names (though unlikely to overlap destructively)
+    out_fields = list(dict.fromkeys(out_fields))
+
+    save_intermediate(output_data, "01_benchmark_step1_product.tsv", out_fields)
+    print_checkpoint(1, "Product & Extraction", "01_benchmark_step1_product.tsv")
+    return output_data, out_fields
+
+def step_1_5_extract_ground_truth_and_distractors(data, config, fields):
+    """For each question-piece pair, extracts the ground truth answer and distractor pool using the specified method."""
+
+    #methods_module = load_methods_module(args['methods_path'])
+    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+
+    output_data = []
+    
+    for row in data:
+        method_name = row['method_for_ground_truth_extraction'] 
         method_func = getattr(AnswerDistractorExtractors, method_name)
+
         # Parse values dict safely
         if not hasattr(AnswerDistractorExtractors, method_name):
             print(f"Error: Method '{method_name}' not found.")
 
             stats["errors"] += 1
             continue
-        values_dict = json.loads(meta['values']) if meta.get('values') else {}
-        
-        for piece in pieces:
-            try:
-                row = {**meta, **piece}
-                ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
-                
-                row['values']  = json.dumps(new_values_word)
-                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_word})
-                
-                if distractor_pool is not None:
-                    row['ground_truth'] = str(ground_truth)
-                    distractor_pool = [str(d) for d in distractor_pool]
-                    row['distractor_pool'] = json.dumps(distractor_pool)
-                    output_data.append(row)
-                # print(row)
-                # print(new_values_dict)
-            except Exception as e:
-                print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
-                stats["errors"] += 1
 
-    out_fields = fields + list(pieces[0].keys()) + ['ground_truth', 'distractor_pool']
+        values_dict = json.loads(row['values']) if row.get('values') else {}
+        
+        try:
+            ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, row['path'], values_dict)
+            
+            row['values']  = json.dumps(new_values_word)
+            row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
+            
+            if distractor_pool is not None:
+                row['ground_truth'] = str(ground_truth)
+                distractor_pool = [str(d) for d in distractor_pool]
+                row['distractor_pool'] = json.dumps(distractor_pool)
+                output_data.append(row)
+            # print(row)
+            # print(new_values_dict)
+        except Exception as e:
+            print(f"Error on Q '{row.get('question_id', '')}' / Piece '{row.get('piece_id', '')}': {e}")
+            stats["errors"] += 1
+
+    out_fields = fields + ['ground_truth', 'distractor_pool']
     # Deduplicate fields in case of identical column names (though unlikely to overlap destructively)
     out_fields = list(dict.fromkeys(out_fields))
 
-    save_intermediate(output_data, "01_benchmark_step1_product.tsv", out_fields)
-    print_checkpoint(1, "Product & Extraction", "01_benchmark_step1_product.tsv")
+    save_intermediate(output_data, "01_5_benchmark_step1.5_extraction.tsv", out_fields)
+    print_checkpoint(1.5, "Ground Truth & Distractor Extraction", "01_5_benchmark_step1.5_extraction.tsv")
     return output_data, out_fields
 
 
@@ -368,7 +395,7 @@ def step_2_sort_distractors(data, config, fields):
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
-def step_2_3_remove_duplicates(data, config, fields):
+def step_1_7_remove_duplicates(data, config, fields):
     """Removes duplicate questions based on question text and piece path."""
     seen = set()
     unique_data = []
@@ -378,11 +405,11 @@ def step_2_3_remove_duplicates(data, config, fields):
             seen.add(identifier)
             unique_data.append(row)
 
-    save_intermediate(unique_data, "02_3_benchmark_deduplicated.tsv", fields)
-    print_checkpoint(2.3, "Remove Duplicates", "02_3_benchmark_deduplicated.tsv")
+    save_intermediate(unique_data, "01_7_benchmark_deduplicated.tsv", fields)
+    print_checkpoint(1.7, "Remove Duplicates", "01_7_benchmark_deduplicated.tsv")
     return unique_data, fields
 
-def step_2_5_subsample(data, config, fields):
+def step_1_4_subsample(data, config, fields):
     """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
 
     q_count = config.get('questions_per_subcategory_count', 10)
@@ -405,8 +432,8 @@ def step_2_5_subsample(data, config, fields):
             out_data.extend(questions)
 
         
-    save_intermediate(out_data, "02_5_benchmark_subsampled.tsv", fields)
-    print_checkpoint(2.5, "Subsample Benchmark", "02_5_benchmark_subsampled.tsv")
+    save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
+    print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
     return out_data, fields
 
 def is_submodality_part_of_modality(submodality, modality):
@@ -588,21 +615,54 @@ def main():
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
 
-        # 1. Load raw
+    # 1. Load raw meta-questions
     raw_meta, meta_fields = step_0_minus_2_load_meta(config)
     
-    # 2. Filter raw
+    # 2. Filter out meta questions based on config (e.g., by allowed meta-question ids)
     filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
 
+    # 3. Instantiate questions from meta-questions by replacing wildcards with values from the ontology, and save the instantiated question text in a new column `question`.
     data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
-    # data, fields = step_0_instantiate_questions(config, ontology)
+    
+    # 4. Generate the product of meta-questions and pieces, and compute the ground truth and distractor pool for each question-piece pair using the methods specified in the meta-questions file.
     data, fields = step_1_generate_product(data, config, fields)
+    
+    # 5. Subsample the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config (this is to control the size of the benchmark, and to ensure diversity across different subcategories). 
+    data, fields = step_1_4_subsample(data, config, fields)
+    
+    # 6. For each question-piece pair, extract the ground truth answer and distractor pool using the specified method, and save them in new columns `ground_truth` and `distractor_pool`. The distractor pool should be saved as a JSON string (list of distractors).
+    data, fields = step_1_5_extract_ground_truth_and_distractors(data, config, fields)
+    
+    # 7. Remove duplicates based on question text and piece path, to ensure that each question-piece pair is unique in the benchmark.
+    # (duplicates are possible in case when we have "use_all_inds" set to true in config, then for the questions of type
+    # "what is in the {order} {voice} note in the provided excerpt?" (e.g. "what is the 2nd soprano note"),
+    # we regenerate the actual values (e.g. "2nd" and "soprano") for each question-piece pair during the
+    # distractor-ground truth extraction, depending on the actual length of the piece
+    data, fields = step_1_7_remove_duplicates(data, config, fields)
+
+    # 8. Apply a method as specified in the config to sort the distractor pool for each question-piece pair (with preliminary dummy implementation of the method that just shuffles the distractor pool, to be replaced later with a real implementation). This method should be applied to each question-piece pair in the benchmark generated in step 1, the distractors sorted should be added to a new column "sorted_distractors" and the output should be saved in an intermediate benchmark file named "benchmark_distractors_sorted.tsv".
     data, fields = step_2_sort_distractors(data, config, fields)
-    data, fields = step_2_3_remove_duplicates(data, config, fields)
-    data, fields = step_2_5_subsample(data, config, fields) # Automatically controls footprint
+    
+    # 9. Generate a product of the benchmark from the 2. step with the list of submodalities specified in the config
+    #    (excluding submodalities that are not part of any modality that is supported for the given question, as
+    #    specified in `modality_in_question` column in the meta-questions file), adding the submodality name as a new
+    #    column "submodality", and the column "path_to_question_context_file", which would be the concatenation of the
+    #    piece directory (column "path" from pieces.tsv) and the submodality name.
+    # The same question-piece pair is used for all submodalities to allow comparsion
     data, fields = step_3_submodalities(data, config, fields)
+
+    # 10. For each question-piece-submodality triplet, generate the final options to be included in the benchmark:
+    #     - if NOTA is to be included, take it (the text specified in config) as one of the options,
+    #     - take the ground truth as one of the options,
+    #     - and take the desired number of remaining options from the sorted distractor pool, in order of difficulty
+    #       (e.g., if the desired number of options is 5 and both NOTA and ground truth are included, take the top 3 most difficult distractors from the sorted distractor pool, and if NOTA is not included, take the top 4 most difficult distractors from the sorted distractor pool).
+    #     - add the ground truth to a new column "final_correct_option"
     data, fields = step_4_final_options(data, config, fields)
+
+    # 11. Add questions where ground-truth is excluded from the options (NOTA is correct answer) - only if the percentage of such desired questions is non-zero:
     data, fields = step_5_nota_correct(data, config, fields)
+    
+    # 12. Format the options and question.
     data, fields = step_6_formatting(data, config, fields)
     step_7_final_save(data, config, fields)
 
