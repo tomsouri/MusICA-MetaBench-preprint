@@ -175,6 +175,11 @@ def get_chords():
   
     ontology = {chord_name: chord_name for chord_name in ontology}
     return ontology
+def get_rhythm_props():
+    # Define the rhythmic proportions to consider
+    rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0]  # e.g., half, equal, double
+
+    return {prop: f"1:{prop}" for prop in rhythmic_proportions}
 
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
@@ -223,6 +228,11 @@ class AnswerDistractorExtractors:
             self.dict_chord_ontology = self.build_chord_ontology(system)
             self.ontology['chords'] = [{k:v} for k,v in self.dict_chord_ontology.items()]
 
+        if "rhythm_proportion" in self.ontology.keys():
+            self.dict_rhythm_prop_ontology = {k: v for d in self.ontology['rhythm_proportion'] for k, v in d.items()}
+        else:
+            self.dict_rhythm_prop_ontology = self.build_rhythm_prop_ontology(system)
+            self.ontology['rhythm_proportion'] = [{k:v} for k,v in self.dict_rhythm_prop_ontology.items()]
         self.voice_mapping = {
                     'S': 0, # Soprano
                     'A': 1, # Alto
@@ -245,7 +255,12 @@ class AnswerDistractorExtractors:
         self.random_distractors = self.config.get('random_distractors', False)
         self.verbose = self.config.get('verbose', False)
         yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
-    
+    def build_rhythm_prop_ontology(self, system):
+        if system=="tonal":
+            return get_rhythm_props()
+        else:
+            raise ValueError(f"Unknown hamonic system for harmonical recognition: {system}")
+
     def build_chord_ontology(self, system):
         if system=="tonal":
             return get_chords()
@@ -809,16 +824,11 @@ class AnswerDistractorExtractors:
     def get_rhythm_quantity(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         
         musicxml_path = get_musicxml_file_path(path)
-
-        if not os.path.exists(musicxml_path):
-            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
-        
-        # Parse the MusicXML file into a music21 Stream
         score = converter.parse(musicxml_path)
-        target_rhythm = question_values.get('rhythm')
+        # # target_rhythm = question_values.get('rhythm')
        
-        if target_rhythm not in self.dict_rhythm_ontology.keys():
-            raise ValueError(f"Invalid rhythm specified: {target_rhythm}. Expected one of {self.dict_rhythm_ontology}.")
+        # if target_rhythm not in self.dict_rhythm_ontology.keys():
+        #     raise ValueError(f"Invalid rhythm specified: {target_rhythm}. Expected one of {self.dict_rhythm_ontology}.")
 
         voice_key = question_values.get('voice')
         if voice_key not in self.voice_mapping:
@@ -837,36 +847,75 @@ class AnswerDistractorExtractors:
         
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'")           
-    
-        count = int(sum(1 for n in notes if n.quarterLength == target_rhythm))
-        #breakpoint()
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+        if self.use_all_inds:
+            note_index = int(np.random.choice(range(len(notes)-1)))
+            question_values['target_index'] = self.ontology['target_index'][note_index]
+        else:
+            note_index = question_values.get('target_index')
+
+        if note_index == 'end':
+            note_index = -1
+        # Check if the target_index is out of bounds
+        if note_index >= len(notes) or int(note_index) < -len(notes):
+            raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(notes)} notes.")
+
+        # Parse the MusicXML file into a music21 Stream
         
-        all_rhys = []
-      
+        props = []
+        for note_idx in range(len(notes)-1):
+            n1 = notes[note_idx].quarterLength
+            n2 = notes[note_idx + 1].quarterLength
+            rhythmic_proporton= n2//n1 if n1 != 0 else 0
+            # iv = interval.Interval(n1, n2)
+            # interval_name = iv.simpleName
+            # intervals.append(interval_name)
+            props.append(rhythmic_proporton)
+        target_prop = props[note_index]#self.dict_rhythm_ontology[target_rhythm]
+        # props_voices = []
+        all_props = []
         for vv in self.voice_mapping.keys():
             other_part = score.parts[self.voice_mapping[vv]]
             other_notes = list(other_part.flatten().getElementsByClass(note.Note))
-            all_rhys.append([n.quarterLength for n in other_notes])
+            for note_idx in range(len(other_notes)-1):
+                n1 = other_notes[note_idx].quarterLength
+                n2 = other_notes[note_idx + 1].quarterLength
+                rhythmic_proporton= n2//n1 if n1 != 0 else 0
+                all_props.append(rhythmic_proporton)
+        all_props_names = [self.dict_rhythm_prop_ontology[prop] for prop in all_props]
+            # props_voices.append(props)
+        # count = int(sum(1 for n in notes if n.quarterLength == target_rhythm))
+        #breakpoint()
+        
+        # all_rhys = []
+      
+        # for vv in self.voice_mapping.keys():
+        #     other_part = score.parts[self.voice_mapping[vv]]
+        #     other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+        #     all_rhys.append([n.quarterLength for n in other_notes])
         
        # breakpoint()
-        tmp_pool = []
-        for nn in all_rhys:
-            for length in list(set(nn)):
-                tmp_pool.append(int(sum(1 for _ in nn if _ == length)))
+        # tmp_pool = []
+        # for nn in all_rhys:
+        #     for length in list(set(nn)):
+        #         tmp_pool.append(int(sum(1 for _ in nn if _ == length)))
         if not self.random_distractors:
-             distractor_tool = set(tmp_pool)
-             distractor_tool.discard(count)
-        else:        
-            try:
-                max_len= max(tmp_pool)
-                distractor_tool = np.random.choice(range(max_len), self.distractor_pool_size, replace=False).tolist()
+             distractor_tool = set(props)
+             distractor_tool.discard(target_prop)
+        else:
+            try:        
+                distractor_tool = np.random.choice(list(set(all_props_names)), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
-                print(f"Warning: Not enough number of same rhythms in the piece to generate {self.distractor_pool_size} distractors. Sampling random numbers instead")
-                distractor_tool = np.random.choice(range(self.distractor_pool_size), self.distractor_pool_size, replace=False).tolist()
-            if count in distractor_tool:
-                distractor_tool.remove(count)
+                if self.verbose:
+                    print(f"Warning: Not enough unique rhythm proportions in the ontology. number of distractors as number of unique rhythm proportions: {len(set(self.ontology['rhythm_proportion'].values()))}")
+                distractor_tool = np.random.choice(list(set(self.dict_rhythm_prop_ontology)), len(set(self.dict_rhythm_prop_ontology)), replace=False).tolist()
 
-        return count, list(distractor_tool), question_values
+            if target_prop in distractor_tool:
+                distractor_tool.remove(target_prop)
+
+        return target_prop, list(distractor_tool), question_values
 
     def get_time_signature(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         musicxml_path = get_musicxml_file_path(path)
