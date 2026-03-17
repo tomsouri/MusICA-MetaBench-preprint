@@ -18,7 +18,7 @@ env_api_key_name: "OPENROUTER_API_KEY"
 # env_api_key_name: "EINFRA_KEY"
 
 
-max_waiting_time_per_request: 60 # in seconds, after which the request will be considered failed and logged as such
+max_waiting_time_per_request: 300 # in seconds, after which the request will be considered failed and logged as such
 
 
 # Filter benchmark items by any column. Only items with the specified values will be processed.

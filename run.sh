@@ -44,6 +44,7 @@ benchmark_file="benchmark_count_$qpersubcategory.tsv"
     --sheet_name "full-$qpersubcategory" \
     --modalities "audio" "symbolic" "visual" \
     --run_id "full-n-$qpersubcategory"  \
+    --max_waiting_time_per_request 300
 
     # --text_only_baseline
     # --modalities "symbolic" \
