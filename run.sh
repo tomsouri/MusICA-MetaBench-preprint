@@ -29,6 +29,7 @@ models=(
     --questions_per_subcategory_count 10 \
     --seed 41 \
     --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.pdf" \
+    --allowed_metaq_ids 0 1 2 3
 
 
 .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
