@@ -19,12 +19,12 @@
 
 models=(
     "google/gemini-2.0-flash-lite-001"
-    "google/gemini-2.5-flash"
+    # "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
 )
 
-qpersubcategory=5
+qpersubcategory=2
 
 benchmark_file="benchmark_count_$qpersubcategory.tsv"
 
@@ -43,7 +43,8 @@ benchmark_file="benchmark_count_$qpersubcategory.tsv"
     --benchmark_file "$benchmark_file" \
     --sheet_name "full-$qpersubcategory" \
     --modalities "audio" "symbolic" "visual" \
-    --run_id "full-n-$qpersubcategory" 
+    --run_id "full-n-$qpersubcategory"  \
+
     # --text_only_baseline
     # --modalities "symbolic" \
 
