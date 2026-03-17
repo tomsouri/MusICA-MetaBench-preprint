@@ -12,6 +12,7 @@ protobenchmark-logging-aa9418338494.json
 *outputs/
 *.err
 *.out
+benchmark_v*.tsv
 
 
 

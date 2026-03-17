@@ -1,5 +1,8 @@
-meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires
-0	perception	pitch	pitch recognition	What is the scientific pitch notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml
-1	perception	pitch	pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity	
-2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval	
-3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity	
+meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires	ontology_key
+0	perception	pitch	pitch recognition	What is the pitch name of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml	pitch
+1	perception	pitch	pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity		pitch
+2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
+3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
+4	perception	rhythm	note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
+5	perception	rhythm	time signature	what is the time signature of the piece?	[]	get_time_signature		signature
+6	perception	rhythm	rhythmic statistics	How many times is the rhythmic notation {rhythm} present in the {voice} line?	["voice", "rhythm"]	get_rhythm_quantity		rhythm

@@ -305,14 +305,14 @@ def step_1_generate_product(meta_questions, config, fields):
             stats["errors"] += 1
             continue
         values_dict = json.loads(meta['values']) if meta.get('values') else {}
-        # breakpoint()
+        
         for piece in pieces:
             try:
-                
                 row = {**meta, **piece}
-                ground_truth, distractor_pool, new_values_dict = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
-                row['values']  = json.dumps(new_values_dict)
-                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_dict})
+                ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
+                
+                row['values']  = json.dumps(new_values_word)
+                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_word})
                 
                 if distractor_pool is not None:
                     row['ground_truth'] = str(ground_truth)
