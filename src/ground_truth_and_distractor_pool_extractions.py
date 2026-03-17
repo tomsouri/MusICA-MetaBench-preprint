@@ -12,7 +12,7 @@ from operator import index
 
 from operator import index
 
-from music21 import converter, note, chord, stream, interval, pitch, meter
+from music21 import converter, note, chord, stream, interval, pitch, meter,key
 import os
 from utils import get_musicxml_file_path
 import yaml
@@ -75,8 +75,6 @@ def get_tonal_notes():
     #     music21_keys.append(p.getEnharmonic().name)
     
     # notes = {k:v for k,v in zip(music21_keys, labels)}
-    
-
 
 def get_rhythm():
          
@@ -107,6 +105,53 @@ def get_time_signatures():
                 pass
 
     return ontology
+
+def get_tonality():
+    modes = ['major', 'minor']  #, 'dorian', 'phrygian', 'lydian', 'mixolydian', 'locrian']
+    ontology = {}
+    for pc in range(12):
+        p = pitch.Pitch()
+        p.pitchClass = pc
+        for mode in modes:
+            word = f"{p.name} {mode}"
+            ontology[word] = word
+            # if mode == 'major':
+            #     word = f"{p.name} {mode}"
+            #     ton_key = p.name.upper()
+            #     #tonality = key.Key(ton_key)
+            # if mode == 'minor':
+            #     word = f"{p.name} {mode}"
+            #     ton_key = p.name.lower()
+            #     #tonality = key.Key(ton_key)
+            # ontology[ton_key] = word
+
+    return ontology
+def get_ordinal_suffix(n: int) -> str:
+      
+        if 11 <= (n % 100) <= 13:
+            return 'th'
+        else:
+            last_digit = n % 10
+            if last_digit == 1:
+                return 'st'
+            elif last_digit == 2:
+                return 'nd'
+            elif last_digit == 3:
+                return 'rd'
+            else:
+                return 'th'
+
+def get_nice_target_index(self, target_index: int) -> str:
+
+    # # Retrieve the dictionary for the target index
+    # target_index_dicts = self.ontology['target_index']
+    # for target_index_dict in target_index_dicts:
+    #     if str(target_index) in target_index_dict:
+    #         return target_index_dict[str(target_index)]
+
+    # Fallback to generating the ordinal suffix dynamically
+    return {f"{target_index}":f"{str(target_index+1)+ get_ordinal_suffix(target_index)}"}
+
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
         self.config = config_yaml
@@ -141,6 +186,13 @@ class AnswerDistractorExtractors:
         else:
             self.dict_time_signature_ontology = self.build_time_signature_ontology(system)
             self.ontology['time_signature'] = [{k:v} for k,v in self.dict_time_signature_ontology.items()]
+        
+        if "tonality" in self.ontology.keys():
+            self.dict_tonality_ontology = {k: v for d in self.ontology['tonality'] for k, v in d.items()}
+        else:
+            self.dict_tonality_ontology = self.build_tonality_ontology(system)
+            self.ontology['tonality'] = [{k:v} for k,v in self.dict_tonality_ontology.items()]
+        
 
         self.voice_mapping = {
                     'S': 0, # Soprano
@@ -151,13 +203,25 @@ class AnswerDistractorExtractors:
         # if self.config.get('use_all_inds', None) and self.ontology.get('target_index') is not None:
         #     print("Warning: Both 'target_index' and 'use_all_inds' are specified in the config. 'use_all_inds' will take precedence and 'target_index' will be ignored.")
         # if if target_index is not specified in the config, or if use_all_inds is set to True, then we will sample from all possible indices in the piece for each question, instead of using a fixed index across all pieces. This allows for more variability in the questions and answers across different pieces.
+        self.distractor_pool_size = self.config.get('distractor_pool_size', 4)
+
         if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
             self.use_all_inds = True
-            self.ontology['target_index'] = [{str(i):str(i)+"th"} for i in range(0,100)]
+            self.ontology['target_index'] = [get_nice_target_index(self, idx) for idx in range(self.distractor_pool_size*10)]
             
         else:
             self.use_all_inds = False 
+
         self.min_num_distractors = self.config['min_num_distractors']
+        self.random_distractors = self.config.get('random_distractors', False)
+        self.verbose = self.config.get('verbose', False)
+    
+    def build_tonality_ontology(self, system):
+        if system=="tonal":
+            return get_tonality()
+        else:
+            raise ValueError(f"Unknown hamonic system for harmonical recognition: {system}")
+        
     def build_rhythm_ontology(self, system):
         if system=="tonal":
             return get_rhythm()
@@ -225,7 +289,7 @@ class AnswerDistractorExtractors:
             
         if self.use_all_inds:
             note_index = int(np.random.choice(range(len(notes)-1)))
-            values['target_index'] = int(note_index)
+            values['target_index'] = self.ontology["target_index"][int(note_index)]
         else:
             note_index = values.get('target_index')
         if note_index == 'end':
@@ -245,15 +309,26 @@ class AnswerDistractorExtractors:
         # Get the target note and return its scientific pitch notation
         target_note = notes[note_index]
         #ground_truth_pool = [np.random.choice([n.name for n in notes if n.name != target_note.name]) for _ in range(self.distractor_pool_size)]
-        
-        # Build a set of candidate distractor notes (exclude the true note)
-        for vv in self.voice_mapping.keys():
-            other_part = score.parts[self.voice_mapping[vv]]
-            other_notes = list(other_part.flatten().getElementsByClass(note.Note))
-            notes += other_notes
-        distractor_pool_set = set(n.name for n in notes) 
-        distractor_pool_set.discard(target_note.name)
-        distractor_pool = list(distractor_pool_set)
+        if not(self.random_distractors):
+            # Build a set of candidate distractor notes (exclude the true note)
+            for vv in self.voice_mapping.keys():
+                other_part = score.parts[self.voice_mapping[vv]]
+                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                notes += other_notes
+
+            distractor_pool_set = set(n.name for n in notes) 
+            distractor_pool_set.discard(target_note.name)
+            distractor_pool = list(distractor_pool_set)
+            
+            distractor_pool = [self.dict_note_ontology[sample] for sample in distractor_pool]
+
+        else:
+            try:
+                distractor_pool = np.random.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                if self.verbose:
+                    print(f"Warning: Not enough unique notes in the ontology. number of distractors as number of unique notes: {len(self.dict_note_ontology.keys())}")
+                distractor_pool = np.random.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
 
         #...sampling from the ontology instead of the notes in the piece
         #distractor_pool_set.remove(target_note)
@@ -265,7 +340,7 @@ class AnswerDistractorExtractors:
         # #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
         # # else:
         #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
-        distractor_pool = [self.dict_note_ontology[sample] for sample in distractor_pool]
+        
         
         return target_note.name, distractor_pool, values
 
@@ -329,10 +404,19 @@ class AnswerDistractorExtractors:
         notes_set = set(all_notes)
         tmp_pool = [int(sum(1 for n in notes if n.name == nn)) for nn in notes_set]
 
+        if not self.random_distractors:
         # Build a set of candidate distractor counts (exclude the true count)
-        distractor_pool_set = set(tmp_pool)
-        distractor_pool_set.discard(count)
-        distractor_pool = list(distractor_pool_set)
+            distractor_pool_set = set(tmp_pool)
+            distractor_pool_set.discard(count)
+            distractor_pool = list(distractor_pool_set)
+        else:
+            try:
+                distractor_pool = np.random.choice(range(len(all_notes)), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                if self.verbose:
+                    print(f"Warning: Not enough notes. number of distractors as number of unique counts: {len(all_notes)}")
+                distractor_pool = np.random.choice(range(len(all_notes)), len(all_notes), replace=False).tolist()
+
         # if len(distractor_pool_set) < self.distractor_pool_size:
         #     distractor_pool = np.random.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
         #     len_diff = self.distractor_pool_size-len(distractor_pool_set)
@@ -389,7 +473,7 @@ class AnswerDistractorExtractors:
 
         if self.use_all_inds:
             note_index = int(np.random.choice(range(len(notes)-1)))
-            question_values['target_index'] = note_index
+            question_values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = question_values.get('target_index')
         if note_index == 'end':
@@ -415,20 +499,29 @@ class AnswerDistractorExtractors:
                 all_interval_keys.append(interval_name)
         # all_interval_keys = [interval.Interval(notes[i], notes[i + 1]).simpleName for i in range(len(notes)-1)]
 
-        distractor_pool_set = set(all_interval_keys)
-        distractor_pool_set.discard(interval_name)
-        distractor_pool = list(distractor_pool_set)
-    
-        # if len(distractor_pool_list) < self.distractor_pool_size:
-        #     #while len(distractor_pool_list) < self.distractor_pool_size:
-        #     distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
-            
-        #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
-        # else:
-        #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
-        # print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
-        distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
+        if not self.random_distractors:
+            distractor_pool_set = set(all_interval_keys)
+            distractor_pool_set.discard(interval_name)
+            distractor_pool = list(distractor_pool_set)
         
+            # if len(distractor_pool_list) < self.distractor_pool_size:
+            #     #while len(distractor_pool_list) < self.distractor_pool_size:
+            #     distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
+                
+            #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+            # else:
+            #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+            # print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
+            distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
+        else:
+            try:
+                distractor_pool = np.random.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                if self.verbose:
+                    print(f"Warning: Not enough unique intervals in the ontology. number of distractors as number of unique intervals: {len(set(all_interval_keys))}")
+                distractor_pool = np.random.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+
+
         return self.dict_interval_ontology[interval_name], distractor_pool, question_values
 
 
@@ -503,10 +596,20 @@ class AnswerDistractorExtractors:
                 intervals.append(interval_name)
         intervals_set = set(intervals)
         # intervals_set.discard(target_interval)
-        for nn in intervals_set:
-            tmp_pool.append(int(sum(1 for _ in intervals if _ == nn)))
-        distractor_tool = set(tmp_pool)
-        distractor_tool.discard(count)
+        if not self.random_distractors:
+            for nn in intervals_set:
+                tmp_pool.append(int(sum(1 for _ in intervals if _ == nn)))
+            distractor_tool = set(tmp_pool)
+            distractor_tool.discard(count)
+        else:
+            try:
+                distractor_tool = np.random.choice(range(len(intervals)), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                print(f"Warning: Not enough distractors ({self.distractor_pool_size}). Sampling numbers in range len(intervals) ({len(intervals)}) instead.")
+                
+                distractor_tool = np.random.choice(range(len(intervals)), len(set(intervals)), replace=False).tolist()
+            if count in distractor_tool:
+                distractor_tool.remove(count)
         # distractor_pool = []
         # while True:
         #     sample = int(np.random.choice(tmp_pool, None))
@@ -537,8 +640,9 @@ class AnswerDistractorExtractors:
         ground_truth, ground_truth_pool, new_values = method(path, question_values) # self.get_nth_note_ground_truth(path, question_values)
         #new values look like this 
         #{'target_index': 38, 'voice': 'S'}
-        # i need: new_words = {"target_index": 38, "voice": "soprano"}
+        # i need: new_words = {"target_index": 38th, "voice": "soprano"}
         new_words = {}
+      
         for var_name, value_symbol in new_values.items():
             value_symbol = str(value_symbol)
             if var_name in self.ontology:
@@ -546,7 +650,7 @@ class AnswerDistractorExtractors:
                 for dict_item in possible_dicts:
                     if value_symbol in dict_item:
                         new_words[var_name] = dict_item[value_symbol]             
-
+        breakpoint()
        # distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
        # breakpoint()
        # additional, just safety reasons: Ensure the ground truth is not in the distractor pool
@@ -575,6 +679,7 @@ class AnswerDistractorExtractors:
             ground_truth_pool += additional_distractors
         else:
             ground_truth_pool = list(set(ground_truth_pool))
+        
         return ground_truth, ground_truth_pool, new_values, new_words
 
     def get_nth_rhythm(self, path: str, values: dict) -> str:
@@ -616,7 +721,7 @@ class AnswerDistractorExtractors:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
         if self.use_all_inds:
             note_index = int(np.random.choice(range(len(notes)-1)))
-            values['target_index'] = int(note_index)
+            values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = values.get('target_index')
 
@@ -630,20 +735,30 @@ class AnswerDistractorExtractors:
         # Get the target note and return its rhythm
         target_note = notes[note_index]
         target_rhythm = target_note.quarterLength
-        all_notes = []
-        for vv in self.voice_mapping.keys():
-            other_part = score.parts[self.voice_mapping[vv]]
-            other_notes = list(other_part.flatten().getElementsByClass(note.Note))
-            all_notes += other_notes
-        # Build a set of candidate distractor rhythms (exclude the true rhythm)
-    
-        distractor_pool_set = set(n.quarterLength for n in all_notes)
-        distractor_pool_set.discard(target_rhythm)
-        distractor_pool = list(distractor_pool_set)
 
-        # Map rhythms to their ontology names
-        distractor_pool = [self.dict_rhythm_ontology[sample] for sample in distractor_pool]
+        if not self.random_distractors:
+            all_notes = []
+            for vv in self.voice_mapping.keys():
+                other_part = score.parts[self.voice_mapping[vv]]
+                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                all_notes += other_notes
+            # Build a set of candidate distractor rhythms (exclude the true rhythm)
 
+            distractor_pool_set = set(n.quarterLength for n in all_notes)
+            distractor_pool_set.discard(target_rhythm)
+            distractor_pool = list(distractor_pool_set)
+
+            # Map rhythms to their ontology names
+            distractor_pool = [self.dict_rhythm_ontology[sample] for sample in distractor_pool]
+        else:
+            try:
+                distractor_pool = np.random.choice(list(self.dict_rhythm_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                print(f"Warning: Not enough unique rhythms in the piece to generate {self.distractor_pool_size} distractors. Sampling from the entire ontology instead.")
+                distractor_pool = np.random.choice(list(self.dict_rhythm_ontology.values()), len(set(n.quarterLength for n in notes)), replace=False).tolist()
+            if target_rhythm in distractor_pool:
+                distractor_pool.remove(target_rhythm)
+            
         return self.dict_rhythm_ontology[target_rhythm], distractor_pool, values
 
     def get_rhythm_quantity(self, path: str, question_values: dict) -> tuple[str, list[str]]:
@@ -693,17 +808,17 @@ class AnswerDistractorExtractors:
         for nn in all_rhys:
             for length in list(set(nn)):
                 tmp_pool.append(int(sum(1 for _ in nn if _ == length)))
-      #  breakpoint()
-        distractor_tool = set(tmp_pool)
-        distractor_tool.discard(count)
-
-        # distractor_pool = []
-        # while True:
-        #     sample = int(np.random.choice(tmp_pool, None))
-        #     if sample != count and sample not in distractor_pool:
-        #         distractor_pool.append(int(sample))
-        #     if len(distractor_pool) > self.distractor_pool_size:
-        #         break
+        if not self.random_distractors:
+             distractor_tool = set(tmp_pool)
+             distractor_tool.discard(count)
+        else:             
+            try:
+                distractor_tool = np.random.choice(range(len(all_rhys)), self.distractor_pool_size, replace=False).tolist()
+            except ValueError:
+                print(f"Warning: Not enough unique rhythms in the piece to generate {self.distractor_pool_size} distractors. Sampling from the entire ontology instead.")
+                distractor_tool = np.random.choice(range(len(all_rhys)), len(set(all_rhys)), replace=False).tolist()
+            if count in distractor_tool:
+                distractor_tool.remove(count)
 
         return count, list(distractor_tool), question_values
 
@@ -728,3 +843,42 @@ class AnswerDistractorExtractors:
             distractor_pool = list(self.dict_time_signature_ontology.values())
 
             return target_time_signature, distractor_pool, question_values
+   
+    def get_harmonic_tonality(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+        musicxml_path = get_musicxml_file_path(path)
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+        
+        # Parse the MusicXML file into a music21 Stream
+        score = converter.parse(musicxml_path)
+
+        #key_signatures = score.recurse().getElementsByClass('KeySignature')
+        key_signatures = score.analyze('key')
+        harmonic_function = question_values["function"]
+        keys_dict = {}
+        
+        if not key_signatures:
+            if self.config.get('verbose', False):
+                print("No key signatures found in the piece., skipping question.")
+            
+            return None, {}, question_values
+        
+        else:
+
+            keys_dict["tonic"]  = key_signatures.name
+            keys_dict["dominant"]  = key.Key(key_signatures.getDominant().name, key_signatures.mode).asKey().name
+            keys_dict["relative minor/major"] = key_signatures.relative.name                       
+            target_key_signature_name = self.dict_tonality_ontology[keys_dict[harmonic_function]]
+            
+            if not(self.random_distractors):
+                distractor_pool = list(keys_dict.values())
+            else:
+                try:
+                    distractor_pool = np.random.choice(list(self.dict_tonality_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                except ValueError:
+                    if self.verbose:
+                        print(f"Warning: Not enough unique tonalities in the ontology. number of distractors as number of unique tonalities: {len(set(self.dict_tonality_ontology.values()))}")
+                    distractor_pool = np.random.choice(list(self.dict_tonality_ontology.values()), len(set(self.dict_tonality_ontology.values())), replace=False).tolist()
+            
+            return target_key_signature_name, distractor_pool, question_values

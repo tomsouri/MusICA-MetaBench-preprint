@@ -4,5 +4,9 @@ meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	me
 2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
 3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
 4	perception	rhythm	note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
-5	perception	rhythm	time signature	what is the time signature of the piece?	[]	get_time_signature		signature
+5	perception	rhythm	time signature	What is the time signature of the piece?	[]	get_time_signature		signature
 6	perception	rhythm	rhythmic statistics	How many times is the rhythmic notation {rhythm} present in the {voice} line?	["voice", "rhythm"]	get_rhythm_quantity		rhythm
+7	perception	harmony	tonality recognition	What is the {function} tonality of the music piece?	["function"]	get_harmonic_tonality		uni-modal
+8	perception	harmony	cadence recognition	Which cadence occurs at the {position} of this excerpt?	["position"]	get_harmonic_cadence		uni-modal
+9	perception	harmony	modulation	What does the excerpt modulate to, if any?	[]	get_harmonic_modulation		
+10	perception	harmony	chord recognition	What is the chord at the {target_index} position considering all the voice?	["target_index"]	get_harmonic_chord		
