@@ -1,10 +1,11 @@
-meta-question_id	category	subcategory	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires	ontology_key
-0	perception	pitch	pitch recognition	What is the pitch name of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml	pitch
-1	perception	pitch	pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity		pitch
-2	perception	pitch	interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
-3	perception	pitch	interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
-4	perception	rhythm	note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
-5	perception	rhythm	time signature	What is the time signature of the piece?	[]	get_time_signature		signature
-6	perception	rhythm	rhythmic statistics	How many times is the rhythmic notation {rhythm} present in the {voice} line?	["voice", "rhythm"]	get_rhythm_quantity		rhythm
-7	perception	harmony	tonality recognition	What is the {function} tonality of the music piece?	["function"]	get_harmonic_tonality		uni-modal
-8	perception	harmony	chord recognition	What is the chord name at the {target_index} position considering all the voices?	["target_index"]	get_harmonic_chord		
+meta-question_id	perception	category	rel/abs	subcategory	simul/seq	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires	ontology_key
+0	perception	pitch	absolute	pitch-absolute		pitch recognition	What is the pitch name of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml	pitch
+1	perception	pitch	absolute	pitch-absolute		pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity		pitch
+2	perception	pitch	relative	pitch-relative		interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
+3	perception	pitch	relative	pitch-relative		interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
+4	perception	rhythm	absolute	rhythm-absolute		note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
+5	perception	rhythm	relative	rhythm-relative		time signature	What is the time signature of the piece?	[]	get_time_signature		signature
+6	perception	rhythm	relative	rhythm-relative		rhythm pattern	How many times is the rhythmic pattern with proportion {rhythm_proportion} present in the {voice} line?	["voice", "rhythm_proportion"]	get_rhythm_pattern		rhythm
+7	perception	harmony	relative	harmony-relative		tonality recognition	What is the {function} tonality of the music piece?	["function"]	get_harmonic_tonality		
+8	perception	harmony	absolute	harmony-absolute		chord recognition	What is the chord at the {target_index} position considering all the voices?	["target_index"]	get_harmonic_chord		
+9	perception	harmony	relative	harmony-relative		cadence recognition	What is the chord progression between the {target_index} and the next one?	["target_index"]	get_harmonic_cadence		
