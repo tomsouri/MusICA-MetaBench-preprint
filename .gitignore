@@ -13,7 +13,7 @@ protobenchmark-logging-aa9418338494.json
 *.err
 *.out
 benchmark_v*.tsv
-
+generated_ontology.yaml
 
 
 

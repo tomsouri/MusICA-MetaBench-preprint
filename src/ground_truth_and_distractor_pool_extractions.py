@@ -63,7 +63,11 @@ def get_tonal_notes():
     for pc in range(12):
         p = pitch.Pitch()
         p.pitchClass = pc
-        notes[p.name] = p.name
+        #value is generated note name with sharp and flat words
+        # TODO rewrite better
+
+        notes[p.name] = p.name[0] + (" sharp" if '#' in p.name else "") + (" flat" if '-' in p.name else "") + (" double sharp" if '##' in p.name else "") + (" double flat" if '--' in p.name else "")
+        # notes[p.name] = p.name
         notes[p.getEnharmonic().name] = p.getEnharmonic().name
     return notes
     # labels = ["C", "C sharp", "D flat","D", "D sharp","E flat","E", "F flat", "E sharp","F", "F sharp","G flat","G", "G sharp","A flat", "A","A sharp","B flat","B","C flat","B sharp"]
@@ -128,18 +132,18 @@ def get_tonality():
     return ontology
 def get_ordinal_suffix(n: int) -> str:
       
-        if 11 <= (n % 100) <= 13:
-            return 'th'
+    if 11 <= (n % 100) <= 13:
+        return 'th'
+    else:
+        last_digit = n % 10
+        if last_digit == 1:
+            return 'st'
+        elif last_digit == 2:
+            return 'nd'
+        elif last_digit == 3:
+            return 'rd'
         else:
-            last_digit = n % 10
-            if last_digit == 1:
-                return 'st'
-            elif last_digit == 2:
-                return 'nd'
-            elif last_digit == 3:
-                return 'rd'
-            else:
-                return 'th'
+            return 'th'
 
 def get_nice_target_index(self, target_index: int) -> str:
 
@@ -151,6 +155,26 @@ def get_nice_target_index(self, target_index: int) -> str:
 
     # Fallback to generating the ordinal suffix dynamically
     return {f"{target_index}":f"{str(target_index+1)+ get_ordinal_suffix(target_index)}"}
+import itertools
+def get_chords():
+    pitch_classes = list(range(12))  # 0–11
+    ontology = set()
+    max_notes = 4 #number of voices
+    for r in range(2, max_notes + 1):  # dyads → tetrads
+        for pcs in itertools.combinations(pitch_classes, r):
+
+            # build chord from pitch classes
+            pitches = [pitch.Pitch(midi=60 + pc) for pc in pcs]
+            ch = chord.Chord(pitches)
+            name = ch.commonName
+            if "with" in name:  # filter out chords with added tones (e.g., "C major with added sixth")
+                name = name.split(" with")[0]
+                
+            if name:  # filter None / empty
+                ontology.add(name)
+  
+    ontology = {chord_name: chord_name for chord_name in ontology}
+    return ontology
 
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
@@ -193,6 +217,11 @@ class AnswerDistractorExtractors:
             self.dict_tonality_ontology = self.build_tonality_ontology(system)
             self.ontology['tonality'] = [{k:v} for k,v in self.dict_tonality_ontology.items()]
         
+        if "chords" in self.ontology.keys():
+            self.dict_chord_ontology = {k: v for d in self.ontology['chords'] for k, v in d.items()}
+        else:
+            self.dict_chord_ontology = self.build_chord_ontology(system)
+            self.ontology['chords'] = [{k:v} for k,v in self.dict_chord_ontology.items()]
 
         self.voice_mapping = {
                     'S': 0, # Soprano
@@ -211,11 +240,19 @@ class AnswerDistractorExtractors:
             
         else:
             self.use_all_inds = False 
-
+        
         self.min_num_distractors = self.config['min_num_distractors']
         self.random_distractors = self.config.get('random_distractors', False)
         self.verbose = self.config.get('verbose', False)
+        yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
     
+    def build_chord_ontology(self, system):
+        if system=="tonal":
+            return get_chords()
+
+        else:
+            raise ValueError(f"Unknown hamonic system for harmonical recognition: {system}")
+
     def build_tonality_ontology(self, system):
         if system=="tonal":
             return get_tonality()
@@ -891,3 +928,46 @@ class AnswerDistractorExtractors:
                     distractor_pool = np.random.choice(list(self.dict_tonality_ontology.values()), len(set(self.dict_tonality_ontology.values())), replace=False).tolist()
             
             return target_key_signature_name, distractor_pool, question_values
+        
+    def get_harmonic_chord(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+        musicxml_path = get_musicxml_file_path(path)
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+        
+        # Parse the MusicXML file into a music21 Stream
+        score = converter.parse(musicxml_path)
+        # chords = score.recurse().getElementsByClass('Chord')
+        chords = score.chordify().recurse().getElementsByClass('Chord')
+        chords = list(chords)
+
+        if not chords:
+            raise ValueError(f"No valid chords found in part '{voice_key}'.")
+        if self.use_all_inds:
+            note_index = int(np.random.choice(range(len(chords)-1)))
+            question_values['target_index'] = self.ontology['target_index'][note_index]
+        else:
+            note_index = question_values.get('target_index')
+
+        if note_index == 'end':
+            note_index = -1
+
+        # Check if the target_index is out of bounds
+        if note_index >= len(chords) or int(note_index) < -len(chords):
+            raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(chords)} chords.")
+
+        target_chord = chords[note_index].commonName
+        
+        if not chords:
+            if self.config.get('verbose', False):
+                print("No chords found in the piece., skipping question.")
+            
+            return None, distractor_pool, question_values
+        else:
+
+            if "with" in target_chord:  # filter out chords with added tones (e.g., "C major with added sixth")
+                target_chord = target_chord.split(" with")[0]
+            target_chord_name = self.dict_chord_ontology[target_chord]
+            distractor_pool = list(self.dict_chord_ontology.values())
+
+            return target_chord_name, distractor_pool, question_values
