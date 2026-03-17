@@ -88,14 +88,22 @@ import os
 import sys
 import time
 import uuid
-from typing import Dict, Tuple
 import random
+import shutil
+from typing import Dict, Tuple
+
+import requests
+import yaml
 
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
 from eval import evaluate_results
 
-import requests
-import yaml
+# Optional GSpread import for the new feature
+try:
+    import gspread
+    GSPREAD_AVAILABLE = True
+except ImportError:
+    GSPREAD_AVAILABLE = False
 
 # =========================================================================
 # Utilities and Helper Functions
@@ -109,6 +117,7 @@ def deterministic_uuid(data):
     """Generates a deterministic UUID based on the input data dictionary."""
     normalized = json.dumps(data, sort_keys=True)
     return uuid.uuid5(PROJECT_NAMESPACE, normalized)
+
 
 def random_uuid():
     """Generates a random UUID."""
@@ -125,32 +134,103 @@ def set_logdir(config: dict) -> str:
     return unique_logdir
 
 
+def create_and_setup_gsheet(folder_id: str, run_uuid: str, config):
+    """
+    Creates a new Google Sheet inside the specified folder ID and initializes 
+    the 3 required tabs: Continuous Logs, Full Logs, Results.
+    """
+    if not GSPREAD_AVAILABLE:
+        print("⚠ gspread is not installed. Run `pip install gspread`")
+        return None
+
+    required = ['sheet_id', 'sheet_name', 'credentials_location']
+    missing = [k for k in required if not config.get(k)]
+    if missing:
+        print(f"⚠ Google Sheets logging skipped: missing config fields: {', '.join(missing)}")
+        return
+
+    cred_path = config['credentials_location']
+    if not os.path.exists(cred_path):
+        print(f"⚠ Google Sheets logging skipped: credentials file not found at {cred_path}")
+        return
+
+
+    try:
+        from google.oauth2.service_account import Credentials
+        # ADD 'https://www.googleapis.com/auth/drive' to the scopes
+        scope = [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive'
+        ]
+        creds = Credentials.from_service_account_file(cred_path, scopes=scope)
+        client = gspread.authorize(creds)
+
+        gc = client
+        dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        sheet_title = f"{run_uuid}_{dt_string}"
+        
+        print(f"Creating Google Sheet: {sheet_title} in folder {folder_id}...")
+        
+        # Create sheet in the specific folder
+        spreadsheet = gc.create(sheet_title, folder_id=folder_id)
+
+        
+        # Create worksheets
+        continuous_ws = spreadsheet.add_worksheet(title="Continuous Logs", rows="1000", cols="30")
+        full_ws = spreadsheet.add_worksheet(title="Full Logs", rows="1000", cols="30")
+        results_ws = spreadsheet.add_worksheet(title="Results", rows="1000", cols="30")
+        
+        # Remove default 'Sheet1'
+        try:
+            sheet1 = spreadsheet.worksheet("Sheet1")
+            spreadsheet.del_worksheet(sheet1)
+        except gspread.exceptions.WorksheetNotFound:
+            pass
+
+        return {
+            "spreadsheet": spreadsheet,
+            "continuous_ws": continuous_ws,
+            "full_ws": full_ws,
+            "results_ws": results_ws
+        }
+    except Exception as e:
+        print(f"Failed to create Google Sheet. Error: {e}")
+        return None
+
+
+def upload_tsv_to_worksheet(tsv_path: str, worksheet):
+    """Uploads the entire content of a TSV file efficiently to a given gspread worksheet."""
+    if not os.path.exists(tsv_path):
+        print(f"Warning: {tsv_path} not found. Skipping GSheet upload.")
+        return
+
+    try:
+        with open(tsv_path, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter='\t')
+            data = list(reader)
+        if data:
+            worksheet.clear()
+            worksheet.update("A1", data)
+            print(f"Uploaded {len(data)} rows to worksheet '{worksheet.title}'.")
+    except Exception as e:
+        print(f"Error uploading {tsv_path} to worksheet '{worksheet.title}': {e}")
+
 
 # =========================================================================
 # Core LLM Call & Payload Builder
 # =========================================================================
 
 def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False) -> Tuple[Dict, str]:
-    """
-    Generates the messages payload based on the modality and files.
-
-    If no_content_file is True, it will prepare a payload but will exclude the content (musical) file. To be used as
-    "text-onlyLLM" baseline.    
-    """
+    """Generates the messages payload based on the modality and files."""
     messages = []
     plugins = None
     
-    # We remove the placeholder from the textual prompt since we'll append data separately
     user_prompt_clean = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "").strip()
 
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
 
-    
     if no_content_file:
-        # Ignore the content file and just send the user prompt (question and options) as text.
-        # To be used as "text-only LLM" baseline, to see how well the model can do without seeing the actual musical
-        # material. (How well it can guess the correct answer from distractor set.)
         messages.append({
             "role": "user",
             "content": [{"type": "text", "text": user_prompt_clean}]
@@ -196,7 +276,6 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
             except FileNotFoundError:
                 file_content = "[FILE NOT FOUND]"
                 
-            # Add the explicit data block separately from the instruction text block
             messages.append({
                 "role": "user",
                 "content": [
@@ -225,6 +304,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
         
     return payload, user_prompt_clean
 
+
 def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: bool = False) -> Tuple[float, float, dict, str]:
     """Runs the API request and returns (price, time_taken, full_json_response, response_text)."""
     start_time = datetime.datetime.now()
@@ -252,13 +332,9 @@ def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: b
 
 
 def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
-    """
-    Calls an API with exponential backoff and jitter.
-    
-    :param max_waiting_time: Total maximum seconds to wait before giving up.
-    """
+    """Calls an API with exponential backoff and jitter."""
     start_time = time.time()
-    base_delay = 1  # Initial delay in seconds
+    base_delay = 1  
     attempt = 0
     
     while time.time() - start_time < max_waiting_time:
@@ -268,13 +344,10 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             return response.json()
             
         except requests.exceptions.RequestException as e:
-            # Check if we should stop for non-transient errors (e.g., 400 Bad Request)
             if hasattr(e.response, 'status_code') and 400 <= e.response.status_code < 500:
                 print(f"Fatal error: {e}. Not retrying.")
                 return {"error": str(e)}
             
-            # Calculate exponential backoff with jitter
-            # Formula: min(max_delay, base * 2^attempt)
             delay = min(64, base_delay * (2 ** attempt))
             jitter = random.uniform(0, delay)
             
@@ -287,6 +360,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             attempt += 1
             
     return {"error": "Max waiting time exceeded."}
+
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
     """Removes base64 data streams from logs."""
@@ -308,12 +382,9 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
 # Main Benchmark Loop
 # =========================================================================
 
-import shutil
-
 def main():
     parser = argparse.ArgumentParser(description="Run LLM benchmark.")
     parser.add_argument("--config", required=True, help="Path to config yaml file")
-    # New command line arguments
     parser.add_argument("--models", nargs='+', help="Override models in config")
     parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
     parser.add_argument("--url", help="Override API endpoint URL in config")
@@ -322,6 +393,8 @@ def main():
     parser.add_argument("--text_only_baseline", help="Override text_only_baseline flag in config", action='store_true')
     parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
     parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
+    # New arg for GSheet generation tracking
+    parser.add_argument("--generate_gsheet_with_logs", type=str, help="Google Drive shared folder ID. Creates an independent GSheet to track logs.")
 
     cmdline_args = parser.parse_args()
 
@@ -352,6 +425,18 @@ def main():
         
     config["benchmark_run_uuid"] = benchmark_run_uuid
     
+    # Optional GSheet Init Tracking
+    generated_gsheets = None
+    setup_gsheet_error = False
+    if cmdline_args.generate_gsheet_with_logs:
+        generated_gsheets = create_and_setup_gsheet(
+            folder_id=cmdline_args.generate_gsheet_with_logs, 
+            run_uuid=benchmark_run_uuid,
+            config=config
+        )
+        if not generated_gsheets:
+            setup_gsheet_error = True
+    
     # ... (Prepare logdir) ...
     logdir = set_logdir(config)
     
@@ -365,15 +450,11 @@ def main():
         shutil.copy2(target_benchmark_file, os.path.join(logdir, os.path.basename(target_benchmark_file)))
     else:
         raise ValueError("Benchmark file must be specified and exist.")
-    
-
          
     # Load extraction method
     methods_module = load_methods_module(config['path_to_extraction_file'])
     extraction_func = getattr(methods_module, config['extraction_method'])
 
-    # Prepare logdir
-    # logdir = set_logdir(config)
     log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
     
@@ -389,7 +470,6 @@ def main():
         headers = reader.fieldnames
         for row in reader:
             items.append(row)
-
 
     # =====================================================================
     # Filter the benchmark items
@@ -409,12 +489,9 @@ def main():
         print("No items match the required filters. Exiting.")
         sys.exit(0)
 
-
     print(f"Models to evaluate: {len(config['models'])}")
     total_runs = len(items) * len(config['models'])
     print(f"Total question/model loops to perform: {total_runs}\n")
-
-
 
     # Prepare the log TSV headers
     log_headers = headers + [
@@ -429,6 +506,7 @@ def main():
 
     # Track all log rows to pass to the evaluator later
     all_executed_logs = []
+    generated_gsheets_header_written = False
 
     run_count = 0
     for model in config['models']:
@@ -437,7 +515,6 @@ def main():
             print(f"\n[{run_count}/{total_runs}] Running Model: {model} | Item ID: {item.get('item_id')}")
 
             # Prepare User Prompt
-
             options = json.loads(item['labeled_final_options'])
             labels = json.loads(item['all_choices'])
             options_text = "\n".join(options)
@@ -447,7 +524,6 @@ def main():
             submodality = item.get('submodality')
             format_desc = fmt_info.get(modality, {}).get(submodality, "a musical excerpt")
 
-            # print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['shortened (opt)']}")
             print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['question']}")
             print(f"Options:" + ", ".join(options))
 
@@ -457,10 +533,7 @@ def main():
             prompt = prompt.replace("<OPTIONS_TEXT>", options_text)
             prompt = prompt.replace("<OPTION_LABELS>", ', '.join(labels))
 
-            # Build Payload
             content_file = item['path_to_question_context_file']
-            # TODO: if empty/noise file should be used, replace with the corresponding path from item
-
             text_only_baseline = config.get('text_only_baseline', False)
 
             payload, final_prompt = prepare_llm_payload(
@@ -473,16 +546,12 @@ def main():
                 no_content_file=text_only_baseline
             )
 
-            # Execute Request
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
-            # Extract Response and Check Correctness
-            # extracted_answer = extraction_func(resp_text)
             extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
 
-            # Logging Logic
             log_row = item.copy()
             model_str = "text-only-" + model if text_only_baseline else model
             log_row.update({
@@ -500,21 +569,30 @@ def main():
                 "is_correct": is_correct
             })
 
-            # Save line into memory
             all_executed_logs.append(log_row)
-
 
             # 1. Log to local TSV
             with open(log_tsv_path, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
                 writer.writerow(log_row)
 
-            # 2. Log to Google Sheets
+            row_list = [log_row.get(h, "") for h in log_headers]
+
+            # 2. Existing log to legacy Google Sheets
             if config.get('log_to_google_sheet'):
-                row_list = [log_row.get(h, "") for h in log_headers]
                 append_to_google_sheet(config, row_list, header=log_headers, force_header_print=config.get("force_header_print", False))
-                # Enforce the header print only for the first item
                 config["force_header_print"] = False
+
+            # 2.5 New dynamic Google sheet functionality for Continuous logs
+            if generated_gsheets and not setup_gsheet_error:
+                try:
+                    ws = generated_gsheets["continuous_ws"]
+                    if not generated_gsheets_header_written:
+                        ws.append_row(log_headers)
+                        generated_gsheets_header_written = True
+                    ws.append_row(row_list)
+                except Exception as e:
+                    print(f"Warning: Failed to append to Continuous Logs GSheet. {e}")
 
             # 3. Print concise log
             print(f"  -> Extracted: {extracted_answer} | Expected: {correct_label} | Correct: {is_correct} | Time: {time_taken:.2f}s | Cost: ${cost:.6f}")
@@ -528,8 +606,17 @@ def main():
     if results_path:
         output_tsvs += [results_path]
 
+    # Evaluate outputs
     evaluate_results(all_executed_logs, evaluation_criteria, output_tsvs=output_tsvs)
 
+    # =====================================================================
+    # Finale generated GSheet dump requests
+    # =====================================================================
+    if generated_gsheets and not setup_gsheet_error:
+        print("\n--- Uploading Full Logs & Results to Google Sheets ---")
+        upload_tsv_to_worksheet(log_tsv_path, generated_gsheets["full_ws"])
+        upload_tsv_to_worksheet(results_tsv_path, generated_gsheets["results_ws"])
+        print("Google Sheet Sync Complete.")
 
 if __name__ == "__main__":
     main()
