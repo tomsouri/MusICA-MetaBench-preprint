@@ -40,7 +40,8 @@ cmdline_args:
 allowed_metaq_ids:
   # - 4
   # - 5
-  - 10
+  # - 10
+  - 6
   # - 3
   # - 2
   # - 1

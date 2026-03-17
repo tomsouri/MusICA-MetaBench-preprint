@@ -324,6 +324,7 @@ def step_1_5_extract_ground_truth_and_distractors(data, config, fields):
     AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
 
     output_data = []
+    breakpoint()
     
     for row in data:
         method_name = row['method_for_ground_truth_extraction'] 

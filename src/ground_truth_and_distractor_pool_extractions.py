@@ -63,12 +63,25 @@ def get_tonal_notes():
     for pc in range(12):
         p = pitch.Pitch()
         p.pitchClass = pc
-        #value is generated note name with sharp and flat words
-        # TODO rewrite better
-
-        notes[p.name] = p.name[0] + (" sharp" if '#' in p.name else "") + (" flat" if '-' in p.name else "") + (" double sharp" if '##' in p.name else "") + (" double flat" if '--' in p.name else "")
+        enh_name = p.getEnharmonic().name
+        for note_name in [p.name, enh_name]:
+            if "#" in note_name:
+                if '##' in note_name:
+                    notes[note_name] = note_name[0]+" double sharp"
+                else:
+                    notes[note_name] = note_name[0]+" sharp"
+            elif "-" in note_name:
+                if '--' in note_name:
+                    notes[note_name] = note_name[0]+" double flat"
+                else:
+                    notes[note_name] = note_name[0]+" flat"
+            else:
+                notes[note_name] = note_name[0]
+            
+        #  + (" sharp" if '#' in p.name else "") + (" flat" if '-' in p.name else "") + (" double sharp" if '##' in p.name else "") + (" double flat" if '--' in p.name else "")
         # notes[p.name] = p.name
-        notes[p.getEnharmonic().name] = p.getEnharmonic().name
+        # notes[p.getEnharmonic().name] = p.getEnharmonic().name
+    breakpoint()
     return notes
     # labels = ["C", "C sharp", "D flat","D", "D sharp","E flat","E", "F flat", "E sharp","F", "F sharp","G flat","G", "G sharp","A flat", "A","A sharp","B flat","B","C flat","B sharp"]
     # music21_keys = []
@@ -177,9 +190,11 @@ def get_chords():
     return ontology
 def get_rhythm_props():
     # Define the rhythmic proportions to consider
-    rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0]  # e.g., half, equal, double
-
-    return {prop: f"1:{prop}" for prop in rhythmic_proportions}
+    rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0, 1.5]  # e.g., half, equal, double
+    ontology = {str(prop) : (f"1:{int(prop)}") for prop in rhythmic_proportions if prop >=1}
+    ontology.update({str(prop) : (f"1:{prop}") for prop in rhythmic_proportions if prop < 1})
+    # ontology = {0:""}
+    return ontology
 
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
@@ -821,7 +836,7 @@ class AnswerDistractorExtractors:
             
         return self.dict_rhythm_ontology[target_rhythm], distractor_pool, values
 
-    def get_rhythm_quantity(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+    def get_rhythm_pattern(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         
         musicxml_path = get_musicxml_file_path(path)
         score = converter.parse(musicxml_path)
@@ -829,7 +844,7 @@ class AnswerDistractorExtractors:
        
         # if target_rhythm not in self.dict_rhythm_ontology.keys():
         #     raise ValueError(f"Invalid rhythm specified: {target_rhythm}. Expected one of {self.dict_rhythm_ontology}.")
-
+   
         voice_key = question_values.get('voice')
         if voice_key not in self.voice_mapping:
             raise ValueError(f"Invalid voice specified: {voice_key}. Expected one of 'S', 'A', 'T', 'B'.")
@@ -859,6 +874,7 @@ class AnswerDistractorExtractors:
         if note_index == 'end':
             note_index = -1
         # Check if the target_index is out of bounds
+        note_index = int(note_index)
         if note_index >= len(notes) or int(note_index) < -len(notes):
             raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(notes)} notes.")
 
@@ -868,11 +884,14 @@ class AnswerDistractorExtractors:
         for note_idx in range(len(notes)-1):
             n1 = notes[note_idx].quarterLength
             n2 = notes[note_idx + 1].quarterLength
-            rhythmic_proporton= n2//n1 if n1 != 0 else 0
+            if n1 and n2 != 0:
+                rhythmic_proportion = n2/n1
+    
+            # rhythmic_proportion = n2/n1 if n1 != 0 else 0
             # iv = interval.Interval(n1, n2)
             # interval_name = iv.simpleName
             # intervals.append(interval_name)
-            props.append(rhythmic_proporton)
+            props.append(rhythmic_proportion)
         target_prop = props[note_index]#self.dict_rhythm_ontology[target_rhythm]
         # props_voices = []
         all_props = []
@@ -882,9 +901,15 @@ class AnswerDistractorExtractors:
             for note_idx in range(len(other_notes)-1):
                 n1 = other_notes[note_idx].quarterLength
                 n2 = other_notes[note_idx + 1].quarterLength
-                rhythmic_proporton= n2//n1 if n1 != 0 else 0
+                if n1 and n2 != 0:
+                    rhythmic_proporton= n2/n1
                 all_props.append(rhythmic_proporton)
-        all_props_names = [self.dict_rhythm_prop_ontology[prop] for prop in all_props]
+        for _p in all_props:
+            _key = str(round(_p,2))
+            try:
+                all_props_names = self.dict_rhythm_prop_ontology[_key]
+            except KeyError:
+                all_props_names = "other"
             # props_voices.append(props)
         # count = int(sum(1 for n in notes if n.quarterLength == target_rhythm))
         #breakpoint()
@@ -901,21 +926,26 @@ class AnswerDistractorExtractors:
         # for nn in all_rhys:
         #     for length in list(set(nn)):
         #         tmp_pool.append(int(sum(1 for _ in nn if _ == length)))
+        try:
+            target_prop_name = self.dict_rhythm_prop_ontology[target_prop]
+        except:
+            target_prop_name="other"
+            
         if not self.random_distractors:
-             distractor_tool = set(props)
-             distractor_tool.discard(target_prop)
+             distractor_tool = set(all_props_names)
+             distractor_tool.discard(target_prop_name)
         else:
             try:        
                 distractor_tool = np.random.choice(list(set(all_props_names)), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 if self.verbose:
-                    print(f"Warning: Not enough unique rhythm proportions in the ontology. number of distractors as number of unique rhythm proportions: {len(set(self.ontology['rhythm_proportion'].values()))}")
+                    print(f"Warning: Not enough unique rhythm proportions in the ontology. number of distractors as number of unique rhythm proportions: {len(self.ontology['rhythm_proportion'])}")
                 distractor_tool = np.random.choice(list(set(self.dict_rhythm_prop_ontology)), len(set(self.dict_rhythm_prop_ontology)), replace=False).tolist()
 
-            if target_prop in distractor_tool:
-                distractor_tool.remove(target_prop)
+            if target_prop_name in distractor_tool:
+                distractor_tool.remove(target_prop_name)
 
-        return target_prop, list(distractor_tool), question_values
+        return target_prop_name, list(distractor_tool), question_values
 
     def get_time_signature(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         musicxml_path = get_musicxml_file_path(path)
@@ -991,7 +1021,7 @@ class AnswerDistractorExtractors:
         chords = list(chords)
 
         if not chords:
-            raise ValueError(f"No valid chords found in part '{voice_key}'.")
+            raise ValueError(f"No valid chords found.")
         if self.use_all_inds:
             note_index = int(np.random.choice(range(len(chords)-1)))
             question_values['target_index'] = self.ontology['target_index'][note_index]
@@ -1007,6 +1037,53 @@ class AnswerDistractorExtractors:
 
         target_chord = chords[note_index].commonName
         
+        if not chords:
+            if self.config.get('verbose', False):
+                print("No chords found in the piece., skipping question.")
+            
+            return None, distractor_pool, question_values
+        else:
+
+            if "with" in target_chord:  # filter out chords with added tones (e.g., "C major with added sixth")
+                target_chord = target_chord.split(" with")[0]
+            target_chord_name = self.dict_chord_ontology[target_chord]
+            distractor_pool = list(self.dict_chord_ontology.values())
+
+            return target_chord_name, distractor_pool, question_values
+        
+    def get_harmonic_cadence(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+        musicxml_path = get_musicxml_file_path(path)
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+        
+        # Parse the MusicXML file into a music21 Stream
+        score = converter.parse(musicxml_path)
+        # chords = score.recurse().getElementsByClass('Chord')
+        chords = score.chordify().recurse().getElementsByClass('Chord')
+        chords = list(chords)
+
+        if not chords:
+            raise ValueError(f"No valid chords found.")
+        if self.use_all_inds:
+            note_index = int(np.random.choice(range(len(chords)-1)))
+            question_values['target_index'] = self.ontology['target_index'][note_index]
+        else:
+            note_index = question_values.get('target_index')
+
+        if note_index == 'end':
+            note_index = -1
+
+        # Check if the target_index is out of bounds
+        if note_index >= len(chords) or int(note_index) < -len(chords):
+            raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(chords)} chords.")
+
+        target_chord = chords[note_index].commonName
+        for note_idx in range(len(chords)-1):
+            # dont remeber how to get the roman number progression / not sure if it is the best way
+            n1 = chords[note_idx].quarterLength
+            n2 = chords[note_idx + 1].quarterLength
+        cadence = [chords[note_index], chords[note_index+1]]
         if not chords:
             if self.config.get('verbose', False):
                 print("No chords found in the piece., skipping question.")
