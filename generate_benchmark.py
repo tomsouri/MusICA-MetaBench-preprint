@@ -176,6 +176,9 @@ import yaml
 import uuid
 import itertools
 
+import math
+
+
 from utils import load_methods_module
 
 stats = {
@@ -205,7 +208,7 @@ def print_checkpoint(step_num, title, filename):
     title_with_brackets = f"[{title}]"
     print(
         f"Step {step_num:>2}  "
-        f"{title_with_brackets:<40}  "
+        f"{title_with_brackets:<45}  "
         f"Items: {count:>8}  "
         f"Errors: {stats['errors']:>4}"
     )
@@ -287,51 +290,77 @@ def step_0_instantiate_questions(meta_questions, config, ontology):
 
 
 def step_1_generate_product(meta_questions, config, fields):
+    """Generates the product of meta-questions and pieces."""
     args = config['cmdline_args']
-    #methods_module = load_methods_module(args['methods_path'])
-    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+    
     with open(args['pieces'], 'r', encoding='utf-8') as f_pieces:
         pieces = list(csv.DictReader(f_pieces, delimiter='\t'))
 
     output_data = []
     
-    for meta in meta_questions:
-        method_name = meta['method_for_ground_truth_extraction'] 
+    for meta in meta_questions:        
+        for piece in pieces:
+            try:
+                row = {**meta, **piece}
+                output_data.append(row)
+            except Exception as e:
+                print(f"Error on Q '{meta.get('meta-question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
+                stats["errors"] += 1
+
+    # Combination of original fields from meta-questions and pieces, without duplicates
+    out_fields = fields + list(pieces[0].keys())
+
+    # Deduplicate fields in case of identical column names (though unlikely to overlap destructively)
+    out_fields = list(dict.fromkeys(out_fields))
+
+    save_intermediate(output_data, "01_benchmark_step1_product.tsv", out_fields)
+    print_checkpoint(1, "Product & Extraction", "01_benchmark_step1_product.tsv")
+    return output_data, out_fields
+
+def step_1_5_extract_ground_truth_and_distractors(data, config, fields):
+    """For each question-piece pair, extracts the ground truth answer and distractor pool using the specified method."""
+
+    #methods_module = load_methods_module(args['methods_path'])
+    AnswerDistractorExtractors = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
+
+    output_data = []
+    
+    for row in data:
+        method_name = row['method_for_ground_truth_extraction'] 
         method_func = getattr(AnswerDistractorExtractors, method_name)
+
         # Parse values dict safely
         if not hasattr(AnswerDistractorExtractors, method_name):
             print(f"Error: Method '{method_name}' not found.")
 
             stats["errors"] += 1
             continue
-        values_dict = json.loads(meta['values']) if meta.get('values') else {}
-        
-        for piece in pieces:
-            try:
-                row = {**meta, **piece}
-                ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
-                    
-                # row['values']  = json.dumps(new_values_word)
-                # breakpoint()
-                # row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_word})
-                
-                if distractor_pool is not None:
-                    row['ground_truth'] = str(ground_truth)
-                    distractor_pool = [str(d) for d in distractor_pool]
-                    row['distractor_pool'] = json.dumps(distractor_pool)
-                    output_data.append(row)
-                # print(row)
-                # print(new_values_dict)
-            except Exception as e:
-                print(f"Error on Q '{meta.get('question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
-                stats["errors"] += 1
 
-    out_fields = fields + list(pieces[0].keys()) + ['ground_truth', 'distractor_pool']
+        values_dict = json.loads(row['values']) if row.get('values') else {}
+        
+        try:
+            ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, row['path'], values_dict)
+            
+            #row['values']  = json.dumps(new_values_word)
+            #row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
+            
+            if distractor_pool is not None:
+                row['ground_truth'] = str(ground_truth)
+                distractor_pool = [str(d) for d in distractor_pool]
+                row['distractor_pool'] = json.dumps(distractor_pool)
+                output_data.append(row)
+            # print(row)
+            # print(new_values_dict)
+        except Exception as e:
+            print(f"Error on Q '{row.get('question_id', '')}' / Piece '{row.get('piece_id', '')}': {e}")
+            stats["errors"] += 1
+
+    out_fields = fields + ['ground_truth', 'distractor_pool']
     # Deduplicate fields in case of identical column names (though unlikely to overlap destructively)
     out_fields = list(dict.fromkeys(out_fields))
 
-    save_intermediate(output_data, "01_benchmark_step1_product.tsv", out_fields)
-    print_checkpoint(1, "Product & Extraction", "01_benchmark_step1_product.tsv")
+    save_intermediate(output_data, "01_5_benchmark_step1.5_extraction.tsv", out_fields)
+    print_checkpoint(1.5, "Ground Truth & Distractor Extraction", "01_5_benchmark_step1.5_extraction.tsv")
     return output_data, out_fields
 
 
@@ -369,7 +398,7 @@ def step_2_sort_distractors(data, config, fields):
     print_checkpoint(2, "Sort Distractors", "02_benchmark_distractors_sorted.tsv")
     return data, out_fields
 
-def step_2_3_remove_duplicates(data, config, fields):
+def step_1_7_remove_duplicates(data, config, fields):
     """Removes duplicate questions based on question text and piece path."""
     seen = set()
     unique_data = []
@@ -379,35 +408,59 @@ def step_2_3_remove_duplicates(data, config, fields):
             seen.add(identifier)
             unique_data.append(row)
 
-    save_intermediate(unique_data, "02_3_benchmark_deduplicated.tsv", fields)
-    print_checkpoint(2.3, "Remove Duplicates", "02_3_benchmark_deduplicated.tsv")
+    save_intermediate(unique_data, "01_7_benchmark_deduplicated.tsv", fields)
+    print_checkpoint(1.7, "Remove Duplicates", "01_7_benchmark_deduplicated.tsv")
     return unique_data, fields
 
-def step_2_5_subsample(data, config, fields):
-    """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
-
+def step_1_4_subsample(data, config, fields):
+    """
+    Subsamples the benchmark to meet a target count per subcategory,
+    balanced by meta-question_id.
+    """
     q_count = config.get('questions_per_subcategory_count', 10)
+    balance_perfectly = config.get('balance_meta_questions_perfectly', False)
 
-    questions_by_subcategory = defaultdict(list)
+    # Group data by subcategory, then by meta-question_id
+    hierarchy = defaultdict(lambda: defaultdict(list))
     for q in data:
-        questions_by_subcategory[q['subcategory']].append(q)
+        hierarchy[q['subcategory']][q['meta-question_id']].append(q)
 
     out_data = []
-    
-    for subcategory, questions in questions_by_subcategory.items():
-        # TODO: for each subcategory, subsample only the specified number of items
 
-        # Subsample if there are more questions than the limit
-        if len(questions) > q_count:
-            sampled_questions = random.sample(questions, q_count)
-            out_data.extend(sampled_questions)
-        else:
-            print("Warning: Subcategory '{}' has only {} questions, which is less than the desired count of {}. Keeping all questions for this subcategory.".format(subcategory, len(questions), q_count))
-            out_data.extend(questions)
-
+    for subcategory, meta_groups in hierarchy.items():
+        meta_ids = list(meta_groups.keys())
+        num_meta = len(meta_ids)
         
-    save_intermediate(out_data, "02_5_benchmark_subsampled.tsv", fields)
-    print_checkpoint(2.5, "Subsample Benchmark", "02_5_benchmark_subsampled.tsv")
+        # Calculate base number of samples per meta-question
+        base_samples, remainder = divmod(q_count, num_meta)
+        
+        # Determine target count for each meta-question
+        # If balance_perfectly is True, we stick to base_samples.
+        # If False, we distribute the 'remainder' (leftover budget) 
+        # to ensure we get closer to q_count if possible.
+        targets = {}
+        for i, meta_id in enumerate(meta_ids):
+            if balance_perfectly:
+                targets[meta_id] = base_samples
+            else:
+                # Distribute remainder: first N meta-groups get (base + 1)
+                targets[meta_id] = base_samples + (1 if i < remainder else 0)
+
+        for meta_id in meta_ids:
+            questions = meta_groups[meta_id]
+            target = targets[meta_id]
+
+            if target > 0 and len(questions) > target:
+                out_data.extend(random.sample(questions, target))
+            elif target > len(questions):
+                print(f"Warning: Subcategory '{subcategory}', Meta-question '{meta_id}' "
+                      f"has {len(questions)} items, less than target {target}.")
+                out_data.extend(questions)
+            else:
+                out_data.extend(questions[:target])
+
+    save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
+    print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
     return out_data, fields
 
 def is_submodality_part_of_modality(submodality, modality):
@@ -546,6 +599,52 @@ def step_7_final_save(data, config, fields):
         writer.writerows(data)
     print(f"\nStep 7 [Final Save] complete. File saved to: {out_path}")
 
+from collections import Counter
+
+def print_formatted_statistics(data, fields, filters=None):
+    """
+    Prints distribution stats with optional filtering.
+    
+    :param filters: dict where keys are field names and values are 
+                    either a single allowed value or a list/set of values.
+    """
+    # 1. Apply filtering logic
+    filtered_data = data
+    if filters:
+        filtered_data = [
+            row for row in data 
+            if all(
+                row.get(f) == val if not isinstance(val, (list, tuple, set)) 
+                else row.get(f) in val 
+                for f, val in filters.items()
+            )
+        ]
+    
+    total_items = len(filtered_data)
+    if total_items == 0:
+        print("No items found matching the filter criteria.")
+        return
+
+    print(f"\n{'='*55}")
+    print(f"{'FIELD DISTRIBUTION STATISTICS':^55}")
+    if filters:
+        print(f"{f'Filtered by: {filters}':^55}")
+    print(f"{'='*55}")
+    print(f"Total Items in Subset: {total_items}\n")
+
+    for field in fields:
+        print(f"--- Field: {field} ---")
+        counts = Counter(str(row.get(field, "N/A")) for row in filtered_data)
+        
+        max_key_len = max((len(k) for k in counts.keys()), default=0)
+        
+        for value, count in counts.most_common():
+            percent = (count / total_items) * 100
+            print(f"{value:<{max_key_len}} : {count:>6} items ({percent:>6.2f}%)")
+        print() 
+    
+    print(f"{'='*55}")
+
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -553,6 +652,8 @@ def main():
     parser.add_argument("--submodalities", nargs='+', help="Override submodalities filter in config")
     parser.add_argument("--questions_per_subcategory_count", type=int, help="Override questions per subcategory count for subsampling")
     parser.add_argument("--seed", type=int, help="Override random seed for reproducibility")
+    parser.add_argument("--allowed_metaq_ids", nargs='+', help="Override allowed metaq ids in config")
+    
 
     args = parser.parse_args()
 
@@ -568,6 +669,8 @@ def main():
         config['questions_per_subcategory_count'] = args.questions_per_subcategory_count
     if args.seed is not None:
         config['seed'] = args.seed
+    if args.allowed_metaq_ids is not None:
+        config['allowed_metaq_ids'] = args.allowed_metaq_ids
 
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
@@ -589,21 +692,54 @@ def main():
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
 
-        # 1. Load raw
+    # 1. Load raw meta-questions
     raw_meta, meta_fields = step_0_minus_2_load_meta(config)
     
-    # 2. Filter raw
+    # 2. Filter out meta questions based on config (e.g., by allowed meta-question ids)
     filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
 
+    # 3. Instantiate questions from meta-questions by replacing wildcards with values from the ontology, and save the instantiated question text in a new column `question`.
     data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
-    # data, fields = step_0_instantiate_questions(config, ontology)
+    
+    # 4. Generate the product of meta-questions and pieces, and compute the ground truth and distractor pool for each question-piece pair using the methods specified in the meta-questions file.
     data, fields = step_1_generate_product(data, config, fields)
+    
+    # 5. Subsample the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config (this is to control the size of the benchmark, and to ensure diversity across different subcategories). 
+    data, fields = step_1_4_subsample(data, config, fields)
+    
+    # 6. For each question-piece pair, extract the ground truth answer and distractor pool using the specified method, and save them in new columns `ground_truth` and `distractor_pool`. The distractor pool should be saved as a JSON string (list of distractors).
+    data, fields = step_1_5_extract_ground_truth_and_distractors(data, config, fields)
+    
+    # 7. Remove duplicates based on question text and piece path, to ensure that each question-piece pair is unique in the benchmark.
+    # (duplicates are possible in case when we have "use_all_inds" set to true in config, then for the questions of type
+    # "what is in the {order} {voice} note in the provided excerpt?" (e.g. "what is the 2nd soprano note"),
+    # we regenerate the actual values (e.g. "2nd" and "soprano") for each question-piece pair during the
+    # distractor-ground truth extraction, depending on the actual length of the piece
+    data, fields = step_1_7_remove_duplicates(data, config, fields)
+
+    # 8. Apply a method as specified in the config to sort the distractor pool for each question-piece pair (with preliminary dummy implementation of the method that just shuffles the distractor pool, to be replaced later with a real implementation). This method should be applied to each question-piece pair in the benchmark generated in step 1, the distractors sorted should be added to a new column "sorted_distractors" and the output should be saved in an intermediate benchmark file named "benchmark_distractors_sorted.tsv".
     data, fields = step_2_sort_distractors(data, config, fields)
-    data, fields = step_2_3_remove_duplicates(data, config, fields)
-    data, fields = step_2_5_subsample(data, config, fields) # Automatically controls footprint
+    
+    # 9. Generate a product of the benchmark from the 2. step with the list of submodalities specified in the config
+    #    (excluding submodalities that are not part of any modality that is supported for the given question, as
+    #    specified in `modality_in_question` column in the meta-questions file), adding the submodality name as a new
+    #    column "submodality", and the column "path_to_question_context_file", which would be the concatenation of the
+    #    piece directory (column "path" from pieces.tsv) and the submodality name.
+    # The same question-piece pair is used for all submodalities to allow comparsion
     data, fields = step_3_submodalities(data, config, fields)
+
+    # 10. For each question-piece-submodality triplet, generate the final options to be included in the benchmark:
+    #     - if NOTA is to be included, take it (the text specified in config) as one of the options,
+    #     - take the ground truth as one of the options,
+    #     - and take the desired number of remaining options from the sorted distractor pool, in order of difficulty
+    #       (e.g., if the desired number of options is 5 and both NOTA and ground truth are included, take the top 3 most difficult distractors from the sorted distractor pool, and if NOTA is not included, take the top 4 most difficult distractors from the sorted distractor pool).
+    #     - add the ground truth to a new column "final_correct_option"
     data, fields = step_4_final_options(data, config, fields)
+
+    # 11. Add questions where ground-truth is excluded from the options (NOTA is correct answer) - only if the percentage of such desired questions is non-zero:
     data, fields = step_5_nota_correct(data, config, fields)
+    
+    # 12. Format the options and question.
     data, fields = step_6_formatting(data, config, fields)
     step_7_final_save(data, config, fields)
 
@@ -612,11 +748,26 @@ def main():
     nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
+    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
+
+    # print("\n--- NOTA-correct items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 1})
+    # print("--------------------------------")
+
+    # print("\n--- NOTA-incorrect items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
+    # print("--------------------------------")
+
+    # print("\n--- ALL DATA ---")
+    print_formatted_statistics(data, selected_fields)
+    # print("--------------------------------")
+
     print("\n--- Final Statistics ---")
     print(f"Total Benchmark Items : {total_items}")
     print(f"NOTA Correct Items    : {nota_correct_count} ({nota_percent:.2f}%)")
     print(f"Total Errors Recorded : {stats['errors']}")
     print("--------------------------------")
+
 
 if __name__ == "__main__":
     main()

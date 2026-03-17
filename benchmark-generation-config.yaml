@@ -51,3 +51,6 @@ verbose: true
 music_ontology_settings:
   ontology_path: "ontology.yaml"
   harmonic_system: "tonal"
+
+balance_meta_questions_perfectly: false # whether the per-meta-question counts should be perfectly balanced in the per-subcategory count in the final subsampled benchmark
+
