@@ -38,14 +38,14 @@ cmdline_args:
   output: "benchmark_v1.tsv"
 
 allowed_metaq_ids:
-  - 4
-  - 5
+  # - 4
+  # - 5
   - 6
-  - 3
-  - 2
+  # - 3
+  # - 2
   - 1
-  - 0
-  - 7
+  # - 0
+  # - 7
 verbose: true
 #use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
 music_ontology_settings:
