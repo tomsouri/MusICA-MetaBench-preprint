@@ -208,7 +208,7 @@ def print_checkpoint(step_num, title, filename):
     title_with_brackets = f"[{title}]"
     print(
         f"Step {step_num:>2}  "
-        f"{title_with_brackets:<40}  "
+        f"{title_with_brackets:<45}  "
         f"Items: {count:>8}  "
         f"Errors: {stats['errors']:>4}"
     )
@@ -599,6 +599,52 @@ def step_7_final_save(data, config, fields):
         writer.writerows(data)
     print(f"\nStep 7 [Final Save] complete. File saved to: {out_path}")
 
+from collections import Counter
+
+def print_formatted_statistics(data, fields, filters=None):
+    """
+    Prints distribution stats with optional filtering.
+    
+    :param filters: dict where keys are field names and values are 
+                    either a single allowed value or a list/set of values.
+    """
+    # 1. Apply filtering logic
+    filtered_data = data
+    if filters:
+        filtered_data = [
+            row for row in data 
+            if all(
+                row.get(f) == val if not isinstance(val, (list, tuple, set)) 
+                else row.get(f) in val 
+                for f, val in filters.items()
+            )
+        ]
+    
+    total_items = len(filtered_data)
+    if total_items == 0:
+        print("No items found matching the filter criteria.")
+        return
+
+    print(f"\n{'='*55}")
+    print(f"{'FIELD DISTRIBUTION STATISTICS':^55}")
+    if filters:
+        print(f"{f'Filtered by: {filters}':^55}")
+    print(f"{'='*55}")
+    print(f"Total Items in Subset: {total_items}\n")
+
+    for field in fields:
+        print(f"--- Field: {field} ---")
+        counts = Counter(str(row.get(field, "N/A")) for row in filtered_data)
+        
+        max_key_len = max((len(k) for k in counts.keys()), default=0)
+        
+        for value, count in counts.most_common():
+            percent = (count / total_items) * 100
+            print(f"{value:<{max_key_len}} : {count:>6} items ({percent:>6.2f}%)")
+        print() 
+    
+    print(f"{'='*55}")
+
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -698,11 +744,26 @@ def main():
     nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
+    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
+
+    # print("\n--- NOTA-correct items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 1})
+    # print("--------------------------------")
+
+    # print("\n--- NOTA-incorrect items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
+    # print("--------------------------------")
+
+    # print("\n--- ALL DATA ---")
+    print_formatted_statistics(data, selected_fields)
+    # print("--------------------------------")
+
     print("\n--- Final Statistics ---")
     print(f"Total Benchmark Items : {total_items}")
     print(f"NOTA Correct Items    : {nota_correct_count} ({nota_percent:.2f}%)")
     print(f"Total Errors Recorded : {stats['errors']}")
     print("--------------------------------")
+
 
 if __name__ == "__main__":
     main()
