@@ -98,12 +98,6 @@ import yaml
 from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64, upload_tsv_to_gsheet, create_gsheet_tabs
 from eval import evaluate_results
 
-# Optional GSpread import for the new feature
-try:
-    import gspread
-    GSPREAD_AVAILABLE = True
-except ImportError:
-    GSPREAD_AVAILABLE = False
 
 # =========================================================================
 # Utilities and Helper Functions
@@ -133,87 +127,6 @@ def set_logdir(config: dict) -> str:
     os.makedirs(unique_logdir, exist_ok=True)
     return unique_logdir
 
-
-def create_and_setup_gsheet(folder_id: str, run_uuid: str, config):
-    """
-    Creates a new Google Sheet inside the specified folder ID and initializes 
-    the 3 required tabs: Continuous Logs, Full Logs, Results.
-    """
-    if not GSPREAD_AVAILABLE:
-        print("⚠ gspread is not installed. Run `pip install gspread`")
-        return None
-
-    required = ['sheet_id', 'sheet_name', 'credentials_location']
-    missing = [k for k in required if not config.get(k)]
-    if missing:
-        print(f"⚠ Google Sheets logging skipped: missing config fields: {', '.join(missing)}")
-        return
-
-    cred_path = config['credentials_location']
-    if not os.path.exists(cred_path):
-        print(f"⚠ Google Sheets logging skipped: credentials file not found at {cred_path}")
-        return
-
-
-    try:
-        from google.oauth2.service_account import Credentials
-        # ADD 'https://www.googleapis.com/auth/drive' to the scopes
-        scope = [
-            'https://www.googleapis.com/auth/spreadsheets',
-            'https://www.googleapis.com/auth/drive'
-        ]
-        creds = Credentials.from_service_account_file(cred_path, scopes=scope)
-        client = gspread.authorize(creds)
-
-        gc = client
-        dt_string = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        sheet_title = f"{run_uuid}_{dt_string}"
-        
-        print(f"Creating Google Sheet: {sheet_title} in folder {folder_id}...")
-        
-        # Create sheet in the specific folder
-        spreadsheet = gc.create(sheet_title, folder_id=folder_id)
-
-        
-        # Create worksheets
-        continuous_ws = spreadsheet.add_worksheet(title="Continuous Logs", rows="1000", cols="30")
-        full_ws = spreadsheet.add_worksheet(title="Full Logs", rows="1000", cols="30")
-        results_ws = spreadsheet.add_worksheet(title="Results", rows="1000", cols="30")
-        
-        # Remove default 'Sheet1'
-        try:
-            sheet1 = spreadsheet.worksheet("Sheet1")
-            spreadsheet.del_worksheet(sheet1)
-        except gspread.exceptions.WorksheetNotFound:
-            pass
-
-        return {
-            "spreadsheet": spreadsheet,
-            "continuous_ws": continuous_ws,
-            "full_ws": full_ws,
-            "results_ws": results_ws
-        }
-    except Exception as e:
-        print(f"Failed to create Google Sheet. Error: {e}")
-        return None
-
-
-def upload_tsv_to_worksheet(tsv_path: str, worksheet):
-    """Uploads the entire content of a TSV file efficiently to a given gspread worksheet."""
-    if not os.path.exists(tsv_path):
-        print(f"Warning: {tsv_path} not found. Skipping GSheet upload.")
-        return
-
-    try:
-        with open(tsv_path, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f, delimiter='\t')
-            data = list(reader)
-        if data:
-            worksheet.clear()
-            worksheet.update("A1", data)
-            print(f"Uploaded {len(data)} rows to worksheet '{worksheet.title}'.")
-    except Exception as e:
-        print(f"Error uploading {tsv_path} to worksheet '{worksheet.title}': {e}")
 
 
 # =========================================================================
