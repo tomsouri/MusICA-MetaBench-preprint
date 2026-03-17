@@ -176,6 +176,9 @@ import yaml
 import uuid
 import itertools
 
+import math
+
+
 from utils import load_methods_module
 
 stats = {
@@ -205,7 +208,7 @@ def print_checkpoint(step_num, title, filename):
     title_with_brackets = f"[{title}]"
     print(
         f"Step {step_num:>2}  "
-        f"{title_with_brackets:<40}  "
+        f"{title_with_brackets:<45}  "
         f"Items: {count:>8}  "
         f"Errors: {stats['errors']:>4}"
     )
@@ -410,28 +413,52 @@ def step_1_7_remove_duplicates(data, config, fields):
     return unique_data, fields
 
 def step_1_4_subsample(data, config, fields):
-    """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
-
+    """
+    Subsamples the benchmark to meet a target count per subcategory,
+    balanced by meta-question_id.
+    """
     q_count = config.get('questions_per_subcategory_count', 10)
+    balance_perfectly = config.get('balance_meta_questions_perfectly', False)
 
-    questions_by_subcategory = defaultdict(list)
+    # Group data by subcategory, then by meta-question_id
+    hierarchy = defaultdict(lambda: defaultdict(list))
     for q in data:
-        questions_by_subcategory[q['subcategory']].append(q)
+        hierarchy[q['subcategory']][q['meta-question_id']].append(q)
 
     out_data = []
-    
-    for subcategory, questions in questions_by_subcategory.items():
-        # TODO: for each subcategory, subsample only the specified number of items
 
-        # Subsample if there are more questions than the limit
-        if len(questions) > q_count:
-            sampled_questions = random.sample(questions, q_count)
-            out_data.extend(sampled_questions)
-        else:
-            print("Warning: Subcategory '{}' has only {} questions, which is less than the desired count of {}. Keeping all questions for this subcategory.".format(subcategory, len(questions), q_count))
-            out_data.extend(questions)
-
+    for subcategory, meta_groups in hierarchy.items():
+        meta_ids = list(meta_groups.keys())
+        num_meta = len(meta_ids)
         
+        # Calculate base number of samples per meta-question
+        base_samples, remainder = divmod(q_count, num_meta)
+        
+        # Determine target count for each meta-question
+        # If balance_perfectly is True, we stick to base_samples.
+        # If False, we distribute the 'remainder' (leftover budget) 
+        # to ensure we get closer to q_count if possible.
+        targets = {}
+        for i, meta_id in enumerate(meta_ids):
+            if balance_perfectly:
+                targets[meta_id] = base_samples
+            else:
+                # Distribute remainder: first N meta-groups get (base + 1)
+                targets[meta_id] = base_samples + (1 if i < remainder else 0)
+
+        for meta_id in meta_ids:
+            questions = meta_groups[meta_id]
+            target = targets[meta_id]
+
+            if target > 0 and len(questions) > target:
+                out_data.extend(random.sample(questions, target))
+            elif target > len(questions):
+                print(f"Warning: Subcategory '{subcategory}', Meta-question '{meta_id}' "
+                      f"has {len(questions)} items, less than target {target}.")
+                out_data.extend(questions)
+            else:
+                out_data.extend(questions[:target])
+
     save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
     print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
     return out_data, fields
@@ -572,6 +599,52 @@ def step_7_final_save(data, config, fields):
         writer.writerows(data)
     print(f"\nStep 7 [Final Save] complete. File saved to: {out_path}")
 
+from collections import Counter
+
+def print_formatted_statistics(data, fields, filters=None):
+    """
+    Prints distribution stats with optional filtering.
+    
+    :param filters: dict where keys are field names and values are 
+                    either a single allowed value or a list/set of values.
+    """
+    # 1. Apply filtering logic
+    filtered_data = data
+    if filters:
+        filtered_data = [
+            row for row in data 
+            if all(
+                row.get(f) == val if not isinstance(val, (list, tuple, set)) 
+                else row.get(f) in val 
+                for f, val in filters.items()
+            )
+        ]
+    
+    total_items = len(filtered_data)
+    if total_items == 0:
+        print("No items found matching the filter criteria.")
+        return
+
+    print(f"\n{'='*55}")
+    print(f"{'FIELD DISTRIBUTION STATISTICS':^55}")
+    if filters:
+        print(f"{f'Filtered by: {filters}':^55}")
+    print(f"{'='*55}")
+    print(f"Total Items in Subset: {total_items}\n")
+
+    for field in fields:
+        print(f"--- Field: {field} ---")
+        counts = Counter(str(row.get(field, "N/A")) for row in filtered_data)
+        
+        max_key_len = max((len(k) for k in counts.keys()), default=0)
+        
+        for value, count in counts.most_common():
+            percent = (count / total_items) * 100
+            print(f"{value:<{max_key_len}} : {count:>6} items ({percent:>6.2f}%)")
+        print() 
+    
+    print(f"{'='*55}")
+
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -671,11 +744,26 @@ def main():
     nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
+    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
+
+    # print("\n--- NOTA-correct items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 1})
+    # print("--------------------------------")
+
+    # print("\n--- NOTA-incorrect items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
+    # print("--------------------------------")
+
+    # print("\n--- ALL DATA ---")
+    print_formatted_statistics(data, selected_fields)
+    # print("--------------------------------")
+
     print("\n--- Final Statistics ---")
     print(f"Total Benchmark Items : {total_items}")
     print(f"NOTA Correct Items    : {nota_correct_count} ({nota_percent:.2f}%)")
     print(f"Total Errors Recorded : {stats['errors']}")
     print("--------------------------------")
+
 
 if __name__ == "__main__":
     main()
