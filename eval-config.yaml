@@ -18,7 +18,7 @@ env_api_key_name: "OPENROUTER_API_KEY"
 # env_api_key_name: "EINFRA_KEY"
 
 
-max_waiting_time_per_request: 60 # in seconds, after which the request will be considered failed and logged as such
+max_waiting_time_per_request: 300 # in seconds, after which the request will be considered failed and logged as such
 
 
 # Filter benchmark items by any column. Only items with the specified values will be processed.
@@ -32,13 +32,7 @@ filters:
   modality: 
     - "audio"
     - "symbolic"
-    # - "visual"
-  piece_id:
-    # - "Anonymous_AusMeinesHerzensGrunde"
-    # - "Crueger_AufAufMeinHerzMitFreuden"
-  submodality: 
-    # - "visual.png"
-    # - "symbolic.musicxml"
+    - "visual"
   # You can add any generic column here, e.g.:
   # question_type:
   #   - "pitch_identification"
@@ -50,7 +44,6 @@ filters:
 # Columns to group the final statistics by
 # ==========================================
 evaluation_criteria:
-  - "modality"
   - "submodality"
   - "piece_id"
   - "is_nota_correct"
@@ -58,6 +51,7 @@ evaluation_criteria:
   - "category"
   - "subcategory"
   - "skill"
+  - "rel/abs"
 
 # Specify where to save the tabular evaluation summary
 evaluation_output_file: "evaluation_summary.tsv"
@@ -107,6 +101,7 @@ musical_piece_format_info:
     audio.mastermix.wav: "an audio recording (WAV format)"
   visual:
     visual.png: "a rendered score (PNG format)"
+    visual.short.png: "a rendered score (PNG format)"
     visual.pdf: "a rendered score (PDF format)"
   symbolic:
     symbolic.musicxml: "a musical score (MusicXML format)"

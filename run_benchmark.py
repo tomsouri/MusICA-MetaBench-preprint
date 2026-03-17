@@ -315,6 +315,7 @@ def main():
     parser.add_argument("--config", required=True, help="Path to config yaml file")
     # New command line arguments
     parser.add_argument("--models", nargs='+', help="Override models in config")
+    parser.add_argument("--max_waiting_time_per_request", type=int, help="Override max_waiting_time_per_request in config")
     parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
     parser.add_argument("--url", help="Override API endpoint URL in config")
     parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
