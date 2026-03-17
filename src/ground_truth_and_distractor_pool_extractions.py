@@ -193,6 +193,7 @@ def get_rhythm_props():
     rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0, 1.5]  # e.g., half, equal, double
     ontology = {str(prop) : (f"1:{int(prop)}") for prop in rhythmic_proportions if prop >=1}
     ontology.update({str(prop) : (f"1:{prop}") for prop in rhythmic_proportions if prop < 1})
+    ontology.update({"other" : "other"})
     # ontology = {0:""}
     return ontology
 
