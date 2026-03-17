@@ -310,9 +310,10 @@ def step_1_generate_product(meta_questions, config, fields):
             try:
                 row = {**meta, **piece}
                 ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, piece['path'], values_dict)
-                
-                row['values']  = json.dumps(new_values_word)
-                row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_word})
+                    
+                # row['values']  = json.dumps(new_values_word)
+                # breakpoint()
+                # row['question'] = meta['text_with_wildcards'].format(**{**values_dict, **new_values_word})
                 
                 if distractor_pool is not None:
                     row['ground_truth'] = str(ground_truth)
@@ -573,7 +574,7 @@ def main():
         
     random.seed(config.get('seed', 42))
     np.random.seed(config.get('seed', 42))
-
+    rng = np.random.default_rng(config.get('seed', 42)) # to use for seed choice generate: rng.choice(list) / tested
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
         # 2. Save modified config to log directory

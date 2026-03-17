@@ -29,7 +29,8 @@ nota_correct_percentage: 0.20 # e.g., 20%
 labels: ["A", "B", "C", "D", "E"]
 seed: 42
 min_num_distractors: 4
-
+distractor_pool_size: 20 # number of distractors to sample from the ontology for each question (before sorting and selecting the final options)
+random_distractors: true # whether to sample distractors randomly from the ontology (instead of using piece specific distractors)
 cmdline_args:
   meta: "meta-questions-K.tsv"
   pieces: "pieces.tsv"
@@ -37,15 +38,16 @@ cmdline_args:
   output: "benchmark_v1.tsv"
 
 allowed_metaq_ids:
-  #- 4
-  #- 5
-  # - 3
-  # - 2
+  - 4
+  - 5
+  - 6
+  - 3
+  - 2
   - 1
   - 0
-  - 6
+  - 7
 verbose: true
-use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
+#use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
 music_ontology_settings:
   ontology_path: "ontology.yaml"
   harmonic_system: "tonal"
