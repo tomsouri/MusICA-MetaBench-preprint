@@ -1,7 +1,7 @@
 target_index:
-  - 1: "first"
-  - 2: "second"
-  - 3: "third"
+  - 0: "first"
+  - 1: "second"
+  - 2: "third"
   - end: "last"
 
 voice:
