@@ -257,9 +257,11 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             return response.json()
             
         except requests.exceptions.RequestException as e:
-            if hasattr(e.response, 'status_code') and 400 <= e.response.status_code < 500:
-                print(f"Fatal error: {e}. Not retrying.")
-                return {"error": str(e)}
+            # Rather wait for all errors, 429 is "too many requests"
+
+            # if hasattr(e.response, 'status_code') and 400 <= e.response.status_code < 500:
+            #     print(f"Fatal error: {e}. Not retrying.")
+            #     return {"error": str(e)}
             
             delay = min(64, base_delay * (2 ** attempt))
             jitter = random.uniform(0, delay)
