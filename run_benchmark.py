@@ -95,7 +95,7 @@ from typing import Dict, Tuple
 import requests
 import yaml
 
-from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
+from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64, upload_tsv_to_gsheet, create_gsheet_tabs
 from eval import evaluate_results
 
 # Optional GSpread import for the new feature
@@ -394,14 +394,16 @@ def main():
     parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
     parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
     # New arg for GSheet generation tracking
-    parser.add_argument("--generate_gsheet_with_logs", type=str, help="Google Drive shared folder ID. Creates an independent GSheet to track logs.")
+    parser.add_argument("--generate_new_list_with_logs", default=False, action="store_true", 
+                        help="Generate separate cont/final/res lists inside Google Sheets")
+
 
     cmdline_args = parser.parse_args()
 
     # 1. Load and Override Config
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
-    
+
     if cmdline_args.models:
         config['models'] = cmdline_args.models
     if cmdline_args.api_key_env:
@@ -424,22 +426,27 @@ def main():
         benchmark_run_uuid = str(random_uuid())
         
     config["benchmark_run_uuid"] = benchmark_run_uuid
-    
-    # Optional GSheet Init Tracking
-    generated_gsheets = None
-    setup_gsheet_error = False
-    if cmdline_args.generate_gsheet_with_logs:
-        generated_gsheets = create_and_setup_gsheet(
-            folder_id=cmdline_args.generate_gsheet_with_logs, 
-            run_uuid=benchmark_run_uuid,
-            config=config
-        )
-        if not generated_gsheets:
-            setup_gsheet_error = True
-    
-    # ... (Prepare logdir) ...
+
     logdir = set_logdir(config)
     
+    # ---------------------------------------------------------------------------------
+    # Generate Run-Specific Lists / Tabs into Google Sheets
+    # ---------------------------------------------------------------------------------
+    cont_list_name = fin_list_name = res_list_name = None
+    if cmdline_args.generate_new_list_with_logs:
+        run_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        cont_list_name = f"{benchmark_run_uuid}_{run_dt}_cont"
+        fin_list_name  = f"{benchmark_run_uuid}_{run_dt}_fin"
+        res_list_name  = f"{benchmark_run_uuid}_{run_dt}_res"
+        
+        # Try to initialize the blank tabs 
+        success = create_gsheet_tabs(config, [cont_list_name, fin_list_name, res_list_name])
+        
+        # If successfully created, override the single sheet_name target 
+        # so utils.append_to_google_sheet directly appends there
+        if success:
+            config['sheet_name'] = cont_list_name
+
     # 2. Save modified config to log directory
     with open(os.path.join(logdir, "config_snapshot.yaml"), 'w') as f:
         yaml.dump(config, f)
@@ -457,7 +464,7 @@ def main():
 
     log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
-    
+
     # Check API key presence 
     api_key_name = config.get("env_api_key_name", "OPENROUTER_API_KEY")
     if not os.environ.get(api_key_name) and not config.get('dry_run'):
@@ -471,16 +478,14 @@ def main():
         for row in reader:
             items.append(row)
 
-    # =====================================================================
     # Filter the benchmark items
-    # =====================================================================
     print(f"\n--- Data Loading & Filtering ---")
     print(f"Loaded initial benchmark with {len(items)} items.")
 
     filters = config.get("filters", {})
     if filters:
         for column, allowed_values in filters.items():
-            if allowed_values:  # If list is empty, ignore this filter
+            if allowed_values: 
                 temp_items = [i for i in items if i.get(column) in allowed_values]
                 print(f"Filter applied: Column '{column}' {allowed_values} -> Kept {len(temp_items)}")
                 items = temp_items
@@ -504,11 +509,9 @@ def main():
         writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
         writer.writeheader()
 
-    # Track all log rows to pass to the evaluator later
     all_executed_logs = []
-    generated_gsheets_header_written = False
-
     run_count = 0
+
     for model in config['models']:
         for item in items:
             run_count += 1
@@ -525,7 +528,7 @@ def main():
             format_desc = fmt_info.get(modality, {}).get(submodality, "a musical excerpt")
 
             print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['question']}")
-            print(f"Options:" + ", ".join(options))
+            print(f"Options: " + ", ".join(options))
 
             prompt = config['user_prompt_template']
             prompt = prompt.replace("<FORMAT>", format_desc)
@@ -533,6 +536,7 @@ def main():
             prompt = prompt.replace("<OPTIONS_TEXT>", options_text)
             prompt = prompt.replace("<OPTION_LABELS>", ', '.join(labels))
 
+            # Build Payload
             content_file = item['path_to_question_context_file']
             text_only_baseline = config.get('text_only_baseline', False)
 
@@ -546,12 +550,15 @@ def main():
                 no_content_file=text_only_baseline
             )
 
+            # Execute Request
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
+            # Extract Response and Check Correctness
             extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
 
+            # Logging Logic
             log_row = item.copy()
             model_str = "text-only-" + model if text_only_baseline else model
             log_row.update({
@@ -569,6 +576,7 @@ def main():
                 "is_correct": is_correct
             })
 
+            # Save line into memory
             all_executed_logs.append(log_row)
 
             # 1. Log to local TSV
@@ -576,27 +584,17 @@ def main():
                 writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
                 writer.writerow(log_row)
 
-            row_list = [log_row.get(h, "") for h in log_headers]
-
-            # 2. Existing log to legacy Google Sheets
+            # 2. Log to Google Sheets
+            # Note: Because we overwrote config['sheet_name'], this goes into the `cont` list dynamically.
             if config.get('log_to_google_sheet'):
+                row_list = [log_row.get(h, "") for h in log_headers]
                 append_to_google_sheet(config, row_list, header=log_headers, force_header_print=config.get("force_header_print", False))
+                # Enforce the header print only for the first item
                 config["force_header_print"] = False
-
-            # 2.5 New dynamic Google sheet functionality for Continuous logs
-            if generated_gsheets and not setup_gsheet_error:
-                try:
-                    ws = generated_gsheets["continuous_ws"]
-                    if not generated_gsheets_header_written:
-                        ws.append_row(log_headers)
-                        generated_gsheets_header_written = True
-                    ws.append_row(row_list)
-                except Exception as e:
-                    print(f"Warning: Failed to append to Continuous Logs GSheet. {e}")
 
             # 3. Print concise log
             print(f"  -> Extracted: {extracted_answer} | Expected: {correct_label} | Correct: {is_correct} | Time: {time_taken:.2f}s | Cost: ${cost:.6f}")
-    
+
     # =====================================================================
     # Trigger final evaluation logic
     # =====================================================================
@@ -606,17 +604,14 @@ def main():
     if results_path:
         output_tsvs += [results_path]
 
-    # Evaluate outputs
     evaluate_results(all_executed_logs, evaluation_criteria, output_tsvs=output_tsvs)
 
-    # =====================================================================
-    # Finale generated GSheet dump requests
-    # =====================================================================
-    if generated_gsheets and not setup_gsheet_error:
-        print("\n--- Uploading Full Logs & Results to Google Sheets ---")
-        upload_tsv_to_worksheet(log_tsv_path, generated_gsheets["full_ws"])
-        upload_tsv_to_worksheet(results_tsv_path, generated_gsheets["results_ws"])
-        print("Google Sheet Sync Complete.")
+    # 4. Final Work - Copy TSVs to their respective Google Sheet tabs if flagged
+    if cmdline_args.generate_new_list_with_logs:
+        print("\nUploading final log and results data to respective Google Sheets lists...")
+        upload_tsv_to_gsheet(config, tab_name=fin_list_name, tsv_file=log_tsv_path)
+        upload_tsv_to_gsheet(config, tab_name=res_list_name, tsv_file=results_tsv_path)
+
 
 if __name__ == "__main__":
     main()
