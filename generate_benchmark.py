@@ -176,6 +176,9 @@ import yaml
 import uuid
 import itertools
 
+import math
+
+
 from utils import load_methods_module
 
 stats = {
@@ -410,28 +413,52 @@ def step_1_7_remove_duplicates(data, config, fields):
     return unique_data, fields
 
 def step_1_4_subsample(data, config, fields):
-    """Samples down the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config."""
-
+    """
+    Subsamples the benchmark to meet a target count per subcategory,
+    balanced by meta-question_id.
+    """
     q_count = config.get('questions_per_subcategory_count', 10)
+    balance_perfectly = config.get('balance_meta_questions_perfectly', False)
 
-    questions_by_subcategory = defaultdict(list)
+    # Group data by subcategory, then by meta-question_id
+    hierarchy = defaultdict(lambda: defaultdict(list))
     for q in data:
-        questions_by_subcategory[q['subcategory']].append(q)
+        hierarchy[q['subcategory']][q['meta-question_id']].append(q)
 
     out_data = []
-    
-    for subcategory, questions in questions_by_subcategory.items():
-        # TODO: for each subcategory, subsample only the specified number of items
 
-        # Subsample if there are more questions than the limit
-        if len(questions) > q_count:
-            sampled_questions = random.sample(questions, q_count)
-            out_data.extend(sampled_questions)
-        else:
-            print("Warning: Subcategory '{}' has only {} questions, which is less than the desired count of {}. Keeping all questions for this subcategory.".format(subcategory, len(questions), q_count))
-            out_data.extend(questions)
-
+    for subcategory, meta_groups in hierarchy.items():
+        meta_ids = list(meta_groups.keys())
+        num_meta = len(meta_ids)
         
+        # Calculate base number of samples per meta-question
+        base_samples, remainder = divmod(q_count, num_meta)
+        
+        # Determine target count for each meta-question
+        # If balance_perfectly is True, we stick to base_samples.
+        # If False, we distribute the 'remainder' (leftover budget) 
+        # to ensure we get closer to q_count if possible.
+        targets = {}
+        for i, meta_id in enumerate(meta_ids):
+            if balance_perfectly:
+                targets[meta_id] = base_samples
+            else:
+                # Distribute remainder: first N meta-groups get (base + 1)
+                targets[meta_id] = base_samples + (1 if i < remainder else 0)
+
+        for meta_id in meta_ids:
+            questions = meta_groups[meta_id]
+            target = targets[meta_id]
+
+            if target > 0 and len(questions) > target:
+                out_data.extend(random.sample(questions, target))
+            elif target > len(questions):
+                print(f"Warning: Subcategory '{subcategory}', Meta-question '{meta_id}' "
+                      f"has {len(questions)} items, less than target {target}.")
+                out_data.extend(questions)
+            else:
+                out_data.extend(questions[:target])
+
     save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
     print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
     return out_data, fields
