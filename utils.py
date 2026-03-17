@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 import base64
+import csv
 
 
 def get_musicxml_file_path(piece_dir: str) -> str:
@@ -87,6 +88,72 @@ def append_to_google_sheet(config: dict, row_data: list, header: list = None, fo
         print("✓ Logged to Google Sheet")
     except Exception as e:
         print(f"⚠ Failed to log to Google Sheet: {e}")
+
+
+# =========================================================================
+# Google Sheets Helpers (New)
+# =========================================================================
+
+def get_gspread_spreadsheet(config):
+    """Initializes standard gspread authentication."""
+    import gspread
+    # Assumes standard authentication (e.g. via service account JSON in ~/.config/gspread)
+    # or you can patch this to specifically load a path from config.
+
+    cred_path = config['credentials_location']
+    if not os.path.exists(cred_path):
+        print(f"⚠ Google Sheets logging skipped: credentials file not found at {cred_path}")
+        return
+
+    from google.oauth2.service_account import Credentials
+    scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+    creds = Credentials.from_service_account_file(cred_path, scopes=scope)
+    client = gspread.authorize(creds)
+
+    spreadsheet = client.open_by_key(config['sheet_id'])
+    
+    return spreadsheet
+
+
+def create_gsheet_tabs(config: dict, tab_names: list) -> bool:
+    """Creates new worksheets (lists) in the target Google Sheet document."""
+    try:
+        import gspread
+        spreadsheet = get_gspread_spreadsheet(config)
+        # Ensure we have a document identifier; assume fallback to standard sheet_name config property
+        
+        
+        for tab in tab_names:
+            try:
+                # Creates tab with standard defaults
+                spreadsheet.add_worksheet(title=tab, rows=1000, cols=30)
+                print(f"Created Google Sheet tab: `{tab}`")
+            except gspread.exceptions.APIError as e:
+                print(f"Warning: Tab `{tab}` could not be created or already exists. Error: {e}")
+        return True
+    except Exception as e:
+        print(f"Error initializing Google Sheets configuration: {e}")
+        return False
+
+def upload_tsv_to_gsheet(config: dict, tab_name: str, tsv_file: str):
+    """Reads a local TSV file and performs a bulk update into the requested worksheet."""
+    try:
+        import gspread
+        spreadsheet = get_gspread_spreadsheet(config)
+        worksheet = spreadsheet.worksheet(tab_name)
+        
+        with open(tsv_file, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter='\t')
+            data = list(reader)
+            
+        worksheet.clear()
+        if data:
+            # Bulk update starting from cell A1
+            worksheet.update('A1', data)
+        print(f"Successfully populated `{tab_name}` from `{tsv_file}`")
+    except Exception as e:
+        print(f"Error copying data to `{tab_name}`: {e}")
+
 
 
 # TODO: if appending still fails, this bypasses the google's append_row logic:

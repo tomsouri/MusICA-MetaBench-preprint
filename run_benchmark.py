@@ -88,14 +88,16 @@ import os
 import sys
 import time
 import uuid
-from typing import Dict, Tuple
 import random
-
-from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64
-from eval import evaluate_results
+import shutil
+from typing import Dict, Tuple
 
 import requests
 import yaml
+
+from utils import load_methods_module, append_to_google_sheet, encode_file_to_base64, upload_tsv_to_gsheet, create_gsheet_tabs
+from eval import evaluate_results
+
 
 # =========================================================================
 # Utilities and Helper Functions
@@ -109,6 +111,7 @@ def deterministic_uuid(data):
     """Generates a deterministic UUID based on the input data dictionary."""
     normalized = json.dumps(data, sort_keys=True)
     return uuid.uuid5(PROJECT_NAMESPACE, normalized)
+
 
 def random_uuid():
     """Generates a random UUID."""
@@ -131,26 +134,16 @@ def set_logdir(config: dict) -> str:
 # =========================================================================
 
 def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False) -> Tuple[Dict, str]:
-    """
-    Generates the messages payload based on the modality and files.
-
-    If no_content_file is True, it will prepare a payload but will exclude the content (musical) file. To be used as
-    "text-onlyLLM" baseline.    
-    """
+    """Generates the messages payload based on the modality and files."""
     messages = []
     plugins = None
     
-    # We remove the placeholder from the textual prompt since we'll append data separately
     user_prompt_clean = user_prompt.replace("<POTENTIAL_TEXTFILE_PLACEHOLDER>", "").strip()
 
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
 
-    
     if no_content_file:
-        # Ignore the content file and just send the user prompt (question and options) as text.
-        # To be used as "text-only LLM" baseline, to see how well the model can do without seeing the actual musical
-        # material. (How well it can guess the correct answer from distractor set.)
         messages.append({
             "role": "user",
             "content": [{"type": "text", "text": user_prompt_clean}]
@@ -196,7 +189,6 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
             except FileNotFoundError:
                 file_content = "[FILE NOT FOUND]"
                 
-            # Add the explicit data block separately from the instruction text block
             messages.append({
                 "role": "user",
                 "content": [
@@ -225,6 +217,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
         
     return payload, user_prompt_clean
 
+
 def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: bool = False) -> Tuple[float, float, dict, str]:
     """Runs the API request and returns (price, time_taken, full_json_response, response_text)."""
     start_time = datetime.datetime.now()
@@ -252,13 +245,9 @@ def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: b
 
 
 def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
-    """
-    Calls an API with exponential backoff and jitter.
-    
-    :param max_waiting_time: Total maximum seconds to wait before giving up.
-    """
+    """Calls an API with exponential backoff and jitter."""
     start_time = time.time()
-    base_delay = 1  # Initial delay in seconds
+    base_delay = 1  
     attempt = 0
     
     while time.time() - start_time < max_waiting_time:
@@ -268,13 +257,10 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             return response.json()
             
         except requests.exceptions.RequestException as e:
-            # Check if we should stop for non-transient errors (e.g., 400 Bad Request)
             if hasattr(e.response, 'status_code') and 400 <= e.response.status_code < 500:
                 print(f"Fatal error: {e}. Not retrying.")
                 return {"error": str(e)}
             
-            # Calculate exponential backoff with jitter
-            # Formula: min(max_delay, base * 2^attempt)
             delay = min(64, base_delay * (2 ** attempt))
             jitter = random.uniform(0, delay)
             
@@ -287,6 +273,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             attempt += 1
             
     return {"error": "Max waiting time exceeded."}
+
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
     """Removes base64 data streams from logs."""
@@ -308,12 +295,9 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
 # Main Benchmark Loop
 # =========================================================================
 
-import shutil
-
 def main():
     parser = argparse.ArgumentParser(description="Run LLM benchmark.")
     parser.add_argument("--config", required=True, help="Path to config yaml file")
-    # New command line arguments
     parser.add_argument("--models", nargs='+', help="Override models in config")
     parser.add_argument("--max_waiting_time_per_request", type=int, help="Override max_waiting_time_per_request in config")
     parser.add_argument("--api-key-env", help="Override env_api_key_name in config")
@@ -323,13 +307,17 @@ def main():
     parser.add_argument("--text_only_baseline", help="Override text_only_baseline flag in config", action='store_true')
     parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
     parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
+    # New arg for GSheet generation tracking
+    parser.add_argument("--generate_new_list_with_logs", default=False, action="store_true", 
+                        help="Generate separate cont/final/res lists inside Google Sheets")
+
 
     cmdline_args = parser.parse_args()
 
     # 1. Load and Override Config
     with open(cmdline_args.config, 'r') as f:
         config = yaml.safe_load(f)
-    
+
     if cmdline_args.models:
         config['models'] = cmdline_args.models
     if cmdline_args.api_key_env:
@@ -352,10 +340,27 @@ def main():
         benchmark_run_uuid = str(random_uuid())
         
     config["benchmark_run_uuid"] = benchmark_run_uuid
-    
-    # ... (Prepare logdir) ...
+
     logdir = set_logdir(config)
     
+    # ---------------------------------------------------------------------------------
+    # Generate Run-Specific Lists / Tabs into Google Sheets
+    # ---------------------------------------------------------------------------------
+    cont_list_name = fin_list_name = res_list_name = None
+    if cmdline_args.generate_new_list_with_logs:
+        run_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        cont_list_name = f"{benchmark_run_uuid}_{run_dt}_cont"
+        fin_list_name  = f"{benchmark_run_uuid}_{run_dt}_fin"
+        res_list_name  = f"{benchmark_run_uuid}_{run_dt}_res"
+        
+        # Try to initialize the blank tabs 
+        success = create_gsheet_tabs(config, [cont_list_name, fin_list_name, res_list_name])
+        
+        # If successfully created, override the single sheet_name target 
+        # so utils.append_to_google_sheet directly appends there
+        if success:
+            config['sheet_name'] = cont_list_name
+
     # 2. Save modified config to log directory
     with open(os.path.join(logdir, "config_snapshot.yaml"), 'w') as f:
         yaml.dump(config, f)
@@ -366,18 +371,14 @@ def main():
         shutil.copy2(target_benchmark_file, os.path.join(logdir, os.path.basename(target_benchmark_file)))
     else:
         raise ValueError("Benchmark file must be specified and exist.")
-    
-
          
     # Load extraction method
     methods_module = load_methods_module(config['path_to_extraction_file'])
     extraction_func = getattr(methods_module, config['extraction_method'])
 
-    # Prepare logdir
-    # logdir = set_logdir(config)
     log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
-    
+
     # Check API key presence 
     api_key_name = config.get("env_api_key_name", "OPENROUTER_API_KEY")
     if not os.environ.get(api_key_name) and not config.get('dry_run'):
@@ -391,17 +392,14 @@ def main():
         for row in reader:
             items.append(row)
 
-
-    # =====================================================================
     # Filter the benchmark items
-    # =====================================================================
     print(f"\n--- Data Loading & Filtering ---")
     print(f"Loaded initial benchmark with {len(items)} items.")
 
     filters = config.get("filters", {})
     if filters:
         for column, allowed_values in filters.items():
-            if allowed_values:  # If list is empty, ignore this filter
+            if allowed_values: 
                 temp_items = [i for i in items if i.get(column) in allowed_values]
                 print(f"Filter applied: Column '{column}' {allowed_values} -> Kept {len(temp_items)}")
                 items = temp_items
@@ -410,12 +408,9 @@ def main():
         print("No items match the required filters. Exiting.")
         sys.exit(0)
 
-
     print(f"Models to evaluate: {len(config['models'])}")
     total_runs = len(items) * len(config['models'])
     print(f"Total question/model loops to perform: {total_runs}\n")
-
-
 
     # Prepare the log TSV headers
     log_headers = headers + [
@@ -428,17 +423,15 @@ def main():
         writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
         writer.writeheader()
 
-    # Track all log rows to pass to the evaluator later
     all_executed_logs = []
-
     run_count = 0
+
     for model in config['models']:
         for item in items:
             run_count += 1
             print(f"\n[{run_count}/{total_runs}] Running Model: {model} | Item ID: {item.get('item_id')}")
 
             # Prepare User Prompt
-
             options = json.loads(item['labeled_final_options'])
             labels = json.loads(item['all_choices'])
             options_text = "\n".join(options)
@@ -448,9 +441,8 @@ def main():
             submodality = item.get('submodality')
             format_desc = fmt_info.get(modality, {}).get(submodality, "a musical excerpt")
 
-            # print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['shortened (opt)']}")
             print(f"Modality: {modality:>10} | Submodality: {submodality:>19} | Question: {item['question']}")
-            print(f"Options:" + ", ".join(options))
+            print(f"Options: " + ", ".join(options))
 
             prompt = config['user_prompt_template']
             prompt = prompt.replace("<FORMAT>", format_desc)
@@ -460,8 +452,6 @@ def main():
 
             # Build Payload
             content_file = item['path_to_question_context_file']
-            # TODO: if empty/noise file should be used, replace with the corresponding path from item
-
             text_only_baseline = config.get('text_only_baseline', False)
 
             payload, final_prompt = prepare_llm_payload(
@@ -478,7 +468,6 @@ def main():
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
             # Extract Response and Check Correctness
-            # extracted_answer = extraction_func(resp_text)
             extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
@@ -504,13 +493,13 @@ def main():
             # Save line into memory
             all_executed_logs.append(log_row)
 
-
             # 1. Log to local TSV
             with open(log_tsv_path, 'a', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=log_headers, delimiter='\t')
                 writer.writerow(log_row)
 
             # 2. Log to Google Sheets
+            # Note: Because we overwrote config['sheet_name'], this goes into the `cont` list dynamically.
             if config.get('log_to_google_sheet'):
                 row_list = [log_row.get(h, "") for h in log_headers]
                 append_to_google_sheet(config, row_list, header=log_headers, force_header_print=config.get("force_header_print", False))
@@ -519,7 +508,7 @@ def main():
 
             # 3. Print concise log
             print(f"  -> Extracted: {extracted_answer} | Expected: {correct_label} | Correct: {is_correct} | Time: {time_taken:.2f}s | Cost: ${cost:.6f}")
-    
+
     # =====================================================================
     # Trigger final evaluation logic
     # =====================================================================
@@ -530,6 +519,12 @@ def main():
         output_tsvs += [results_path]
 
     evaluate_results(all_executed_logs, evaluation_criteria, output_tsvs=output_tsvs)
+
+    # 4. Final Work - Copy TSVs to their respective Google Sheet tabs if flagged
+    if cmdline_args.generate_new_list_with_logs:
+        print("\nUploading final log and results data to respective Google Sheets lists...")
+        upload_tsv_to_gsheet(config, tab_name=fin_list_name, tsv_file=log_tsv_path)
+        upload_tsv_to_gsheet(config, tab_name=res_list_name, tsv_file=results_tsv_path)
 
 
 if __name__ == "__main__":
