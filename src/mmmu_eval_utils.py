@@ -5,8 +5,8 @@
 from typing import Dict
 
 import re
-import random
-random.seed(42)
+# import random
+# random.seed(42)
 import numpy as np
 
 # ----------- Process Multi-choice -------------
@@ -15,6 +15,11 @@ def parse_multi_choice_response(response, all_choices, index2ans):
     Parse the prediction from the generated response.
     Return the predicted index e.g., A, B, C, D.
     """
+    
+    # --- ADDED CHECK TO PREVENT TYPE ERRORS ---
+    if not isinstance(response, str):
+        return "UNPARSABLE"
+
 
     if response == "ERROR":
         return "MODEL_ERROR"
