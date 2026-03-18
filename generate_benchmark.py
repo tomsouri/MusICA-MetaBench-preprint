@@ -414,13 +414,37 @@ def step_1_7_remove_duplicates(data, config, fields):
 
 def step_1_4_subsample(data, config, fields):
     """
-    Subsamples the benchmark to meet a target count per subcategory,
+    Subsamples the benchmark data to ensure a target count per subcategory,
     balanced by meta-question_id.
-    """
-    q_count = config.get('questions_per_subcategory_count', 10)
-    balance_perfectly = config.get('balance_meta_questions_perfectly', False)
 
-    # Group data by subcategory, then by meta-question_id
+    Logic:
+    1. Initially calculates an even distribution of items across all unique 
+       `meta-question_id` groups within each subcategory to reach `q_count`.
+    2. If `allow_meta_question_backoff` is True:
+       - The method enters an iterative balancing loop. 
+       - If a meta-question has fewer items available than its allocated target, 
+         it locks its target to the available count (the "backoff").
+       - The resulting deficit is redistributed across other meta-questions 
+         within the same subcategory that possess a surplus of items.
+       - This process repeats until all items are distributed or no meta-questions 
+         remain with a surplus of items to "absorb" the deficit.
+    3. The method ensures no over-sampling by capping requests at the 
+       available population size.
+
+    Args:
+        data: List of dictionary records containing 'subcategory' and 'meta-question_id'.
+        config: Configuration dict containing:
+            - 'questions_per_subcategory_count' (int): Target total items per subcategory.
+            - 'allow_meta_question_backoff' (bool): Whether to redistribute deficits.
+        fields: Metadata fields to pass through during saving.
+
+    Returns:
+        tuple: (out_data, fields)
+    """
+
+    q_count = config.get('questions_per_subcategory_count', 10)
+    allow_backoff = config.get('allow_meta_question_backoff', True)
+
     hierarchy = defaultdict(lambda: defaultdict(list))
     for q in data:
         hierarchy[q['subcategory']][q['meta-question_id']].append(q)
@@ -428,36 +452,56 @@ def step_1_4_subsample(data, config, fields):
     out_data = []
 
     for subcategory, meta_groups in hierarchy.items():
+        # Calculate total available in this subcategory to check against q_count
+        total_available_in_sub = sum(len(items) for items in meta_groups.values())
+        if total_available_in_sub < q_count:
+            print(f"Warning: Subcategory '{subcategory}' has a total of {total_available_in_sub} "
+                  f"items, which is less than the requested {q_count}. Using all available items.\n"
+                  f"You may try setting `use_all_inds` to true in config, which may increase the number of generated items per meta-question.")
+
         meta_ids = list(meta_groups.keys())
-        num_meta = len(meta_ids)
-        
-        # Calculate base number of samples per meta-question
-        base_samples, remainder = divmod(q_count, num_meta)
-        
-        # Determine target count for each meta-question
-        # If balance_perfectly is True, we stick to base_samples.
-        # If False, we distribute the 'remainder' (leftover budget) 
-        # to ensure we get closer to q_count if possible.
-        targets = {}
-        for i, meta_id in enumerate(meta_ids):
-            if balance_perfectly:
-                targets[meta_id] = base_samples
-            else:
-                # Distribute remainder: first N meta-groups get (base + 1)
-                targets[meta_id] = base_samples + (1 if i < remainder else 0)
+        # Initial targets
+        base, remainder = divmod(q_count, len(meta_ids))
 
-        for meta_id in meta_ids:
-            questions = meta_groups[meta_id]
-            target = targets[meta_id]
+        # target is the target count of items sampled from a given meta-question
+        targets = {m_id: base + (1 if i < remainder else 0) for i, m_id in enumerate(meta_ids)}
+        
+        if allow_backoff:
+            while True:
+                deficit = 0
+                # Identify which meta-questions are maxed out/short
+                for m_id in meta_ids:
+                    available = len(meta_groups[m_id])
+                    if targets[m_id] > available:
+                        deficit += (targets[m_id] - available)
+                        print(f"Warning: Meta-question '{m_id}' (subcategory {subcategory}) has insufficient items (has {available}, requested {targets[m_id]}). "
+                              f"Will try to redistribute the remaining {deficit} items across other meta-questions from the subcategory.")
+                        targets[m_id] = available
+                
+                # Find meta-questions that can actually take more items
+                candidates = [m for m in meta_ids if len(meta_groups[m]) > targets[m]]
+                
+                if deficit > 0 and candidates:
+                    # print(f"Warning: Subcategory '{subcategory}' has insufficient items. "
+                    #       f"Redistributing {deficit} items.")
+                    
+                    # Distribute deficit among candidates
+                    share = deficit // len(candidates)
+                    extra = deficit % len(candidates)
+                    for i, m_id in enumerate(candidates):
+                        targets[m_id] += share + (1 if i < extra else 0)
+                else:
+                    # Break if no deficit or no more room to distribute
+                    break
 
-            if target > 0 and len(questions) > target:
-                out_data.extend(random.sample(questions, target))
-            elif target > len(questions):
-                print(f"Warning: Subcategory '{subcategory}', Meta-question '{meta_id}' "
-                      f"has {len(questions)} items, less than target {target}.")
-                out_data.extend(questions)
-            else:
-                out_data.extend(questions[:target])
+        # Extraction
+        for m_id, target in targets.items():
+            pool = meta_groups[m_id]
+            if len(pool) < target and not allow_backoff and total_available_in_sub >= q_count:
+                print(f"Warning: Meta-question '{m_id}' (subcategory {subcategory}) has insufficient items (has {len(pool)}, requested {target})."
+                      f"This will lead to lower number of questions per subcategory than requested ({q_count})."
+                      f"If you allow backoff (`allow_meta_question_backoff: true` in config), will try to achieve the desired number by using other meta-questions from the subcategory.")
+            out_data.extend(random.sample(pool, min(len(pool), target)))
 
     save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
     print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
@@ -555,6 +599,7 @@ def step_5_nota_correct(data, config, fields):
     return out_data, fields
 
 def step_6_formatting(data, config, fields):
+    """Shuffle options randomly, add labels."""
     out_fields = ['item_id'] + fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option', 'label_of_final_correct_option']
     labels = config['labels']
     
@@ -750,13 +795,14 @@ def main():
 
     selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
 
+    # print("\n--- NOTA-incorrect items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
+    # print("--------------------------------")
+
     # print("\n--- NOTA-correct items ---")
     print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 1})
     # print("--------------------------------")
 
-    # print("\n--- NOTA-incorrect items ---")
-    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
-    # print("--------------------------------")
 
     # print("\n--- ALL DATA ---")
     print_formatted_statistics(data, selected_fields)
