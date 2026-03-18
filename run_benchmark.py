@@ -314,6 +314,9 @@ def main():
                         help="Generate separate cont/final/res lists inside Google Sheets")
     parser.add_argument("--verbose", default=False, action="store_true", 
                         help="Print verbose logs")
+    parser.add_argument("--extra-verbose", default=False, action="store_true", 
+                        help="If true, print the verbose logs to stdout")
+    
 
 
     cmdline_args = parser.parse_args()
@@ -473,18 +476,19 @@ def main():
             # Execute Request
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
+            verbose_logs_file = sys.stdout if cmdline_args.extra_verbose else sys.stderr
             if config["verbose"]:
-                print("="*50)
-                print(f"Full response text: {resp_text}")
-                print("="*50)
+                print("="*50, file=verbose_logs_file)
+                print(f"Full response text: {resp_text}", file=verbose_logs_file)
+                print("="*50, file=verbose_logs_file)
 
             # Extract Response and Check Correctness
             extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
             
             if config["verbose"]:
-                print(f"Extracted answer: {extracted_answer}")
-                print("="*50)
-                
+                print(f"Extracted answer: {extracted_answer}", file=verbose_logs_file)
+                print("="*50, file=verbose_logs_file)
+
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
 
