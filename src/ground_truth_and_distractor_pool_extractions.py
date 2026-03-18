@@ -12,7 +12,7 @@ from operator import index
 
 from operator import index
 
-from music21 import converter, note, chord, stream, interval, pitch, meter,key
+from music21 import converter, note, chord, stream, interval, pitch, meter,key,roman
 import os
 from utils import get_musicxml_file_path
 import yaml
@@ -81,7 +81,7 @@ def get_tonal_notes():
         #  + (" sharp" if '#' in p.name else "") + (" flat" if '-' in p.name else "") + (" double sharp" if '##' in p.name else "") + (" double flat" if '--' in p.name else "")
         # notes[p.name] = p.name
         # notes[p.getEnharmonic().name] = p.getEnharmonic().name
-    breakpoint()
+    
     return notes
     # labels = ["C", "C sharp", "D flat","D", "D sharp","E flat","E", "F flat", "E sharp","F", "F sharp","G flat","G", "G sharp","A flat", "A","A sharp","B flat","B","C flat","B sharp"]
     # music21_keys = []
@@ -188,6 +188,31 @@ def get_chords():
   
     ontology = {chord_name: chord_name for chord_name in ontology}
     return ontology
+def get_cadences():
+    pitch_classes = list(range(12))  # 0–11
+    ontology = set()
+    max_notes = 3 #number of voices
+    
+    for r in range(3, max_notes + 1):  # dyads → tetrads
+        for pcs in itertools.combinations(pitch_classes, r):
+
+            # build chord from pitch classes
+            pitches = [pitch.Pitch(midi=60 + pc) for pc in pcs]
+            ch = chord.Chord(pitches)
+            for pcs2 in itertools.combinations(pitch_classes, r):
+                pitches2 = [pitch.Pitch(midi=60 + pc) for pc in pcs2]
+                ch2 = chord.Chord(pitches2)
+                
+                rn = str(roman.romanNumeralFromChord(ch, key.Key('A')).figure)
+                rn2 = str(roman.romanNumeralFromChord(ch2, key.Key('A')).figure)
+                if rn != rn2:
+                    cad_name = f"{rn}: {rn2}"
+            # value = f"{rn.figure}: {rn2.figure}"    
+            # if name:  # filter None / empty
+                    ontology.add(cad_name)
+    # breakpoint()
+    ontology = {cad_name: cad_name for cad_name in ontology}
+    return ontology
 def get_rhythm_props():
     # Define the rhythmic proportions to consider
     rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0, 1.5]  # e.g., half, equal, double
@@ -196,7 +221,8 @@ def get_rhythm_props():
     ontology.update({"other" : "other"})
     # ontology = {0:""}
     return ontology
-
+# def get_harmonic_cadences():
+    
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
         self.config = config_yaml
@@ -255,9 +281,12 @@ class AnswerDistractorExtractors:
                     'T': 2, # Tenor
                     'B': 3  # Bass
                 }
-        # if self.config.get('use_all_inds', None) and self.ontology.get('target_index') is not None:
-        #     print("Warning: Both 'target_index' and 'use_all_inds' are specified in the config. 'use_all_inds' will take precedence and 'target_index' will be ignored.")
-        # if if target_index is not specified in the config, or if use_all_inds is set to True, then we will sample from all possible indices in the piece for each question, instead of using a fixed index across all pieces. This allows for more variability in the questions and answers across different pieces.
+        if "cadences" in self.ontology.keys():
+            self.dict_cadence_ontology = {k: v for d in self.ontology['cadences'] for k, v in d.items()}
+        #  TODO: TO SOLVE / very slow
+        # else:
+            # self.dict_cadence_ontology = self.build_cadence_ontology(system)
+            # self.ontology['cadences'] = [{k:v} for k,v in self.dict_cadence_ontology.items()]
         self.distractor_pool_size = self.config.get('distractor_pool_size', 4)
 
         if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
@@ -271,6 +300,22 @@ class AnswerDistractorExtractors:
         self.random_distractors = self.config.get('random_distractors', False)
         self.verbose = self.config.get('verbose', False)
         yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
+
+    def build_cadence_ontology(self, system):
+        if system=="tonal":
+            
+            return get_cadences()
+                # "V-I": "authentic cadence",
+                # "V-vi": "deceptive cadence",
+                # "IV-I": "plagal cadence",
+                # "V-VI": "half cadence",
+                # "I-V": "retrograde authentic cadence",
+
+                # Add more cadences as needed
+            
+        else:
+            raise ValueError(f"Unknown hamonic system for harmonical recognition: {system}")
+
     def build_rhythm_prop_ontology(self, system):
         if system=="tonal":
             return get_rhythm_props()
@@ -1063,6 +1108,7 @@ class AnswerDistractorExtractors:
         # chords = score.recurse().getElementsByClass('Chord')
         chords = score.chordify().recurse().getElementsByClass('Chord')
         chords = list(chords)
+        signature = score.recurse().getElementsByClass('KeySignature')
 
         if not chords:
             raise ValueError(f"No valid chords found.")
@@ -1080,21 +1126,21 @@ class AnswerDistractorExtractors:
             raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(chords)} chords.")
 
         target_chord = chords[note_index].commonName
-        for note_idx in range(len(chords)-1):
+        score_cadences = []
+        for _ni in range(len(chords)-1):
             # dont remeber how to get the roman number progression / not sure if it is the best way
-            n1 = chords[note_idx].quarterLength
-            n2 = chords[note_idx + 1].quarterLength
-        cadence = [chords[note_index], chords[note_index+1]]
+            rn1 = str(roman.romanNumeralFromChord(chords[_ni], signature[0]).figure)
+            rn2 = str(roman.romanNumeralFromChord(chords[_ni+1], signature[0]).figure)
+            cadence = [chords[_ni], chords[_ni+1]]
+            score_cadences.append(cadence)
         if not chords:
             if self.config.get('verbose', False):
                 print("No chords found in the piece., skipping question.")
             
             return None, distractor_pool, question_values
         else:
+            target_cadence = score_cadences[note_index]
+            target_cadence = self.dict_cadence_ontology[target_cadence]
+            distractor_pool = list(self.dict_cadence_ontology.values())
 
-            if "with" in target_chord:  # filter out chords with added tones (e.g., "C major with added sixth")
-                target_chord = target_chord.split(" with")[0]
-            target_chord_name = self.dict_chord_ontology[target_chord]
-            distractor_pool = list(self.dict_chord_ontology.values())
-
-            return target_chord_name, distractor_pool, question_values
+            return target_cadence, distractor_pool, question_values
