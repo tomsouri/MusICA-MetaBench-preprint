@@ -312,6 +312,8 @@ def main():
     # New arg for GSheet generation tracking
     parser.add_argument("--generate_new_list_with_logs", default=False, action="store_true", 
                         help="Generate separate cont/final/res lists inside Google Sheets")
+    parser.add_argument("--verbose", default=False, action="store_true", 
+                        help="Print verbose logs")
 
 
     cmdline_args = parser.parse_args()
@@ -335,6 +337,8 @@ def main():
     if cmdline_args.modalities:
         config['filters'] = config.get('filters', {})
         config['filters']['modality'] = cmdline_args.modalities
+    if cmdline_args.verbose:
+        config['verbose'] = True
 
     if cmdline_args.run_id:
         benchmark_run_uuid = cmdline_args.run_id
@@ -469,8 +473,18 @@ def main():
             # Execute Request
             cost, time_taken, full_json, resp_text = ask_model(config, payload, final_prompt, config['dry_run'])
 
+            if config["verbose"]:
+                print("="*50)
+                print(f"Full response text: {resp_text}")
+                print("="*50)
+
             # Extract Response and Check Correctness
             extracted_answer = extraction_func(response=resp_text, all_choices=json.loads(item['all_choices']), index2ans=json.loads(item['index2ans']))
+            
+            if config["verbose"]:
+                print(f"Extracted answer: {extracted_answer}")
+                print("="*50)
+                
             correct_label = item.get('label_of_final_correct_option', '').strip()
             is_correct = (extracted_answer == correct_label) if extracted_answer else "EXTRACTION FAILED"
 
