@@ -686,9 +686,9 @@ def main():
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
-    # breakpoint()
 
     # TODO: is it strange that the AnswerQG is instantiated but not used after that?
+    # NO! It creates the whole ontology that is then used in the step 0 for question instantiation, and also the methods that are used for ground truth and distractor extraction in step 1.5 are methods of this class, so it needs to be instantiated before step 0 and step 1.5
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
 

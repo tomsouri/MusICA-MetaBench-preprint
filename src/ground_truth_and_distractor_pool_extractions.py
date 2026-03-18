@@ -188,6 +188,42 @@ def get_chords():
   
     ontology = {chord_name: chord_name for chord_name in ontology}
     return ontology
+def get_cadence_types():
+    """
+    Generates a dictionary of cadence types using a manually sampled list of 
+    the most frequent Roman numeral combinations (20-50).
+    If a YAML file with the ontology exists, it loads it. Otherwise, it builds the ontology and saves it.
+    """
+    ontology_path = "selected_cadences.yaml"
+
+    if os.path.exists(ontology_path):
+        with open(ontology_path, 'r') as file:
+            print(f"Loading cadence types ontology from {ontology_path}")
+            return yaml.load(file, Loader=yaml.FullLoader)
+
+    print(f"Building cadence types ontology...")
+    # Manually sampled frequent Roman numeral combinations (approx 45 samples)
+    selected_list = [
+        "V - I", "V7 - I", "v - i", "V - i", "V7 - i", 
+        "vii° - I", "vii°7 - I", "vii° - i", "vii°7 - i",
+        "IV - I", "iv - I", "IV - i", "iv - i",
+        "I - V", "i - V", "IV - V", "iv - V", "ii - V", "ii° - V", 
+        "vi - V", "VI - V", "ii7 - V", "ii°7 - V",
+        "V - vi", "V - VI", "V7 - vi", "V7 - VI",
+        "vi - ii", "VI - ii°", "IV - ii", "iv - ii°", 
+        "I - vi", "i - VI", "iii - vi", "III - VI",
+        "ii - IV", "ii° - iv", "I - IV", "i - iv",
+        "V - IV", "V - iv", "ii - V7", "ii° - V7",
+        "iii - IV", "III - IV"
+    ]
+
+    ontology = {cad: cad for cad in selected_list}
+    ontology.update({"other": "other"})
+    with open(ontology_path, 'w') as file:
+        yaml.dump(ontology, file)
+        print(f"Cadence types ontology saved to {ontology_path}")
+
+    return ontology
 def get_cadences():
     pitch_classes = list(range(12))  # 0–11
     ontology = set()
@@ -200,16 +236,18 @@ def get_cadences():
             pitches = [pitch.Pitch(midi=60 + pc) for pc in pcs]
             ch = chord.Chord(pitches)
             for pcs2 in itertools.combinations(pitch_classes, r):
+                # Use cached pitches
                 pitches2 = [pitch.Pitch(midi=60 + pc) for pc in pcs2]
                 ch2 = chord.Chord(pitches2)
-                
+
+                # Generate Roman numeral figures
                 rn = str(roman.romanNumeralFromChord(ch, key.Key('A')).figure)
                 rn2 = str(roman.romanNumeralFromChord(ch2, key.Key('A')).figure)
+
                 if rn != rn2:
                     cad_name = f"{rn}: {rn2}"
-            # value = f"{rn.figure}: {rn2.figure}"    
-            # if name:  # filter None / empty
                     ontology.add(cad_name)
+    
     # breakpoint()
     ontology = {cad_name: cad_name for cad_name in ontology}
     return ontology
@@ -284,9 +322,9 @@ class AnswerDistractorExtractors:
         if "cadences" in self.ontology.keys():
             self.dict_cadence_ontology = {k: v for d in self.ontology['cadences'] for k, v in d.items()}
         #  TODO: TO SOLVE / very slow
-        # else:
-            # self.dict_cadence_ontology = self.build_cadence_ontology(system)
-            # self.ontology['cadences'] = [{k:v} for k,v in self.dict_cadence_ontology.items()]
+        else:
+            self.dict_cadence_ontology = self.build_cadence_ontology(system)
+            self.ontology['cadences'] = [{k:v} for k,v in self.dict_cadence_ontology.items()]
         self.distractor_pool_size = self.config.get('distractor_pool_size', 4)
 
         if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
@@ -304,7 +342,7 @@ class AnswerDistractorExtractors:
     def build_cadence_ontology(self, system):
         if system=="tonal":
             
-            return get_cadences()
+            return get_cadence_types()
                 # "V-I": "authentic cadence",
                 # "V-vi": "deceptive cadence",
                 # "IV-I": "plagal cadence",
@@ -848,8 +886,8 @@ class AnswerDistractorExtractors:
 
         if note_index == 'end':
             note_index = -1
-
         # Check if the target_index is out of bounds
+        note_index = int(note_index)
         if note_index >= len(notes) or int(note_index) < -len(notes):
             raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(notes)} notes.")
 
@@ -1126,21 +1164,63 @@ class AnswerDistractorExtractors:
             raise IndexError(f"Requested note target_index '{note_index}' is out of bounds. The part has {len(chords)} chords.")
 
         target_chord = chords[note_index].commonName
-        score_cadences = []
-        for _ni in range(len(chords)-1):
-            # dont remeber how to get the roman number progression / not sure if it is the best way
-            rn1 = str(roman.romanNumeralFromChord(chords[_ni], signature[0]).figure)
-            rn2 = str(roman.romanNumeralFromChord(chords[_ni+1], signature[0]).figure)
-            cadence = [chords[_ni], chords[_ni+1]]
-            score_cadences.append(cadence)
         if not chords:
             if self.config.get('verbose', False):
                 print("No chords found in the piece., skipping question.")
             
-            return None, distractor_pool, question_values
+            return None, [], question_values
         else:
-            target_cadence = score_cadences[note_index]
-            target_cadence = self.dict_cadence_ontology[target_cadence]
+            # Get Roman numerals relative to a detected key
+            try:
+                k = score.analyze('key')
+            except:
+                # Fallback to C major if analysis fails
+                k = key.Key('C')
+                
+            target_chord1 = chords[note_index]
+            # Ensure we don't go out of bounds for the second chord
+            if note_index + 1 >= len(chords):
+                return None, [], question_values
+
+            target_chord2 = chords[note_index + 1]
+            
+            rn1 = str(roman.romanNumeralFromChord(target_chord1, k).figure)
+            rn2 = str(roman.romanNumeralFromChord(target_chord2, k).figure)
+            
+            target_cadence_str = f"{rn1} - {rn2}"
+
+            # Check if this combination or a similar one (using regex) is in our ontology
+            import re
+            target_cadence = None
+            
+            # 1. Exact match first
+            if target_cadence_str in self.dict_cadence_ontology:
+                target_cadence = self.dict_cadence_ontology[target_cadence_str]
+            else:
+                # 2. Try to find a match in ontology by simplifying the Roman numerals (e.g., V7 -> V)
+                # We use regex to find if any key in ontology "fits" our target.
+                # Specifically, if the ontology has "V - I" and we have "V7 - I", we might want to match it.
+                for ont_cadence in self.dict_cadence_ontology.keys():
+                    if ont_cadence == "other": continue
+                    
+                    # Create a regex that allows for some flexibility in the Roman numeral figures
+                    # (e.g., matching 'V' with 'V7' or 'vii°' with 'vii°7')
+                    parts = ont_cadence.split(" - ")
+                    if len(parts) == 2:
+                        # Escape special characters like ° and build a regex that matches the base RN
+                        # but allows for suffixes like '7', '65', etc.
+                        p1 = re.escape(parts[0])
+                        p2 = re.escape(parts[1])
+                        # This regex checks if our target_cadence_str starts with the ontology pattern segments
+                        pattern = f"^{p1}.* - {p2}.*$"
+                        if re.match(pattern, target_cadence_str):
+                            target_cadence = self.dict_cadence_ontology[ont_cadence]
+                            break
+
+            if target_cadence is None:
+                # If still not found, map to "other"
+                target_cadence = self.dict_cadence_ontology.get("other", "other")
+
             distractor_pool = list(self.dict_cadence_ontology.values())
 
             return target_cadence, distractor_pool, question_values
