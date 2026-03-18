@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J run-f5-n      # name of job
+#SBATCH -J run-15      # name of job
 #SBATCH -p cpu-ms       # name of partition or queue (default=cpu-troja)
-#SBATCH -o run_f5-n.out  # name of output file for this submission script
-#SBATCH -e run_f5-n.err  # name of error file for this submission script
+#SBATCH -o run_15.out  # name of output file for this submission script
+#SBATCH -e run_15.err  # name of error file for this submission script
 
 # to submit the job, you need to be ssh-ed at one of the lrc or sol machines. (from geri/freki/blackbird, ssh lrc1 or sol1)
 # Then use:
@@ -19,12 +19,12 @@
 
 models=(
     "google/gemini-2.0-flash-lite-001"
-    # "google/gemini-2.5-flash"
+    "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
 )
 
-qpersubcategory=2
+qpersubcategory=15
 
 benchmark_file="benchmark_count_$qpersubcategory.tsv"
 
@@ -41,11 +41,25 @@ benchmark_file="benchmark_count_$qpersubcategory.tsv"
     --url "https://openrouter.ai/api/v1/chat/completions" \
     --api-key-env "OPENROUTER_API_KEY" \
     --benchmark_file "$benchmark_file" \
-    --sheet_name "full-$qpersubcategory" \
     --modalities "audio" "symbolic" "visual" \
-    --run_id "full-n-$qpersubcategory"  \
+    --run_id "$qpersubcategory"  \
     --max_waiting_time_per_request 300 \
-    --generate_new_list_with_logs
+    --generate_new_list_with_logs \
+    --verbose
+
+
+
+# The same, now with text-only baseline
+.venv/bin/python3 run_benchmark.py --config eval-config.yaml \
+    --models ${models[*]} \
+    --url "https://openrouter.ai/api/v1/chat/completions" \
+    --api-key-env "OPENROUTER_API_KEY" \
+    --benchmark_file "$benchmark_file" \
+    --modalities "audio" "symbolic" "visual" \
+    --run_id "textonly-$qpersubcategory"  \
+    --max_waiting_time_per_request 300 \
+    --generate_new_list_with_logs \
+     --text_only_baseline
 
     # --text_only_baseline
     # --modalities "symbolic" \
