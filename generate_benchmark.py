@@ -456,7 +456,8 @@ def step_1_4_subsample(data, config, fields):
         total_available_in_sub = sum(len(items) for items in meta_groups.values())
         if total_available_in_sub < q_count:
             print(f"Warning: Subcategory '{subcategory}' has a total of {total_available_in_sub} "
-                  f"items, which is less than the requested {q_count}. Using all available items.\n")
+                  f"items, which is less than the requested {q_count}. Using all available items.\n"
+                  f"You may try setting `use_all_inds` to true in config, which may increase the number of generated items per meta-question.")
 
         meta_ids = list(meta_groups.keys())
         # Initial targets
@@ -496,7 +497,7 @@ def step_1_4_subsample(data, config, fields):
         # Extraction
         for m_id, target in targets.items():
             pool = meta_groups[m_id]
-            if len(pool) < target and not allow_backoff:
+            if len(pool) < target and not allow_backoff and total_available_in_sub >= q_count:
                 print(f"Warning: Meta-question '{m_id}' (subcategory {subcategory}) has insufficient items (has {len(pool)}, requested {target})."
                       f"This will lead to lower number of questions per subcategory than requested ({q_count})."
                       f"If you allow backoff (`allow_meta_question_backoff: true` in config), will try to achieve the desired number by using other meta-questions from the subcategory.")
@@ -598,6 +599,7 @@ def step_5_nota_correct(data, config, fields):
     return out_data, fields
 
 def step_6_formatting(data, config, fields):
+    """Shuffle options randomly, add labels."""
     out_fields = ['item_id'] + fields + ['all_choices', 'index2ans', 'labeled_final_options', 'labeled_final_correct_option', 'label_of_final_correct_option']
     labels = config['labels']
     
@@ -793,13 +795,14 @@ def main():
 
     selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
 
+    # print("\n--- NOTA-incorrect items ---")
+    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
+    # print("--------------------------------")
+
     # print("\n--- NOTA-correct items ---")
     print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 1})
     # print("--------------------------------")
 
-    # print("\n--- NOTA-incorrect items ---")
-    print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})
-    # print("--------------------------------")
 
     # print("\n--- ALL DATA ---")
     print_formatted_statistics(data, selected_fields)
