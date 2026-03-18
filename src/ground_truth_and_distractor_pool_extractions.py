@@ -94,33 +94,31 @@ def get_tonal_notes():
     # notes = {k:v for k,v in zip(music21_keys, labels)}
 
 def get_rhythm():
-         
-    return {3.0: 'triple-whole', 
-            2.0: 'double-whole', 
-            1.0: 'whole', 
-            1.5: 'dotted-whole', 
-            0.5: 'half', 0.25: 'quarter', 
+    rhythms_dict = {3.000: 'triple-whole', 
+            2.000: 'double-whole', 
+            1.000: 'whole', 
+            1.500: 'dotted-whole', 
+            0.500: 'half', 0.250: 'quarter', 
             0.125: 'eighth', 0.0625: 'sixteenth',
             0.03125: 'thirty-second', 
             0.015625: 'sixty-fourth', 
             0.0078125: 'hundred-twenty-eighth', 
             0.00390625: 'two-hundred-fifty-sixth'}
+    return rhythms_dict
+
 def get_time_signatures():
+    """
+    Returns a dictionary of common real-world time signatures.
+    """
+    # Sample common real time signatures
+    common_time_signatures = [
+        "2/4", "3/4", "4/4", "5/4", "6/4",
+        "3/8", "6/8", "9/8", "12/8",
+        "2/2", "3/2", "4/2",
+        "5/8", "7/8", "11/8"
+    ]
 
-    numerators = range(1, 13)          # 1–12 beats
-    denominators = [1, 2, 4, 8, 16, 32]
-
-    ontology = {}
-
-    for n in numerators:
-        for d in denominators:
-            ts_str = f"{n}/{d}"
-            try:
-                ts = meter.TimeSignature(ts_str)
-                ontology[ts_str] = ts.ratioString
-            except:
-                pass
-
+    ontology = {ts: ts for ts in common_time_signatures}
     return ontology
 
 def get_tonality():
