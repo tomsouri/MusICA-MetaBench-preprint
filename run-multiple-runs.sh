@@ -24,7 +24,8 @@ models=(
     # "google/gemini-3.1-pro-preview"
 )
 
-qpersubcategory=1
+
+qpersubcategory=15
 seeds=({42..52})
 
 benchmarks=() # Initialize an empty array
@@ -47,7 +48,6 @@ done
 
 .venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
 
-exit()
 
 for seed in "${seeds[@]}"; do
     benchmark_file="benchmark_count_${qpersubcategory}_${seed}.tsv"
@@ -75,7 +75,7 @@ for seed in "${seeds[@]}"; do
             --url "https://openrouter.ai/api/v1/chat/completions" \
             --api-key-env "OPENROUTER_API_KEY" \
             --benchmark_file "$benchmark_file" \
-            --modalities "audio" "symbolic" "visual" logdir\
+            --modalities "audio" "symbolic" "visual" \
             --run_id "to_rs${seed}"  \
             --max_waiting_time_per_request 300 \
             --generate_new_list_with_logs \
