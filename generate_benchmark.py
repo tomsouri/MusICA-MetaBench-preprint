@@ -167,7 +167,6 @@ import datetime
 import importlib.util
 import json
 import os
-import random
 import numpy as np
 import sys
 from collections import defaultdict
@@ -387,7 +386,7 @@ def step_2_sort_distractors(data, config, fields):
     for row in data:
         pool = json.loads(row['distractor_pool'])
         try:
-            sorted_pool = sort_func(pool, row)
+            sorted_pool = sort_func(distractors=pool, row=row, rng=config['rng'])
             row['sorted_distractors'] = json.dumps(sorted_pool)
         except Exception as e:
             print(f"Error sorting distractors for item: {e}")
@@ -501,7 +500,7 @@ def step_1_4_subsample(data, config, fields):
                 print(f"Warning: Meta-question '{m_id}' (subcategory {subcategory}) has insufficient items (has {len(pool)}, requested {target})."
                       f"This will lead to lower number of questions per subcategory than requested ({q_count})."
                       f"If you allow backoff (`allow_meta_question_backoff: true` in config), will try to achieve the desired number by using other meta-questions from the subcategory.")
-            out_data.extend(random.sample(pool, min(len(pool), target)))
+            out_data.extend(config['rng'].choice(pool, min(len(pool), target), replace=False))
 
     save_intermediate(out_data, "01_4_benchmark_subsampled.tsv", fields)
     print_checkpoint(1.4, "Subsample Benchmark", "01_4_benchmark_subsampled.tsv")
@@ -581,7 +580,7 @@ def step_5_nota_correct(data, config, fields):
         for row in data:
             out_data.append(dict(row)) 
             
-            if random.random() < P:
+            if config['rng'].random() < P:
                 new_row = dict(row)
                 distractors = json.loads(row['sorted_distractors'])
                 
@@ -610,7 +609,7 @@ def step_6_formatting(data, config, fields):
         # print(options)
 
         options.sort()
-        random.shuffle(options)
+        config['rng'].shuffle(options)
         
         all_choices = labels[:len(options)]
         index2ans = {}
@@ -722,10 +721,11 @@ def main():
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
         
-    random.seed(config.get('seed', 42))
-    np.random.seed(config.get('seed', 42))
+    # random.seed(config.get('seed', 42))
+    # np.random.seed(config.get('seed', 42))
+
+    # For reproducibility, create a numpy random generator and save it to config to be used in random sampling, shuffling and decisions
     rng = np.random.default_rng(config.get('seed', 42)) # to use for seed choice generate: rng.choice(list) / tested
-    
     config['rng'] = rng
     
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
