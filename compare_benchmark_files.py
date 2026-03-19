@@ -102,8 +102,8 @@ def main():
     # Pattern arguments
     parser.add_argument("--dir_pattern", type=str, required=True,
                         help="Unix-like pattern for subdirectories (e.g., 'batch_*')")
-    parser.add_argument("--file_pattern", type=str, required=True,
-                        help="Unix-like pattern for files (e.g., 'results_*23')")
+    parser.add_argument("--file_pattern", type=str, default="benchmark*.tsv",
+                        help="Unix-like pattern for files (e.g., 'benchmark*.tsv')")
     
     # Comparison arguments
     parser.add_argument("--columns", nargs='+', 
