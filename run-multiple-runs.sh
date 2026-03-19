@@ -85,7 +85,6 @@ for model in "${models[@]}"; do
             --max_waiting_time_per_request 300 \
             --verbose \
             --evaluation_output_file "${resfile}" \
-            --dry_run \
             --generate_new_list_with_logs \
 
         echo "================================================================================"
@@ -104,7 +103,6 @@ for model in "${models[@]}"; do
             --text_only_baseline \
             --verbose \
             --evaluation_output_file "${toresfile}" \
-            --dry_run \
             --generate_new_list_with_logs \
 
         echo "================================================================================"
