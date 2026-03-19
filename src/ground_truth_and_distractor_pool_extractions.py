@@ -262,6 +262,8 @@ def get_rhythm_props():
 class AnswerDistractorExtractors:
     def __init__(self, config_yaml):
         self.config = config_yaml
+        self.rng = self.config['rng']
+
         # print(self.config)
         music_config = self.config['music_ontology_settings']
         if "harmonic_system" in self.config:
@@ -336,6 +338,10 @@ class AnswerDistractorExtractors:
         self.random_distractors = self.config.get('random_distractors', False)
         self.verbose = self.config.get('verbose', False)
         yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
+
+    
+    def random_choice(self, pool, count, replace):
+        ...
 
     def build_cadence_ontology(self, system):
         if system=="tonal":
@@ -437,7 +443,7 @@ class AnswerDistractorExtractors:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
             
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(notes)-1)))
+            note_index = int(self.rng.choice(range(len(notes)-1)))
             values['target_index'] = self.ontology["target_index"][int(note_index)]
         else:
             note_index = values.get('target_index')
@@ -457,7 +463,7 @@ class AnswerDistractorExtractors:
         
         # Get the target note and return its scientific pitch notation
         target_note = notes[note_index]
-        #ground_truth_pool = [np.random.choice([n.name for n in notes if n.name != target_note.name]) for _ in range(self.distractor_pool_size)]
+        #ground_truth_pool = [self.rng.choice([n.name for n in notes if n.name != target_note.name]) for _ in range(self.distractor_pool_size)]
         if not(self.random_distractors):
             # Build a set of candidate distractor notes (exclude the true note)
             for vv in self.voice_mapping.keys():
@@ -473,11 +479,11 @@ class AnswerDistractorExtractors:
 
         else:
             try:
-                distractor_pool = np.random.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 if self.verbose:
                     print(f"Warning: Not enough unique notes in the ontology. number of distractors as number of unique notes: {len(self.dict_note_ontology.keys())}")
-                distractor_pool = np.random.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_note_ontology.values()), self.distractor_pool_size, replace=False).tolist()
 
         #...sampling from the ontology instead of the notes in the piece
         #distractor_pool_set.remove(target_note)
@@ -485,10 +491,10 @@ class AnswerDistractorExtractors:
         
         # # if len(distractor_pool_list) < self.distractor_pool_size:
         # #     #while len(distractor_pool_list) < self.distractor_pool_size:
-        # #     distractor_pool = np.random.choice(list(self.dict_note_ontology.keys()), self.distractor_pool_size-len(distractor_pool_list), replace=False).tolist()
-        # #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+        # #     distractor_pool = self.rng.choice(list(self.dict_note_ontology.keys()), self.distractor_pool_size-len(distractor_pool_list), replace=False).tolist()
+        # #     distractor_pool = self.rng.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
         # # else:
-        #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+        #     distractor_pool = self.rng.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
         
         
         return target_note.name, distractor_pool, values
@@ -564,23 +570,23 @@ class AnswerDistractorExtractors:
         else:
             try:
                 max_len= max(tmp_pool)
-                distractor_pool = np.random.choice(range(max_len), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(range(max_len), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 print(f"Warning: Not enough number of same notes in the piece to generate {self.distractor_pool_size} distractors. Sampling random numbers instead")
-                distractor_pool = np.random.choice(range(self.distractor_pool_size), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(range(self.distractor_pool_size), self.distractor_pool_size, replace=False).tolist()
             if count in distractor_pool:
                 distractor_pool.remove(count)
 
         # if len(distractor_pool_set) < self.distractor_pool_size:
-        #     distractor_pool = np.random.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
+        #     distractor_pool = self.rng.choice(list(distractor_pool_set), len(distractor_pool_set), replace=False).tolist()
         #     len_diff = self.distractor_pool_size-len(distractor_pool_set)
         #    # if (max(distractor_pool_set)-min(distractor_pool_set) ) < len_diff:
-        #     distractor_pool += np.random.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=True).tolist()
+        #     distractor_pool += self.rng.choice([_ for _ in range(min(distractor_pool_set)//2, max(distractor_pool_set)*2 )], len_diff, replace=True).tolist()
         #    # else:
                 
-        #     #     distractor_pool += np.random.choice(distractor_pool_set, self.distractor_pool_size-len(distractor_pool), replace=True).tolist()
+        #     #     distractor_pool += self.rng.choice(distractor_pool_set, self.distractor_pool_size-len(distractor_pool), replace=True).tolist()
         # else:
-        #     distractor_pool = np.random.choice(list(distractor_pool_set), self.distractor_pool_size, replace=False).tolist()
+        #     distractor_pool = self.rng.choice(list(distractor_pool_set), self.distractor_pool_size, replace=False).tolist()
         distractor_pool = list(distractor_pool)
         return count, distractor_pool, question_values
     
@@ -626,7 +632,7 @@ class AnswerDistractorExtractors:
         notes = list(target_part.flatten().getElementsByClass(note.Note))
 
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(notes)-1)))
+            note_index = int(self.rng.choice(range(len(notes)-1)))
             question_values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = question_values.get('target_index')
@@ -660,20 +666,20 @@ class AnswerDistractorExtractors:
         
             # if len(distractor_pool_list) < self.distractor_pool_size:
             #     #while len(distractor_pool_list) < self.distractor_pool_size:
-            #     distractor_pool = np.random.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
+            #     distractor_pool = self.rng.choice(list(all_possible_interval_keys), self.distractor_pool_size-len(distractor_pool_list), replace=True).tolist()
                 
-            #     distractor_pool = np.random.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
+            #     distractor_pool = self.rng.choice(distractor_pool_list, len(distractor_pool_list), replace=False).tolist() + distractor_pool
             # else:
-            #     distractor_pool = np.random.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
+            #     distractor_pool = self.rng.choice(distractor_pool_list, self.distractor_pool_size, replace=False).tolist()
             # print(self.dict_interval_ontology[interval_name], distractor_pool, question_values)
             distractor_pool = [self.dict_interval_ontology[sample] for sample in distractor_pool]
         else:
             try:
-                distractor_pool = np.random.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 if self.verbose:
                     print(f"Warning: Not enough unique intervals in the ontology. number of distractors as number of unique intervals: {len(set(all_interval_keys))}")
-                distractor_pool = np.random.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_interval_ontology.values()), self.distractor_pool_size, replace=False).tolist()
 
 
         return self.dict_interval_ontology[interval_name], distractor_pool, question_values
@@ -761,15 +767,15 @@ class AnswerDistractorExtractors:
 
             try:
                 max_len= max(tmp_pool)
-                distractor_tool = np.random.choice(range(max_len), self.distractor_pool_size, replace=False).tolist()
+                distractor_tool = self.rng.choice(range(max_len), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 print(f"Warning: Not enough distractors ({self.distractor_pool_size}). Sampling numbers in range len(intervals) ({len(intervals)}) instead.")
-                distractor_tool = np.random.choice(range(self.distractor_pool_size), self.distractor_pool_size, replace=False).tolist()
+                distractor_tool = self.rng.choice(range(self.distractor_pool_size), self.distractor_pool_size, replace=False).tolist()
             if count in distractor_tool:
                 distractor_tool.remove(count)
         # distractor_pool = []
         # while True:
-        #     sample = int(np.random.choice(tmp_pool, None))
+        #     sample = int(self.rng.choice(tmp_pool, None))
         #     if sample != count and sample not in distractor_pool:
         #         distractor_pool.append(int(sample))
         #     if len(distractor_pool) > self.distractor_pool_size:
@@ -824,18 +830,21 @@ class AnswerDistractorExtractors:
             if "interval" in method_name:
                 sample_space = copy.deepcopy(set(self.dict_interval_ontology.values()))
                 sample_space.discard(ground_truth)
-                additional_distractors = np.random.choice(list(sample_space), len_diff, replace=False).tolist()
+                additional_distractors = self.rng.choice(list(sample_space), len_diff, replace=False).tolist()
             elif "note" in method_name:
                 sample_space = copy.deepcopy(set(self.dict_note_ontology.values()))
                 sample_space.discard(ground_truth)
-                additional_distractors = np.random.choice(list(sample_space), len_diff, replace=False).tolist()
+                additional_distractors = self.rng.choice(list(sample_space), len_diff, replace=False).tolist()
             elif "rhythm" in method_name:
                 sample_space = copy.deepcopy(set(self.dict_rhythm_ontology.values()))
                 sample_space.discard(ground_truth)
-                additional_distractors = np.random.choice(list(sample_space), len_diff, replace=False).tolist()
+                additional_distractors = self.rng.choice(list(sample_space), len_diff, replace=False).tolist()
             ground_truth_pool += additional_distractors
         else:
             ground_truth_pool = list(set(ground_truth_pool))
+
+        # Sort the distractor pool in order to ensure reproducibility, which is hindered by the use of sets.
+        ground_truth_pool = sorted(ground_truth_pool)
         
         return ground_truth, ground_truth_pool, new_values, new_words
 
@@ -877,7 +886,7 @@ class AnswerDistractorExtractors:
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(notes)-1)))
+            note_index = int(self.rng.choice(range(len(notes)-1)))
             values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = values.get('target_index')
@@ -909,10 +918,10 @@ class AnswerDistractorExtractors:
             distractor_pool = [self.dict_rhythm_ontology[sample] for sample in distractor_pool]
         else:
             try:
-                distractor_pool = np.random.choice(list(self.dict_rhythm_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_rhythm_ontology.values()), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 print(f"Warning: Not enough unique rhythms in the piece to generate {self.distractor_pool_size} distractors. Sampling from the entire ontology instead.")
-                distractor_pool = np.random.choice(list(self.dict_rhythm_ontology.values()), len(list(self.dict_rhythm_ontology.values())), replace=False).tolist()
+                distractor_pool = self.rng.choice(list(self.dict_rhythm_ontology.values()), len(list(self.dict_rhythm_ontology.values())), replace=False).tolist()
             if target_rhythm in distractor_pool:
                 distractor_pool.remove(target_rhythm)
             
@@ -948,7 +957,7 @@ class AnswerDistractorExtractors:
         if not os.path.exists(musicxml_path):
             raise FileNotFoundError(f"Could not find file: {musicxml_path}")
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(notes)-1)))
+            note_index = int(self.rng.choice(range(len(notes)-1)))
             question_values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = question_values.get('target_index')
@@ -1018,11 +1027,11 @@ class AnswerDistractorExtractors:
              distractor_tool.discard(target_prop_name)
         else:
             try:        
-                distractor_tool = np.random.choice(list(set(all_props_names)), self.distractor_pool_size, replace=False).tolist()
+                distractor_tool = self.rng.choice(list(set(all_props_names)), self.distractor_pool_size, replace=False).tolist()
             except ValueError:
                 if self.verbose:
                     print(f"Warning: Not enough unique rhythm proportions in the ontology. number of distractors as number of unique rhythm proportions: {len(self.ontology['rhythm_proportion'])}")
-                distractor_tool = np.random.choice(list(set(self.dict_rhythm_prop_ontology)), len(set(self.dict_rhythm_prop_ontology)), replace=False).tolist()
+                distractor_tool = self.rng.choice(list(set(self.dict_rhythm_prop_ontology)), len(set(self.dict_rhythm_prop_ontology)), replace=False).tolist()
 
             if target_prop_name in distractor_tool:
                 distractor_tool.remove(target_prop_name)
@@ -1082,11 +1091,11 @@ class AnswerDistractorExtractors:
                 distractor_pool = list(keys_dict.values())
             else:
                 try:
-                    distractor_pool = np.random.choice(list(self.dict_tonality_ontology.values()), self.distractor_pool_size, replace=False).tolist()
+                    distractor_pool = self.rng.choice(list(self.dict_tonality_ontology.values()), self.distractor_pool_size, replace=False).tolist()
                 except ValueError:
                     if self.verbose:
                         print(f"Warning: Not enough unique tonalities in the ontology. number of distractors as number of unique tonalities: {len(set(self.dict_tonality_ontology.values()))}")
-                    distractor_pool = np.random.choice(list(self.dict_tonality_ontology.values()), len(set(self.dict_tonality_ontology.values())), replace=False).tolist()
+                    distractor_pool = self.rng.choice(list(self.dict_tonality_ontology.values()), len(set(self.dict_tonality_ontology.values())), replace=False).tolist()
             
             return target_key_signature_name, distractor_pool, question_values
         
@@ -1105,7 +1114,7 @@ class AnswerDistractorExtractors:
         if not chords:
             raise ValueError(f"No valid chords found.")
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(chords)-1)))
+            note_index = int(self.rng.choice(range(len(chords)-1)))
             question_values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = question_values.get('target_index')
@@ -1149,7 +1158,7 @@ class AnswerDistractorExtractors:
         if not chords:
             raise ValueError(f"No valid chords found.")
         if self.use_all_inds:
-            note_index = int(np.random.choice(range(len(chords)-1)))
+            note_index = int(self.rng.choice(range(len(chords)-1)))
             question_values['target_index'] = self.ontology['target_index'][note_index]
         else:
             note_index = question_values.get('target_index')

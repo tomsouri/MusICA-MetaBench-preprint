@@ -725,6 +725,9 @@ def main():
     random.seed(config.get('seed', 42))
     np.random.seed(config.get('seed', 42))
     rng = np.random.default_rng(config.get('seed', 42)) # to use for seed choice generate: rng.choice(list) / tested
+    
+    config['rng'] = rng
+    
     os.makedirs(INTERMEDIATE_DIR, exist_ok=True)
 
         # 2. Save modified config to log directory
