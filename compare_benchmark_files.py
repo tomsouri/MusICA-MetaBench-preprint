@@ -55,6 +55,7 @@ def discover_tsv_files_from_patterns(root_path, dir_pattern, file_pattern):
     if len(target_files) < 2:
         print(f"Insufficient files found matching patterns (Found: {len(target_files)})")
         return None
+    return target_files
     
 def analyze_tsv_collection(target_files, columns):
 
@@ -128,8 +129,8 @@ def main():
         print(f"Using {len(target_files)} provided files.")
     else:
         # Use Discovery Mode (ensure patterns are provided)
-        if not args.dir_substring or not args.file_substring:
-            parser.error("Either --list_of_tsvs OR both --dir_substring and --file_substring must be provided.")
+        if not args.dir_pattern or not args.file_pattern:
+            parser.error("Either --list_of_tsvs OR both --dir_pattern and --file_pattern must be provided.")
 
         target_files = discover_tsv_files_from_patterns(root_path=args.root_path, dir_pattern=args.dir_pattern, file_pattern=args.file_pattern)
 
