@@ -357,7 +357,8 @@ def main():
     # ---------------------------------------------------------------------------------
     cont_list_name = fin_list_name = res_list_name = None
     if cmdline_args.generate_new_list_with_logs:
-        run_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        # run_dt = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        run_dt = ""
         cont_list_name = f"{benchmark_run_uuid}_{run_dt}_cont"
         fin_list_name  = f"{benchmark_run_uuid}_{run_dt}_fin"
         res_list_name  = f"{benchmark_run_uuid}_{run_dt}_res"
@@ -385,7 +386,7 @@ def main():
     methods_module = load_methods_module(config['path_to_extraction_file'])
     extraction_func = getattr(methods_module, config['extraction_method'])
 
-    log_tsv_path = os.path.join(logdir, "benchmark_logs.tsv")
+    log_tsv_path = os.path.join(logdir, "logs.tsv")
     results_tsv_path = os.path.join(logdir, "results.tsv")
 
     # Check API key presence 
