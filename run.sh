@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH -J run-15      # name of job
+#SBATCH -J run-15n      # name of job
 #SBATCH -p cpu-ms       # name of partition or queue (default=cpu-troja)
-#SBATCH -o run_15.out  # name of output file for this submission script
-#SBATCH -e run_15.err  # name of error file for this submission script
+#SBATCH -o run_15n.out  # name of output file for this submission script
+#SBATCH -e run_15n.err  # name of error file for this submission script
 
 # to submit the job, you need to be ssh-ed at one of the lrc or sol machines. (from geri/freki/blackbird, ssh lrc1 or sol1)
 # Then use:
@@ -28,24 +28,24 @@ qpersubcategory=15
 
 benchmark_file="benchmark_count_$qpersubcategory.tsv"
 
-.venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
-    --benchmark_file "$benchmark_file" \
-    --questions_per_subcategory_count "$qpersubcategory" \
-    --seed 41 \
-    --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.short.png" \
-    --allowed_metaq_ids 0 1 2 3 4 5 7
+# .venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
+#     --benchmark_file "$benchmark_file" \
+#     --questions_per_subcategory_count "$qpersubcategory" \
+#     --seed 41 \
+#     --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.short.png" \
+#     --allowed_metaq_ids 0 1 2 3 4 5 7
 
 
-.venv/bin/python3 run_benchmark.py --config eval-config.yaml \
-    --models ${models[*]} \
-    --url "https://openrouter.ai/api/v1/chat/completions" \
-    --api-key-env "OPENROUTER_API_KEY" \
-    --benchmark_file "$benchmark_file" \
-    --modalities "audio" "symbolic" "visual" \
-    --run_id "$qpersubcategory"  \
-    --max_waiting_time_per_request 300 \
-    --generate_new_list_with_logs \
-    --verbose
+# .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
+#     --models ${models[*]} \
+#     --url "https://openrouter.ai/api/v1/chat/completions" \
+#     --api-key-env "OPENROUTER_API_KEY" \
+#     --benchmark_file "$benchmark_file" \
+#     --modalities "audio" "symbolic" "visual" \
+#     --run_id "$qpersubcategory"  \
+#     --max_waiting_time_per_request 300 \
+#     --generate_new_list_with_logs \
+#     --verbose
 
 
 
@@ -59,7 +59,8 @@ benchmark_file="benchmark_count_$qpersubcategory.tsv"
     --run_id "textonly-$qpersubcategory"  \
     --max_waiting_time_per_request 300 \
     --generate_new_list_with_logs \
-     --text_only_baseline
+    --text_only_baseline \
+    --verbose
 
     # --text_only_baseline
     # --modalities "symbolic" \
