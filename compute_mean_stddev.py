@@ -69,6 +69,9 @@ def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: 
     dataframes = []
     target_col = "Accuracy_Percent"
 
+    mean_targets = ["Unparsable_Percent", "Model_Error_Percent"]
+    sum_targets = ["Total_Time_s", "Total_Price"]
+
     try:
         for path in file_paths:
             # We use sep=None with engine='python' to automatically detect 
@@ -110,13 +113,31 @@ def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: 
         # Select ONLY the identity columns from the first dataframe
         result_df = dataframes[0][identity_cols].copy()
 
-        result_df["Mean_Accuracy"] = means.round(4)
-        result_df["StdDev_Accuracy"] = stds.round(4)
+        result_df[f"Mean_Accuracy ({len(file_paths)} runs)"] = means.round(4)
+        result_df[f"StdDev_Accuracy ({len(file_paths)} runs)"] = stds.round(4)
+
+                # 3. Compute Mean and StdDev for the 3 main metrics
+        for col in mean_targets:
+            # Stack current column from all files
+            combined = pd.concat([df[col] for df in dataframes], axis=1)
+            
+            # Use original name for the mean, and add _Std for standard deviation
+            result_df[f"Mean_{col}"] = combined.mean(axis=1).round(4)
+            # result_df[f"StdDev_{col}"] = combined.std(axis=1, ddof=1).round(4)
+
+        # 4. Compute Sum for time and price
+        for col in sum_targets:
+            combined = pd.concat([df[col] for df in dataframes], axis=1)
+            # Result is the sum across axis 1 (rows)
+            result_df[f"Sum_{col}"] = combined.sum(axis=1).round(4)
+
+
 
         # 4. Final Output
         # Re-ordering columns to put stats next to where Accuracy was
-        with open(outfile, "w") as f:
-            f.write(result_df.to_csv(sep='\t', index=False))
+        # with open(outfile, "w") as f:
+        #     f.write(result_df.to_csv(sep='\t', index=False))
+        result_df.to_csv(outfile, sep='\t', index=False)
         
         print(f"Written the aggregated results to {outfile}.")
 
