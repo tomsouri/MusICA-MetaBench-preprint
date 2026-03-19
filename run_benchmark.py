@@ -316,6 +316,7 @@ def main():
                         help="Print verbose logs")
     parser.add_argument("--extra-verbose", default=False, action="store_true", 
                         help="If true, print the verbose logs to stdout")
+    parser.add_argument("--evaluation_output_file", type=str, help="overrides the config's path to evaluation output file")
     
 
 
@@ -342,6 +343,8 @@ def main():
         config['filters']['modality'] = cmdline_args.modalities
     if cmdline_args.verbose:
         config['verbose'] = True
+    if cmdline_args.evaluation_output_file:
+        config['evaluation_output_file'] = cmdline_args.evaluation_output_file
 
     if cmdline_args.run_id:
         benchmark_run_uuid = cmdline_args.run_id
