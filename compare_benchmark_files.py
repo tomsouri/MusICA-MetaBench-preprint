@@ -26,7 +26,7 @@ def calculate_tsv_overlap(file1_path, file2_path, columns_to_compare):
     matches = sum(1 for row in data1 if row in set2)
     return (matches / len(data1)) * 100
 
-def analyze_tsv_collection_glob(root_path, dir_pattern, file_pattern, columns):
+def discover_tsv_files_from_patterns(root_path, dir_pattern, file_pattern):
     """
     Finds matching TSVs using Unix-like wildcard patterns and computes statistics.
     
@@ -55,6 +55,8 @@ def analyze_tsv_collection_glob(root_path, dir_pattern, file_pattern, columns):
     if len(target_files) < 2:
         print(f"Insufficient files found matching patterns (Found: {len(target_files)})")
         return None
+    
+def analyze_tsv_collection(target_files, columns):
 
     # 2. Pair-wise Comparison
     overlaps = []
@@ -77,7 +79,7 @@ def analyze_tsv_collection_glob(root_path, dir_pattern, file_pattern, columns):
 
     # Formatting output
     print(f"\n{'='*40}")
-    print(f"Results for pattern: {dir_pattern}/{file_pattern}")
+    # print(f"Results for pattern: {dir_pattern}/{file_pattern}")
     print(f"{'='*40}")
     print(f"Average Overlap: {stats['avg']:.2f}%")
     print(f"Maximum Overlap: {stats['max']:.2f}%")
@@ -100,7 +102,7 @@ def main():
                         help="The base directory to search in (default: logs/)")
     
     # Pattern arguments
-    parser.add_argument("--dir_pattern", type=str, required=True,
+    parser.add_argument("--dir_pattern", type=str,
                         help="Unix-like pattern for subdirectories (e.g., 'batch_*')")
     parser.add_argument("--file_pattern", type=str, default="benchmark*.tsv",
                         help="Unix-like pattern for files (e.g., 'benchmark*.tsv')")
@@ -109,9 +111,27 @@ def main():
     parser.add_argument("--columns", nargs='+', 
                         default=['meta-question_id', 'dataset', 'piece_id', 'question', 'modality'],
                         help="List of column names to compare (space separated)")
+    
+    # Explicit List Mode Argument
+    parser.add_argument("--list_of_tsvs", nargs='+', 
+                        help="Explicit list of TSV file paths to compare. Overrides discovery mode.")
+
 
     args = parser.parse_args()
 
+    target_files = []
+
+    # 1. File Selection Logic
+    if args.list_of_tsvs:
+        # Use explicitly provided files
+        target_files = args.list_of_tsvs
+        print(f"Using {len(target_files)} provided files.")
+    else:
+        # Use Discovery Mode (ensure patterns are provided)
+        if not args.dir_substring or not args.file_substring:
+            parser.error("Either --list_of_tsvs OR both --dir_substring and --file_substring must be provided.")
+
+        target_files = discover_tsv_files_from_patterns(root_path=args.root_path, dir_pattern=args.dir_pattern, file_pattern=args.file_pattern)
 
     # Example Usage:
     # import sys
@@ -120,7 +140,7 @@ def main():
     # percent = calculate_tsv_overlap(sys.argv[1], sys.argv[2], columns)
     # print(f"Overlap: {percent}%")
 
-    analyze_tsv_collection_glob(root_path=args.root_path, dir_pattern=args.dir_pattern, file_pattern=args.file_pattern, columns=args.columns)
+    analyze_tsv_collection(target_files, args.columns)
 
 # Example run:
 # .venv/bin/python3 compare_benchmark_files.py --dir_pattern "run_2026-03-18_*rs*-15" --file_pattern "benchmark_cou*.tsv"
