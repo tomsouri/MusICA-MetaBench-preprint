@@ -698,7 +698,7 @@ def main():
     parser.add_argument("--questions_per_subcategory_count", type=int, help="Override questions per subcategory count for subsampling")
     parser.add_argument("--seed", type=int, help="Override random seed for reproducibility")
     parser.add_argument("--allowed_metaq_ids", nargs='+', help="Override allowed metaq ids in config")
-    
+    parser.add_argument("--use_all_inds", default=False, action="store_true", help="Override `use_all_inds` setting from config.")
 
     args = parser.parse_args()
 
@@ -716,6 +716,8 @@ def main():
         config['seed'] = args.seed
     if args.allowed_metaq_ids is not None:
         config['allowed_metaq_ids'] = args.allowed_metaq_ids
+    if args.use_all_inds:
+        config['use_all_inds'] = True
 
     global INTERMEDIATE_DIR
     INTERMEDIATE_DIR = "logs/intermediate_benchmarks/" + datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
