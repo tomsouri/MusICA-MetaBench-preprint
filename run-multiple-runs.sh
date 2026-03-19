@@ -49,13 +49,22 @@ done
 .venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
 
 
-for seed in "${seeds[@]}"; do
-    benchmark_file="benchmark_count_${qpersubcategory}_${seed}.tsv"
 
-    echo "Running on a benchmark with random seed: $seed"
+for model in "${models[@]}"; do
+    echo "Running the benchmarks for model ${model}..."
+
+    resfiles=()
+    textonlyresfiles=()
+
+
+    for seed in "${seeds[@]}"; do
+        benchmark_file="benchmark_count_${qpersubcategory}_${seed}.tsv"
+
+        echo "Running on a benchmark with random seed: $seed"
     
+        resfile="${seed}_${qpersubcategory}_{model}.res.tsv"
+        resfiles+=("$resfile")
     
-    for model in "${models[@]}"; do
 
         run .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
             --models "${model}" \
@@ -66,10 +75,14 @@ for seed in "${seeds[@]}"; do
             --run_id "rs${seed}"  \
             --max_waiting_time_per_request 300 \
             --generate_new_list_with_logs \
-            --verbose
+            --verbose \
+            --evaluation_output_file "${resfile}"
 
         echo "================================================================================"
-        
+
+        toresfile="${seed}_${qpersubcategory}_to_{model}.res.tsv"
+        textonlyresfiles+=("$toresfile")
+
         run .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
             --models "${model}" \
             --url "https://openrouter.ai/api/v1/chat/completions" \
@@ -80,10 +93,20 @@ for seed in "${seeds[@]}"; do
             --max_waiting_time_per_request 300 \
             --generate_new_list_with_logs \
             --text_only_baseline \
-            --verbose
+            --verbose \
+            --evaluation_output_file "${toresfile}"
 
         echo "================================================================================"
     done
+
+    dir="averaged/${model}/${qpersubcategory}"
+    mkdir -p $dir
+
+    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${resfiles[@]}" --output_file "${dir}/res.tsv"
+    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${textonlyresfiles[@]}" --output_file "${dir}/textonly.tsv"
+
+    cp "benchmark_comparison_${qpersubcategory}qs.txt" $dir/
+
 done
 
 
