@@ -299,12 +299,8 @@ def step_1_generate_product(meta_questions, config, fields):
     
     for meta in meta_questions:        
         for piece in pieces:
-            try:
-                row = {**meta, **piece}
-                output_data.append(row)
-            except Exception as e:
-                print(f"Error on Q '{meta.get('meta-question_id', '')}' / Piece '{piece.get('piece_id', '')}': {e}")
-                stats["errors"] += 1
+            row = {**meta, **piece}
+            output_data.append(row)
 
     # Combination of original fields from meta-questions and pieces, without duplicates
     out_fields = fields + list(pieces[0].keys())
