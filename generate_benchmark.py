@@ -337,22 +337,22 @@ def step_1_5_extract_ground_truth_and_distractors(data, config, fields):
 
         values_dict = json.loads(row['values']) if row.get('values') else {}
         
-        try:
-            ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, row['path'], values_dict)
-            
-            #row['values']  = json.dumps(new_values_word)
-            #row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
-            
-            if distractor_pool is not None:
-                row['ground_truth'] = str(ground_truth)
-                distractor_pool = [str(d) for d in distractor_pool]
-                row['distractor_pool'] = json.dumps(distractor_pool)
-                output_data.append(row)
+        # try:
+        ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, row['path'], values_dict)
+        
+        #row['values']  = json.dumps(new_values_word)
+        #row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
+        
+        if distractor_pool is not None:
+            row['ground_truth'] = str(ground_truth)
+            distractor_pool = [str(d) for d in distractor_pool]
+            row['distractor_pool'] = json.dumps(distractor_pool)
+            output_data.append(row)
             # print(row)
             # print(new_values_dict)
-        except Exception as e:
-            print(f"Error on Q '{row.get('question_id', '')}' / Piece '{row.get('piece_id', '')}': {e}")
-            stats["errors"] += 1
+        # except Exception as e:
+        #     print(f"Error on Q '{row.get('meta-question_id', '')}' / Piece '{row.get('piece_id', '')}': {e}")
+        #     stats["errors"] += 1
 
     out_fields = fields + ['ground_truth', 'distractor_pool']
     # Deduplicate fields in case of identical column names (though unlikely to overlap destructively)
@@ -733,6 +733,7 @@ def main():
         # 2. Save modified config to log directory
     with open(os.path.join(INTERMEDIATE_DIR, "config_snapshot.yaml"), 'w') as f:
         yaml.dump(config, f)
+
 
     # Pipeline Execution
     print("--- Starting Pipeline ---")
