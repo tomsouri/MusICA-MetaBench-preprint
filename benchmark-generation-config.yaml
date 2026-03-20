@@ -20,8 +20,8 @@ ontology_path: "ontology.yaml" # Add this to specify the path to the ontology fi
 # simplification for draft: only use final mix recordings, high-quality rendered PDF, and musicxml
 submodalities:
   - "audio.mastermix.wav"
-  - "visual.pdf"
-  # - "visual.png"
+  # - "visual.pdf"
+  - "visual.png"
   - "symbolic.musicxml"
 
 # simplification: for the draft, pre-decided percentage of such questions (those that do not contain ground truth among the options), e.g. 20% if we use 5 options (then NOTA is correct as frequently as any other option), only focus on it on evaluation (discussion of results)
@@ -29,7 +29,7 @@ nota_correct_percentage: 0.20 # e.g., 20%
 labels: ["A", "B", "C", "D", "E"]
 seed: 42
 min_num_distractors: 4
-distractor_pool_size: 20 # number of distractors to sample from the ontology for each question (before sorting and selecting the final options)
+distractor_pool_size: 5 # number of distractors to sample from the ontology for each question (before sorting and selecting the final options)
 random_distractors: true # whether to sample distractors randomly from the ontology (instead of using piece specific distractors)
 cmdline_args:
   meta: "meta-questions-K.tsv"
@@ -50,7 +50,8 @@ allowed_metaq_ids:
   # - 0
   - 7
 verbose: true
-#use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
+use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
+max_target_index: 30 # Until which index do we ask? (in questions like "what is the 29th note in soprano?") if use_all_inds is True, this is the maximum target index to generate (e.g., if 30, it will generate indices from 0 to 29, plus "end")
 music_ontology_settings:
   ontology_path: "ontology.yaml"
   harmonic_system: "tonal"

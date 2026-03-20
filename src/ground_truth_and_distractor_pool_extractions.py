@@ -156,16 +156,56 @@ def get_ordinal_suffix(n: int) -> str:
         else:
             return 'th'
 
-def get_nice_target_index(self, target_index: int) -> str:
 
-    # # Retrieve the dictionary for the target index
-    # target_index_dicts = self.ontology['target_index']
-    # for target_index_dict in target_index_dicts:
-    #     if str(target_index) in target_index_dict:
-    #         return target_index_dict[str(target_index)]
+class VirtualIndexList:
+    """
+    A list-like class that does not store data, but generates values on-the-fly.
+    
+    This class mimics the behavior of a standard Python list by implementing 
+    the __getitem__ magic method. Instead of retrieving data from internal 
+    storage, it invokes get_nice_target_index(target_index) for every access.
+    """
 
-    # Fallback to generating the ordinal suffix dynamically
-    return {f"{target_index}":f"{str(target_index+1)+ get_ordinal_suffix(target_index)}"}
+    def __init__(self, size: int):
+        self._size = size
+
+    def __getitem__(self, index: int) -> str:
+        """
+        Allows indexing (e.g., obj[5]) and slicing (e.g., obj[1:3]).
+        """
+        if isinstance(index, slice):
+            return [self.get_nice_target_index(i) for i in range(*index.indices(self._size))]
+        
+        # Handle negative indexing
+        if index < 0:
+            index += self._size
+            
+        return self.get_nice_target_index(index)
+
+    def __len__(self):
+        """Returns the virtual size of the list."""
+        return self._size
+
+    def get_nice_target_index(self, target_index: int) -> str:
+
+        # # Retrieve the dictionary for the target index
+        # target_index_dicts = self.ontology['target_index']
+        # for target_index_dict in target_index_dicts:
+        #     if str(target_index) in target_index_dict:
+        #         return target_index_dict[str(target_index)]
+
+        # Fallback to generating the ordinal suffix dynamically
+        return {f"{target_index}":f"{str(target_index+1)+ get_ordinal_suffix(target_index)}"}
+
+    def __iter__(self):
+        """Allows the instance to be used in loops or iterables."""
+        for i in range(self._size):
+            yield self.get_nice_target_index(i)
+        # Always yield "last" as a special index representing the last note, 
+        # regardless of the size of the list
+        yield {"end": "last"}
+    
+
 import itertools
 def get_chords():
     pitch_classes = list(range(12))  # 0–11
@@ -186,6 +226,8 @@ def get_chords():
   
     ontology = {chord_name: chord_name for chord_name in ontology}
     return ontology
+
+
 def get_cadence_types():
     """
     Generates a dictionary of cadence types using a manually sampled list of 
@@ -222,6 +264,8 @@ def get_cadence_types():
         print(f"Cadence types ontology saved to {ontology_path}")
 
     return ontology
+
+
 def get_cadences():
     pitch_classes = list(range(12))  # 0–11
     ontology = set()
@@ -249,6 +293,8 @@ def get_cadences():
     # breakpoint()
     ontology = {cad_name: cad_name for cad_name in ontology}
     return ontology
+
+
 def get_rhythm_props():
     # Define the rhythmic proportions to consider
     rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0, 1.5]  # e.g., half, equal, double
@@ -329,7 +375,14 @@ class AnswerDistractorExtractors:
 
         if self.ontology.get('target_index') is None or self.config.get('use_all_inds', None):
             self.use_all_inds = True
-            self.ontology['target_index'] = [get_nice_target_index(self, idx) for idx in range(self.distractor_pool_size*10)]
+            
+            # Use a virtual index that behaves like a list of (let's say) 30 indices, 
+            # but generates the nice string representation on the fly when accessed,
+            # for any index (never returns IndexError).
+            # This is beneficial, because we do not know in advance the length of the pieces.
+            # We use 30 as a reasonable default
+            self.ontology['target_index'] = VirtualIndexList(self.config.get('max_target_index', 30))
+            #self.ontology['target_index'] = [get_nice_target_index(self, idx) for idx in range(self.distractor_pool_size*100)]
             
         else:
             self.use_all_inds = False 
@@ -827,6 +880,11 @@ class AnswerDistractorExtractors:
             len_diff = self.min_num_distractors - len(ground_truth_pool)
             
             method_name = method.__name__
+            # TODO: fix. For now, a simple hack to overcome the error of referencing additional distractors before assignment
+            # The backoff here is needed for the added questions.
+            # Now it is failing for them, because not enough distractors are generated.
+            additional_distractors = []
+            
             if "interval" in method_name:
                 sample_space = copy.deepcopy(set(self.dict_interval_ontology.values()))
                 sample_space.discard(ground_truth)
