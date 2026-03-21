@@ -552,7 +552,7 @@ def step_4_final_options(data, config, fields):
         options.extend(distractors[:distractors_needed])
 
         if len(options) < num_opt:
-            print(f"Warning: Not enough distractors for item. Needed {num_opt - 1} distractors, but only {len(distractors)} available.")
+            print(f"Warning: Not enough distractors for item (meta-qid: {row.get('meta-question_id', 'Unknown')}). Needed {num_opt - 1} distractors, but only {len(distractors)} available.")
             stats["errors"] += 1
         
         row['final_correct_option'] = gt
