@@ -13,16 +13,19 @@
 # - "google/gemini-2.0-flash-lite-001"
 
 
+# TODO: aggregate models need to be run with --disable_zdr in run_benchmark.py
 models=(
-    "google/gemini-2.0-flash-lite-001"
-    "google/gemini-2.5-flash-lite"
-    "google/gemini-2.5-pro"
-    "xiaomi/mimo-v2-omni"
+    "aggregate-gpt-4o"
+    "aggregate-mistral"
+    "aggregate-gpt-5"
+    # "google/gemini-2.0-flash-lite-001"
+    # "google/gemini-2.5-flash-lite"
+    # "google/gemini-2.5-pro"
+    # "xiaomi/mimo-v2-omni"
     # "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
 )
-
 
 # omni models:
 #   +   xiaomi/mimo-v2-omni
@@ -45,8 +48,8 @@ models=(
 
 
 qpersubcategory=5
-# seeds=({42..43})
 seeds=({42..51})
+# seeds=({43..43})
 
 
 benchmarks=() # Initialize an empty array
@@ -109,7 +112,6 @@ for model in "${models[@]}"; do
             --verbose \
             --evaluation_output_file "${resfile}" \
             --generate_new_list_with_logs \
-
         echo "================================================================================"
 
         mkdir -p "results/${safe_model}/${qpersubcategory}/to/"
