@@ -30,7 +30,7 @@ labels: ["A", "B", "C", "D", "E"]
 seed: 42
 min_num_distractors: 4
 distractor_pool_size: 5 # number of distractors to sample from the ontology for each question (before sorting and selecting the final options)
-random_distractors: true # whether to sample distractors randomly from the ontology (instead of using piece specific distractors)
+random_distractors: false # whether to sample distractors randomly from the ontology (instead of using piece specific distractors)
 cmdline_args:
   meta: "meta-questions-K.tsv"
   pieces: "pieces.tsv"
