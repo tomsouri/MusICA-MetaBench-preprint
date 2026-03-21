@@ -12,7 +12,7 @@ from typing import List
 
 from compare_benchmark_files import discover_tsv_files_from_patterns
 
-from utils import upload_tsv_to_gsheet
+from utils import upload_tsv_to_gsheet, create_gsheet_tabs
 
 # def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str):
 #     """
@@ -205,6 +205,7 @@ def main():
 
     # Upload to Google Sheet if ID is provided
     if args.gsheet_id_to_upload and args.gsheet_tab_name:
+        create_gsheet_tabs(config=config, tab_names=[args.gsheet_tab_name])
         upload_tsv_to_gsheet(config=config, tab_name=args.gsheet_tab_name, tsv_file=args.output_file)
 
 # .venv/bin/python3 compute_mean_stddev.py --dir_pattern "run_2026-03-17_2*rs*" --file_pattern "results.tsv" --output_file "a.tsv" --root_path "logs/"
