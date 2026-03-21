@@ -1,0 +1,93 @@
+add_nota: true
+allow_meta_question_backoff: true
+allowed_metaq_ids:
+- '0'
+- '1'
+- '2'
+- '3'
+- '4'
+- '5'
+- '6'
+- '7'
+- '8'
+- '9'
+balance_meta_questions_perfectly: false
+cmdline_args:
+  meta: meta-questions-K.tsv
+  methods_path: src/ground_truth_and_distractor_pool_extractions.py
+  output: benchmark_count_15_50.tsv
+  pieces: pieces.tsv
+distractor_pool_size: 20
+labels:
+- A
+- B
+- C
+- D
+- E
+min_num_distractors: 4
+music_ontology_settings:
+  harmonic_system: tonal
+  ontology_path: ontology.yaml
+nota_correct_percentage: 0.2
+nota_text: none of the other options is correct
+num_options: 5
+ontology_path: ontology.yaml
+questions_per_subcategory_count: 15
+random_distractors: true
+rng: !!python/object/apply:numpy.random._pickle.__generator_ctor
+- !!python/object/apply:numpy.random._pickle.__bit_generator_ctor
+  args:
+  - !!python/name:numpy.random._pcg64.PCG64 ''
+  state: !!python/tuple
+  - bit_generator: PCG64
+    has_uint32: 0
+    state:
+      inc: 81605775420243012667316905014758695997
+      state: 259031282180232884730447052609721539192
+    uinteger: 0
+  - !!python/object/apply:numpy.random.bit_generator.__pyx_unpickle_SeedSequence
+    args:
+    - !!python/name:numpy.random.bit_generator.SeedSequence ''
+    - 65708578
+    - null
+    state: !!python/tuple
+    - 50
+    - 0
+    - !!python/object/apply:numpy._core.multiarray._reconstruct
+      args:
+      - !!python/name:numpy.ndarray ''
+      - !!python/tuple
+        - 0
+      - !!binary |
+        Yg==
+      state: !!python/tuple
+      - 1
+      - !!python/tuple
+        - 4
+      - !!python/object/apply:numpy.dtype
+        args:
+        - u4
+        - false
+        - true
+        state: !!python/tuple
+        - 3
+        - <
+        - null
+        - null
+        - null
+        - -1
+        - -1
+        - 0
+      - false
+      - !!binary |
+        ERBssAVkJEJYgkxO3AeBsg==
+    - 4
+    - !!python/tuple []
+seed: 50
+sorting_method: dummy_shuffle
+sorting_methods_path: src/distractor_sorting.py
+submodalities:
+- audio.mastermix.wav
+- symbolic.musicxml
+- visual.short.png
+verbose: true

@@ -1,0 +1,67 @@
+benchmark_file: benchmark_count_15_42.tsv
+benchmark_run_uuid: Nrs42
+credentials_location: logs/protobenchmark-logging-aa9418338494.json
+dry_run: false
+env_api_key_name: OPENROUTER_API_KEY
+evaluation_criteria:
+- submodality
+- is_nota_correct
+- meta-question_id
+- category
+- subcategory
+- skill
+- rel/abs
+evaluation_output_file: 42_15_google_gemini-2.0-flash-lite-001.res.tsv
+extraction_method: parse_multi_choice_response
+filters:
+  modality:
+  - audio
+  - symbolic
+  - visual
+force_header_print: false
+log_to_google_sheet: true
+logdir: logs
+max_waiting_time_per_request: 300
+models:
+- google/gemini-2.0-flash-lite-001
+musical_piece_format_info:
+  audio:
+    audio.mastermix.wav: an audio recording (WAV format)
+  symbolic:
+    symbolic.abc: a musical score (ABC notation format)
+    symbolic.midi: a musical score (MIDI format represented as CSV)
+    symbolic.musicxml: a musical score (MusicXML format)
+  visual:
+    visual.pdf: a rendered score (PDF format)
+    visual.png: a rendered score (PNG format)
+    visual.short.png: a rendered score (PNG format)
+path_to_extraction_file: src/mmmu_eval_utils.py
+seed: 42
+sheet_id: 1UMw6xgduiloDhO9kZdU4bI10Mtmaw7yRcrHdB8spsmM
+sheet_name: Nrs42__cont
+system_prompt: null
+text_only_baseline: false
+url: https://openrouter.ai/api/v1/chat/completions
+user_prompt_template: 'You are a specialist in the analysis and interpretation of
+  musical materials. You are provided with a musical work as <FORMAT>. Analyze the
+  material carefully. Then, given a question and a set of options, choose the most
+  appropriate option.
+
+  Question:
+
+  <QUESTION>
+
+  Options:
+
+  <OPTIONS_TEXT>
+
+
+  <POTENTIAL_TEXTFILE_PLACEHOLDER>
+
+
+  Answer with the option letter from the given choices. The last line of your response
+  should be of the following format: ''Answer: $LETTER'' (without quotes) where LETTER
+  is one of options.
+
+  '
+verbose: true

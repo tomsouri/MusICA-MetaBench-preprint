@@ -1,0 +1,38 @@
+Model	Criterion_Type	Criterion_Value	Mean_Accuracy (10 runs)	StdDev_Accuracy (10 runs)	Mean_Unparsable_Percent	Mean_Model_Error_Percent	Sum_Total_Time_s	Sum_Total_Price
+google/gemini-2.5-flash-lite	OVERALL	ALL	32.642	3.5368	0.0	0.0	14080.13	2.4328
+google/gemini-2.5-flash-lite	submodality	audio.mastermix.wav	26.95	5.4039	0.0	0.0	3479.56	0.3543
+google/gemini-2.5-flash-lite	submodality	symbolic.musicxml	43.578	4.0255	0.0	0.0	3996.33	1.3625
+google/gemini-2.5-flash-lite	submodality	visual.short.png	27.219	5.6454	0.0	0.0	6604.24	0.716
+google/gemini-2.5-flash-lite	is_nota_correct	0	33.889	3.8938	0.0	0.0	10642.35	1.8676
+google/gemini-2.5-flash-lite	is_nota_correct	1	27.434	9.6472	0.0	0.0	3437.78	0.5652
+google/gemini-2.5-flash-lite	meta-question_id	0	22.571	9.4517	0.0	0.0	944.42	0.1973
+google/gemini-2.5-flash-lite	meta-question_id	1	52.12	21.1215	0.0	0.0	499.73	0.1123
+google/gemini-2.5-flash-lite	meta-question_id	2	18.762	13.7366	0.0	0.0	1667.52	0.2711
+google/gemini-2.5-flash-lite	meta-question_id	3	60.16	28.5656	0.0	0.0	1706.39	0.2635
+google/gemini-2.5-flash-lite	meta-question_id	4	23.626	7.6115	0.0	0.0	1512.72	0.3238
+google/gemini-2.5-flash-lite	meta-question_id	5	51.079	11.5162	0.0	0.0	870.31	0.1669
+google/gemini-2.5-flash-lite	meta-question_id	6	9.009	8.2139	0.0	0.0	867.36	0.1498
+google/gemini-2.5-flash-lite	meta-question_id	7	36.612	11.3824	0.0	0.0	620.66	0.1403
+google/gemini-2.5-flash-lite	meta-question_id	8	37.35	11.8593	0.0	0.0	3535.11	0.5373
+google/gemini-2.5-flash-lite	meta-question_id	9	16.587	15.1795	0.0	0.0	1855.88	0.2706
+google/gemini-2.5-flash-lite	category	harmony	32.888	7.2463	0.0	0.0	6011.66	0.9481
+google/gemini-2.5-flash-lite	category	pitch	35.506	8.0277	0.0	0.0	4818.06	0.8441
+google/gemini-2.5-flash-lite	category	rhythm	29.831	5.6855	0.0	0.0	3250.41	0.6405
+google/gemini-2.5-flash-lite	subcategory	harmony-absolute	37.35	11.8593	0.0	0.0	3535.11	0.5373
+google/gemini-2.5-flash-lite	subcategory	harmony-relative	28.164	11.819	0.0	0.0	2476.56	0.4108
+google/gemini-2.5-flash-lite	subcategory	pitch-absolute	34.148	10.435	0.0	0.0	1444.15	0.3095
+google/gemini-2.5-flash-lite	subcategory	pitch-relative	36.56	13.1202	0.0	0.0	3373.92	0.5346
+google/gemini-2.5-flash-lite	subcategory	rhythm-absolute	23.626	7.6115	0.0	0.0	1512.72	0.3238
+google/gemini-2.5-flash-lite	subcategory	rhythm-relative	35.277	8.8038	0.0	0.0	1737.67	0.3167
+google/gemini-2.5-flash-lite	skill	cadence recognition	16.587	15.1795	0.0	0.0	1855.88	0.2706
+google/gemini-2.5-flash-lite	skill	chord recognition	37.35	11.8593	0.0	0.0	3535.11	0.5373
+google/gemini-2.5-flash-lite	skill	interval recognition	18.762	13.7366	0.0	0.0	1667.52	0.2711
+google/gemini-2.5-flash-lite	skill	interval statistics	60.16	28.5656	0.0	0.0	1706.39	0.2635
+google/gemini-2.5-flash-lite	skill	note length	23.626	7.6115	0.0	0.0	1512.72	0.3238
+google/gemini-2.5-flash-lite	skill	pitch recognition	22.571	9.4517	0.0	0.0	944.42	0.1973
+google/gemini-2.5-flash-lite	skill	pitch statistics	52.12	21.1215	0.0	0.0	499.73	0.1123
+google/gemini-2.5-flash-lite	skill	rhythm pattern	9.009	8.2139	0.0	0.0	867.36	0.1498
+google/gemini-2.5-flash-lite	skill	time signature	51.079	11.5162	0.0	0.0	870.31	0.1669
+google/gemini-2.5-flash-lite	skill	tonality recognition	36.612	11.3824	0.0	0.0	620.66	0.1403
+google/gemini-2.5-flash-lite	rel/abs	absolute	31.899	5.3926	0.0	0.0	6492.01	1.1707
+google/gemini-2.5-flash-lite	rel/abs	relative	33.159	5.92	0.0	0.0	7588.15	1.2621

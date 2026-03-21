@@ -1,0 +1,12 @@
+Model	Criterion_Type	Criterion_Value	Mean_Accuracy (2 runs)	StdDev_Accuracy (2 runs)	Mean_Unparsable_Percent	Mean_Model_Error_Percent	Sum_Total_Time_s	Sum_Total_Price
+text-only-google/gemini-2.0-flash-lite-001	OVERALL	ALL	12.5	17.6777	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	submodality	audio.mastermix.wav	0.0	0.0	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	submodality	symbolic.musicxml	0.0	0.0	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	submodality	visual.short.png	25.0	35.3553	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	is_nota_correct	0	16.665	23.5679	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	is_nota_correct	1	0.0	0.0	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	0	12.5	17.6777	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	category	pitch	12.5	17.6777	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	subcategory	pitch-absolute	12.5	17.6777	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	skill	pitch recognition	12.5	17.6777	0.0	0.0	0.0	0.0
+text-only-google/gemini-2.0-flash-lite-001	rel/abs	absolute	12.5	17.6777	0.0	0.0	0.0	0.0

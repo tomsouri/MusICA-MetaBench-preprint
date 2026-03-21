@@ -12,6 +12,8 @@ from typing import List
 
 from compare_benchmark_files import discover_tsv_files_from_patterns
 
+from utils import upload_tsv_to_gsheet
+
 # def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str):
 #     """
 #     Aggregates multiple TSV experiment runs, verifies consistency across 
@@ -168,6 +170,14 @@ def main():
                         help="Explicit list of TSV file paths to compare. Overrides discovery mode.")
     parser.add_argument("--output_file", type=str, required=True,
                         help="Path to output file")
+    
+    parser.add_argument("--gsheet_id_to_upload", type=str, default="14uUleePBCZMJOn1BuH9OM1NA8L0NcBbjLpi4lHGapd0",
+                        help="Google Sheet ID to upload results to")
+    parser.add_argument("--gsheet_tab_name", type=str,
+                        help="Tab name in the Google Sheet to upload results to")
+    parser.add_argument("--gspread_credentials_location", type=str, default="logs/protobenchmark-logging-aa9418338494.json",
+                        help="Path to gspread credentials JSON file")
+    
 
     args = parser.parse_args()
 
@@ -188,6 +198,14 @@ def main():
 
     aggregate_experiment_results(target_files, args.identity_columns, args.output_file)
 
+    config = {
+        'credentials_location': args.gspread_credentials_location,
+        'sheet_id': args.gsheet_id_to_upload
+    }
+
+    # Upload to Google Sheet if ID is provided
+    if args.gsheet_id_to_upload and args.gsheet_tab_name:
+        upload_tsv_to_gsheet(config=config, tab_name=args.gsheet_tab_name, tsv_file=args.output_file)
 
 # .venv/bin/python3 compute_mean_stddev.py --dir_pattern "run_2026-03-17_2*rs*" --file_pattern "results.tsv" --output_file "a.tsv" --root_path "logs/"
 
