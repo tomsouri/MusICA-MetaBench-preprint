@@ -1,0 +1,11 @@
+Using 2 provided files.
+Comparing 2 files (1 unique pairs)...
+
+========================================
+========================================
+Average Overlap: 0.00%
+Maximum Overlap: 0.00%
+Minimum Overlap: 0.00%
+Total Files Compared: 2
+========================================
+
