@@ -1,8 +1,4 @@
 #!/bin/bash
-#SBATCH -J run      # name of job
-#SBATCH -p cpu-ms       # name of partition or queue (default=cpu-troja)
-#SBATCH -o run.out  # name of output file for this submission script
-#SBATCH -e run.err  # name of error file for this submission script
 
 # to submit the job, you need to be ssh-ed at one of the lrc or sol machines. (from geri/freki/blackbird, ssh lrc1 or sol1)
 # Then use: sbatch --dependency=afterany:<JOB_ID>
@@ -19,15 +15,39 @@
 
 models=(
     "google/gemini-2.0-flash-lite-001"
+    "google/gemini-2.5-flash-lite"
+    "google/gemini-2.5-pro"
+    "xiaomi/mimo-v2-omni"
+
     # "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
 )
 
 
-qpersubcategory=15
+# omni models:
+#   +   xiaomi/mimo-v2-omni
+#   -   google/gemini-3.1-pro-preview
+#   -   google/gemini-3-flash-preview
+#   +   google/gemini-2.5-pro
+#   -   google/gemini-3.1-flash-lite-preview
+#   +   google/gemini-2.5-flash-lite
+#   +   google/gemini-2.0-flash-lite-001 (going away June 1, 2026)
+# aggregate models:
+# gpt-5 (less costly):
+#   +   openai/gpt-audio-mini
+#   +   openai/gpt-5-image-mini
+# gpt-4o (costly):
+#   -   openai/gpt-4o-audio-preview
+#   -   openai/gpt-4o
+# mistral (costly)
+#   +   mistralai/voxtral-small-24b-2507
+#   +   mistralai/mistral-small-3.2-24b-instruct
+
+
+qpersubcategory=5
 # seeds=({42..43})
-seeds=({42..52})
+seeds=({42..51})
 
 
 benchmarks=() # Initialize an empty array
@@ -48,7 +68,12 @@ for seed in "${seeds[@]}"; do
     echo "================================================================================"
 done
 
+
+
+
 .venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
+
+exit 0
 
 
 
