@@ -895,6 +895,12 @@ class AnswerDistractorExtractors:
                     if value_symbol in dict_item:
                         new_words[var_name] = dict_item[value_symbol]  
 
+        # TODO: Kacko, would the following make sense?
+        # if this code is used later, the code for sampling random distractors can be removed from the individual functions.
+        # if self.random_distractors:
+        #     # throw away the extracted distractors from the piece and use the precomputed ones
+        #     method_name = method.__name__
+        #     ground_truth_pool = self.rng.choice(self.random_distractor_pools[method_name], self.distractor_pool_size, replace=False).tolist()
 
     
        # distractor_pool = self.get_distractors(distractor_keys, ground_truth_pool)
