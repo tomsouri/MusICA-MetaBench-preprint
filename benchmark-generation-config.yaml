@@ -20,8 +20,7 @@ ontology_path: "ontology.yaml" # Add this to specify the path to the ontology fi
 # simplification for draft: only use final mix recordings, high-quality rendered PDF, and musicxml
 submodalities:
   - "audio.mastermix.wav"
-  # - "visual.pdf"
-  - "visual.png"
+  - "visual.short.png"
   - "symbolic.musicxml"
 
 # simplification: for the draft, pre-decided percentage of such questions (those that do not contain ground truth among the options), e.g. 20% if we use 5 options (then NOTA is correct as frequently as any other option), only focus on it on evaluation (discussion of results)
@@ -38,20 +37,20 @@ cmdline_args:
   output: "benchmark_v1.tsv"
 
 allowed_metaq_ids:
-  # - 4
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
   - 5
-  # - 10
   - 6
+  - 7
   - 8
   - 9
-  # - 3
-  # - 2
-  # - 1
-  # - 0
-  - 7
+
 verbose: true
 use_all_inds: true # whether to use all indices for target_index (instead of just 1, 2, 3, end)
-max_target_index: 30 # Until which index do we ask? (in questions like "what is the 29th note in soprano?") if use_all_inds is True, this is the maximum target index to generate (e.g., if 30, it will generate indices from 0 to 29, plus "end")
+max_target_index: 20 # Until which index do we ask? (in questions like "what is the 29th note in soprano?") if use_all_inds is True, this is the maximum target index to generate (e.g., if 30, it will generate indices from 0 to 29, plus "end")
 music_ontology_settings:
   ontology_path: "ontology.yaml"
   harmonic_system: "tonal"
