@@ -133,7 +133,7 @@ def set_logdir(config: dict) -> str:
 # Core LLM Call & Payload Builder
 # =========================================================================
 
-def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False) -> Tuple[Dict, str]:
+def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False, zdr: bool = True) -> Tuple[Dict, str]:
     """Generates the messages payload based on the modality and files."""
     messages = []
     plugins = None
@@ -208,7 +208,7 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
         "messages": messages,
         "provider": { 
              "require_parameters": True,
-             "zdr": True,
+            "zdr": zdr,
              "data_collection": "deny",
         }
     }
@@ -234,7 +234,9 @@ def ask_model(config: dict, payload: dict, original_user_prompt: str, dry_run: b
 
     max_waiting_time = config.get("max_waiting_time_per_request", 10)
     response_json = call_api_with_backoff(url, headers, payload, max_waiting_time=max_waiting_time)
-        
+    
+    # print(response_json)
+
     end_time = datetime.datetime.now()
     time_taken = (end_time - start_time).total_seconds()
     
@@ -249,10 +251,13 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     start_time = time.time()
     base_delay = 1  
     attempt = 0
+
+    response = {}
     
     while time.time() - start_time < max_waiting_time:
         try:
             response = requests.post(url, headers=headers, json=payload)
+            # print(json.dumps(response.json(), indent=2))
             response.raise_for_status()
             return response.json()
             
@@ -273,7 +278,9 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             print(f"Error encountered: {e}. Retrying in {jitter:.2f}s...")
             time.sleep(jitter)
             attempt += 1
-            
+    # TODO: do not return just max waiting time exceeded, but also log the error that caused the final failure
+
+
     return {"error": "Max waiting time exceeded."}
 
 
@@ -319,6 +326,9 @@ def main():
     parser.add_argument("--evaluation_output_file", type=str, help="overrides the config's path to evaluation output file")
     parser.add_argument("--dry_run", default=False, action="store_true", 
                         help="Dry run: do not send anything to LLMs")
+    
+    parser.add_argument("--disable_zdr", default=False, action="store_true",
+                        help="Disable ZDR in the payload, to allow running other audio models that do not support ZDR.")
 
 
     cmdline_args = parser.parse_args()
@@ -348,6 +358,13 @@ def main():
         config['evaluation_output_file'] = cmdline_args.evaluation_output_file
     if cmdline_args.dry_run:
         config['dry_run'] = True
+    if cmdline_args.max_waiting_time_per_request:
+        config['max_waiting_time_per_request'] = cmdline_args.max_waiting_time_per_request
+
+    if cmdline_args.disable_zdr:
+        config['zdr'] = False
+    else:
+        config['zdr'] = True
 
     if cmdline_args.run_id:
         benchmark_run_uuid = cmdline_args.run_id
@@ -441,6 +458,7 @@ def main():
 
     all_executed_logs = []
     run_count = 0
+    supported_aggregate_models = config.get("supported_aggregate_models", {})
 
     for model in config['models']:
         for item in items:
@@ -470,14 +488,23 @@ def main():
             content_file = item['path_to_question_context_file']
             text_only_baseline = config.get('text_only_baseline', False)
 
+            if model in supported_aggregate_models:
+                print(f"Model {model} is an aggregate model. Using supported aggregate model {supported_aggregate_models[model]} for payload preparation.")
+                model_name = supported_aggregate_models[model][modality]
+            else:
+                model_name = model
+
+            print(f"Running model: #{model_name}#")
+
             payload, final_prompt = prepare_llm_payload(
-                model=model, 
+                model=model_name, 
                 user_prompt=prompt, 
                 system_prompt=config['system_prompt'], 
                 content_file=content_file, 
                 modality=modality, 
                 submodality=submodality,
-                no_content_file=text_only_baseline
+                no_content_file=text_only_baseline,
+                zdr=config.get('zdr', True)
             )
 
             # Execute Request
