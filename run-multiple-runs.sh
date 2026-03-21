@@ -18,7 +18,6 @@ models=(
     "google/gemini-2.5-flash-lite"
     "google/gemini-2.5-pro"
     "xiaomi/mimo-v2-omni"
-
     # "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
@@ -73,9 +72,6 @@ done
 
 .venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
 
-exit 0
-
-
 
 for model in "${models[@]}"; do
     echo "Running the benchmarks for model ${model}..."
@@ -95,8 +91,10 @@ for model in "${models[@]}"; do
         benchmark_file="benchmark_count_${qpersubcategory}_${seed}.tsv"
 
         echo "Running on a benchmark with random seed: $seed"
-    
-        resfile="${seed}_${qpersubcategory}_${safe_model}.res.tsv"
+
+        mkdir -p "results/${safe_model}/${qpersubcategory}/normal/"
+        
+        resfile="results/${safe_model}/${qpersubcategory}/normal/rs${seed}.res.tsv"
         resfiles+=("$resfile")
     
 
@@ -106,7 +104,7 @@ for model in "${models[@]}"; do
             --api-key-env "OPENROUTER_API_KEY" \
             --benchmark_file "$benchmark_file" \
             --modalities "audio" "symbolic" "visual" \
-            --run_id "Nrs${seed}"  \
+            --run_id "Omni-${safe_model}-${seed}"  \
             --max_waiting_time_per_request 300 \
             --verbose \
             --evaluation_output_file "${resfile}" \
@@ -114,7 +112,8 @@ for model in "${models[@]}"; do
 
         echo "================================================================================"
 
-        toresfile="${seed}_${qpersubcategory}_to_${safe_model}.res.tsv"
+        mkdir -p "results/${safe_model}/${qpersubcategory}/to/"
+        toresfile="results/${safe_model}/${qpersubcategory}/to/rs${seed}.res.tsv"
         textonlyresfiles+=("$toresfile")
 
         run .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
@@ -123,7 +122,7 @@ for model in "${models[@]}"; do
             --api-key-env "OPENROUTER_API_KEY" \
             --benchmark_file "$benchmark_file" \
             --modalities "audio" "symbolic" "visual" \
-            --run_id "Nto_rs${seed}"  \
+            --run_id "TO-Omni-${safe_model}-${seed}"  \
             --max_waiting_time_per_request 300 \
             --text_only_baseline \
             --verbose \
@@ -136,8 +135,10 @@ for model in "${models[@]}"; do
     dir="averaged/${safe_model}/${qpersubcategory}"
     mkdir -p $dir
 
-    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${resfiles[@]}" --output_file "${dir}/res.tsv"
-    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${textonlyresfiles[@]}" --output_file "${dir}/textonly.tsv"
+    tabname="${safe_model}.${qpersubcategory}"
+
+    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${resfiles[@]}" --output_file "${dir}/res.tsv" --gsheet_tab_name "${tabname}"
+    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${textonlyresfiles[@]}" --output_file "${dir}/textonly.tsv" --gsheet_tab_name "${tabname}.to"
 
     cp "benchmark_comparison_${qpersubcategory}qs.txt" $dir/
 
