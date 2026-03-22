@@ -285,7 +285,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     # TODO: do not return just max waiting time exceeded, but also log the error that caused the final failure
 
 
-    return {"error": "Max waiting time exceeded.", "original_errors": errors, "last_response":response}
+    return {"error": "Max waiting time exceeded.", "original_errors": errors, "last_response": str(response)}
 
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
