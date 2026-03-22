@@ -1,9 +1,9 @@
 import pandas as pd
 import os
 import glob
+import argparse
 
-def process_benchmarks(root_dir, output_dir):
-    # Ensure output directory exists
+def process_benchmarks(root_dir, output_dir, target_criteria):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -21,22 +21,28 @@ def process_benchmarks(root_dir, output_dir):
         all_data.append(df)
 
     if not all_data:
-        print("No files found.")
+        print("No files found in the specified directory.")
         return
 
     full_df = pd.concat(all_data, ignore_index=True)
     full_df['display_val'] = (
-        full_df['Mean_Accuracy (10 runs)'].round(2).astype(str) + 
-        " (" + full_df['StdDev_Accuracy (10 runs)'].round(2).astype(str) + ")"
+        full_df['Mean_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + 
+        " (" + full_df['StdDev_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + ")"
     )
 
-    # Export Loop
-    criteria = full_df['Criterion_Value'].unique()
-    for criterion in criteria:
+    # Filter by user provided criteria
+    unique_criteria = full_df['Criterion_Value'].unique()
+    criteria_to_process = [c for c in target_criteria if c in unique_criteria]
+
+    if not criteria_to_process:
+        print(f"None of the provided criteria found: {target_criteria}")
+        print(f"Available criteria: {list(unique_criteria)}")
+        return
+
+    for criterion in criteria_to_process:
         subset = full_df[full_df['Criterion_Value'] == criterion]
         pivot_table = subset.pivot(index='model', columns='size', values='display_val')
         
-        # Create a safe filename by replacing dots/spaces
         safe_name = criterion.replace(".", "_").replace(" ", "_")
         output_path = os.path.join(output_dir, f"table_{safe_name}.md")
         
@@ -47,8 +53,11 @@ def process_benchmarks(root_dir, output_dir):
         print(f"Generated: {output_path}")
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 3:
-        print("Usage: python generate_tables_to_file.py <path_to_averaged_dir> <output_dir>")
-    else:
-        process_benchmarks(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description="Generate benchmark tables from TSV files.")
+    parser.add_argument("input_dir", help="Path to the directory containing averaged data")
+    parser.add_argument("output_dir", help="Directory where tables will be saved")
+    parser.add_argument("--criteria", nargs='+', default=["ALL", "audio.mastermix.wav", "symbolic.musicxml", "visual.short.png"], 
+                        help="List of Criterion_Values to generate tables for (e.g., ALL submodality)")
+
+    args = parser.parse_args()
+    process_benchmarks(args.input_dir, args.output_dir, args.criteria)
