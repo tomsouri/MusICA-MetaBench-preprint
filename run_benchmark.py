@@ -253,6 +253,8 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     attempt = 0
 
     response = {}
+
+    errors = []
     
     while time.time() - start_time < max_waiting_time:
         try:
@@ -274,6 +276,8 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
             remaining_time = max_waiting_time - (time.time() - start_time)
             if jitter > remaining_time:
                 break
+
+            errors.append(str(e))
                 
             print(f"Error encountered: {e}. Retrying in {jitter:.2f}s...")
             time.sleep(jitter)
@@ -281,7 +285,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     # TODO: do not return just max waiting time exceeded, but also log the error that caused the final failure
 
 
-    return {"error": "Max waiting time exceeded."}
+    return {"error": "Max waiting time exceeded.", "original_errors": errors}
 
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
