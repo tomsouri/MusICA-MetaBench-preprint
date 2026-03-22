@@ -67,7 +67,7 @@ from utils import upload_tsv_to_gsheet, create_gsheet_tabs
 
 
 
-def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str):
+def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str, drop_inconsistent_rows: bool = False):
     dataframes = []
     target_col = "Accuracy_Percent"
 
@@ -91,13 +91,25 @@ def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: 
                 available = ", ".join(list(first_df_cols))
                 raise KeyError(f"Column '{col}' not found. Available columns: [{available}]")
 
-        # 1. Check consistency across all files
-        # We ensure they have the same metadata rows in the same order
-        reference_identity = dataframes[0][identity_cols]
-        for i, df in enumerate(dataframes[1:], start=1):
-            if not reference_identity.equals(df[identity_cols]):
-                raise ValueError(f"Consistency check failed: Row values in {identity_cols} "
-                                 f"in file '{file_paths[i]}' do not match the first file.")
+        # Handle consistency check
+        if drop_inconsistent_rows:
+            # Find the intersection of identity rows across all dataframes
+            reference_identity = dataframes[0][identity_cols]
+            for df in dataframes[1:]:
+                # Inner join to find rows present in all files
+                reference_identity = pd.merge(reference_identity, df[identity_cols], on=identity_cols, how='inner')
+            
+            # Filter all dataframes to only include the intersection
+            for i in range(len(dataframes)):
+                dataframes[i] = pd.merge(dataframes[i], reference_identity, on=identity_cols, how='inner')
+        else:
+            # Original strict consistency check
+            reference_identity = dataframes[0][identity_cols]
+            for i, df in enumerate(dataframes[1:], start=1):
+                if not reference_identity.equals(df[identity_cols]):
+                    raise ValueError(f"Consistency check failed: Row values in {identity_cols} "
+                                     f"in file '{file_paths[i]}' do not match the first file.")
+
 
         # 2. Extract values and compute statistics
         # Concatenate only the Accuracy_Percent column from all files side-by-side
@@ -177,7 +189,9 @@ def main():
                         help="Tab name in the Google Sheet to upload results to")
     parser.add_argument("--gspread_credentials_location", type=str, default="logs/protobenchmark-logging-aa9418338494.json",
                         help="Path to gspread credentials JSON file")
-    
+    parser.add_argument("--drop_inconsistent_rows", action="store_true", default=True,
+                        help="If set, drops rows not present in all files instead of raising an error.")
+
 
     args = parser.parse_args()
 
@@ -196,7 +210,7 @@ def main():
         target_files = discover_tsv_files_from_patterns(root_path=args.root_path, dir_pattern=args.dir_pattern, file_pattern=args.file_pattern)
 
 
-    aggregate_experiment_results(target_files, args.identity_columns, args.output_file)
+    aggregate_experiment_results(target_files, args.identity_columns, args.output_file, args.drop_inconsistent_rows)
 
     config = {
         'credentials_location': args.gspread_credentials_location,
