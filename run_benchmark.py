@@ -258,7 +258,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     
     while time.time() - start_time < max_waiting_time:
         try:
-            response = requests.post(url, headers=headers, json=payload)
+            response = requests.post(url, headers=headers, json=payload, timeout=max_waiting_time)
             # print(json.dumps(response.json(), indent=2))
             response.raise_for_status()
             return response.json()
@@ -285,7 +285,7 @@ def call_api_with_backoff(url, headers, payload, max_waiting_time=300):
     # TODO: do not return just max waiting time exceeded, but also log the error that caused the final failure
 
 
-    return {"error": "Max waiting time exceeded.", "original_errors": errors}
+    return {"error": "Max waiting time exceeded.", "original_errors": errors, "last_response":response}
 
 
 def sanitize_payload_for_logging(payload: dict) -> dict:
