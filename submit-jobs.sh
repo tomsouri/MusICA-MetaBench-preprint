@@ -21,6 +21,8 @@ seeds=({55..55}) # just a single seed
 # sizes=({1..1}) # just 20 questions per subcategory
 sizes=({20..20}) # just 20 questions per subcategory
 
+mkdir -p runs
+
 for seed in "${seeds[@]}"; do
     for size in ${sizes[@]} ; do
 
