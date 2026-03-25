@@ -50,4 +50,4 @@ run .venv/bin/python3 run_benchmark.py --config eval-config.yaml \
     --evaluation_output_file "${resfile}" \
     --generate_new_list_with_logs \
     --disable_zdr \
-    $text_only_flag \
+    $text_only_flag
