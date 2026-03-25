@@ -1,0 +1,47 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+aggregate-gpt-5	OVERALL	ALL	115	46	69	7	0	40.0	10.14	0.0	1744.41	2.327555
+aggregate-gpt-5	submodality	audio.mastermix.wav	33	4	29	7	0	12.12	24.14	0.0	261.8	0.022589
+aggregate-gpt-5	submodality	symbolic.musicxml	41	24	17	0	0	58.54	0.0	0.0	845.4	2.161049
+aggregate-gpt-5	submodality	visual.short.png	41	18	23	0	0	43.9	0.0	0.0	637.2	0.143917
+aggregate-gpt-5	piece_id	Anonymous_AusMeinesHerzensGrunde	4	2	2	0	0	50.0	0.0	0.0	35.54	0.139104
+aggregate-gpt-5	piece_id	Bach_IchStehAnDeinerKrippe	24	13	11	1	0	54.17	9.09	0.0	329.51	0.497757
+aggregate-gpt-5	piece_id	Drese_JesuGehVoran	10	2	8	2	0	20.0	25.0	0.0	126.07	0.149919
+aggregate-gpt-5	piece_id	Gesius_BefiehlDuDeineWege	12	4	8	0	0	33.33	0.0	0.0	214.89	0.313473
+aggregate-gpt-5	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	13	5	8	1	0	38.46	12.5	0.0	312.51	0.252334
+aggregate-gpt-5	piece_id	Jan_DuGrosserSchmerzensmann	14	7	7	1	0	50.0	14.29	0.0	195.14	0.316463
+aggregate-gpt-5	piece_id	Telemann_DerLiebenSonneLichtUndPracht	8	2	6	2	0	25.0	33.33	0.0	102.83	0.199125
+aggregate-gpt-5	piece_id	Vulpius_ChristusDerIstMeinLeben	14	6	8	0	0	42.86	0.0	0.0	227.87	0.194197
+aggregate-gpt-5	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	16	5	11	0	0	31.25	0.0	0.0	200.06	0.265184
+aggregate-gpt-5	is_nota_correct	0	90	34	56	5	0	37.78	8.93	0.0	1337.71	1.709607
+aggregate-gpt-5	is_nota_correct	1	25	12	13	2	0	48.0	15.38	0.0	406.7	0.617948
+aggregate-gpt-5	meta-question_id	0	11	1	10	0	0	9.09	0.0	0.0	141.05	0.226943
+aggregate-gpt-5	meta-question_id	1	10	6	4	0	0	60.0	0.0	0.0	121.56	0.209073
+aggregate-gpt-5	meta-question_id	2	11	1	10	1	0	9.09	10.0	0.0	147.43	0.163068
+aggregate-gpt-5	meta-question_id	3	7	4	3	1	0	57.14	33.33	0.0	235.68	0.208386
+aggregate-gpt-5	meta-question_id	4	21	6	15	2	0	28.57	13.33	0.0	305.14	0.420775
+aggregate-gpt-5	meta-question_id	5	11	7	4	0	0	63.64	0.0	0.0	106.04	0.240207
+aggregate-gpt-5	meta-question_id	6	7	1	6	0	0	14.29	0.0	0.0	103.38	0.16769
+aggregate-gpt-5	meta-question_id	7	10	4	6	2	0	40.0	33.33	0.0	130.4	0.179678
+aggregate-gpt-5	meta-question_id	8	19	12	7	1	0	63.16	14.29	0.0	299.09	0.376854
+aggregate-gpt-5	meta-question_id	9	8	4	4	0	0	50.0	0.0	0.0	154.64	0.134883
+aggregate-gpt-5	category	harmony	37	20	17	3	0	54.05	17.65	0.0	584.12	0.691414
+aggregate-gpt-5	category	pitch	39	12	27	2	0	30.77	7.41	0.0	645.72	0.80747
+aggregate-gpt-5	category	rhythm	39	14	25	2	0	35.9	8.0	0.0	514.57	0.828671
+aggregate-gpt-5	subcategory	harmony-absolute	19	12	7	1	0	63.16	14.29	0.0	299.09	0.376854
+aggregate-gpt-5	subcategory	harmony-relative	18	8	10	2	0	44.44	20.0	0.0	285.04	0.314561
+aggregate-gpt-5	subcategory	pitch-absolute	21	7	14	0	0	33.33	0.0	0.0	262.61	0.436016
+aggregate-gpt-5	subcategory	pitch-relative	18	5	13	2	0	27.78	15.38	0.0	383.12	0.371453
+aggregate-gpt-5	subcategory	rhythm-absolute	21	6	15	2	0	28.57	13.33	0.0	305.14	0.420775
+aggregate-gpt-5	subcategory	rhythm-relative	18	8	10	0	0	44.44	0.0	0.0	209.42	0.407897
+aggregate-gpt-5	skill	cadence recognition	8	4	4	0	0	50.0	0.0	0.0	154.64	0.134883
+aggregate-gpt-5	skill	chord recognition	19	12	7	1	0	63.16	14.29	0.0	299.09	0.376854
+aggregate-gpt-5	skill	interval recognition	11	1	10	1	0	9.09	10.0	0.0	147.43	0.163068
+aggregate-gpt-5	skill	interval statistics	7	4	3	1	0	57.14	33.33	0.0	235.68	0.208386
+aggregate-gpt-5	skill	note length	21	6	15	2	0	28.57	13.33	0.0	305.14	0.420775
+aggregate-gpt-5	skill	pitch recognition	11	1	10	0	0	9.09	0.0	0.0	141.05	0.226943
+aggregate-gpt-5	skill	pitch statistics	10	6	4	0	0	60.0	0.0	0.0	121.56	0.209073
+aggregate-gpt-5	skill	rhythm pattern	7	1	6	0	0	14.29	0.0	0.0	103.38	0.16769
+aggregate-gpt-5	skill	time signature	11	7	4	0	0	63.64	0.0	0.0	106.04	0.240207
+aggregate-gpt-5	skill	tonality recognition	10	4	6	2	0	40.0	33.33	0.0	130.4	0.179678
+aggregate-gpt-5	rel/abs	absolute	61	25	36	3	0	40.98	8.33	0.0	866.83	1.233645
+aggregate-gpt-5	rel/abs	relative	54	21	33	4	0	38.89	12.12	0.0	877.58	1.093911

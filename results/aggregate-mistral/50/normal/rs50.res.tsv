@@ -1,0 +1,48 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+aggregate-mistral	OVERALL	ALL	1123	374	749	2	0	33.3	0.27	0.0	7554.2	2.460578
+aggregate-mistral	submodality	audio.mastermix.wav	382	109	273	2	0	28.53	0.73	0.0	2517.31	1.64583
+aggregate-mistral	submodality	symbolic.musicxml	365	145	220	0	0	39.73	0.0	0.0	3085.46	0.776633
+aggregate-mistral	submodality	visual.short.png	376	120	256	0	0	31.91	0.0	0.0	1951.43	0.038116
+aggregate-mistral	piece_id	Anonymous_AusMeinesHerzensGrunde	107	37	70	0	0	34.58	0.0	0.0	1123.63	0.333987
+aggregate-mistral	piece_id	Bach_IchStehAnDeinerKrippe	116	45	71	0	0	38.79	0.0	0.0	930.53	0.280361
+aggregate-mistral	piece_id	Crueger_AufAufMeinHerzMitFreuden	118	38	80	0	0	32.2	0.0	0.0	797.0	0.316611
+aggregate-mistral	piece_id	Drese_JesuGehVoran	122	44	78	0	0	36.07	0.0	0.0	865.11	0.195886
+aggregate-mistral	piece_id	Gesius_BefiehlDuDeineWege	115	47	68	0	0	40.87	0.0	0.0	623.24	0.262644
+aggregate-mistral	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	118	32	86	0	0	27.12	0.0	0.0	542.51	0.223349
+aggregate-mistral	piece_id	Jan_DuGrosserSchmerzensmann	115	39	76	1	0	33.91	1.32	0.0	900.51	0.275999
+aggregate-mistral	piece_id	Telemann_DerLiebenSonneLichtUndPracht	109	35	74	0	0	32.11	0.0	0.0	775.66	0.317067
+aggregate-mistral	piece_id	Vulpius_ChristusDerIstMeinLeben	105	30	75	0	0	28.57	0.0	0.0	589.71	0.145283
+aggregate-mistral	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	98	27	71	1	0	27.55	1.41	0.0	406.3	0.109392
+aggregate-mistral	is_nota_correct	0	900	310	590	2	0	34.44	0.34	0.0	6203.02	1.961466
+aggregate-mistral	is_nota_correct	1	223	64	159	0	0	28.7	0.0	0.0	1351.17	0.499113
+aggregate-mistral	meta-question_id	0	95	16	79	0	0	16.84	0.0	0.0	305.05	0.183969
+aggregate-mistral	meta-question_id	1	91	48	43	1	0	52.75	2.33	0.0	1200.08	0.201294
+aggregate-mistral	meta-question_id	2	93	19	74	1	0	20.43	1.35	0.0	785.62	0.188598
+aggregate-mistral	meta-question_id	3	90	55	35	0	0	61.11	0.0	0.0	665.34	0.204866
+aggregate-mistral	meta-question_id	4	182	69	113	0	0	37.91	0.0	0.0	965.79	0.407519
+aggregate-mistral	meta-question_id	5	37	19	18	0	0	51.35	0.0	0.0	135.77	0.075738
+aggregate-mistral	meta-question_id	6	158	18	140	0	0	11.39	0.0	0.0	1083.28	0.366054
+aggregate-mistral	meta-question_id	7	100	32	68	0	0	32.0	0.0	0.0	625.5	0.221119
+aggregate-mistral	meta-question_id	8	185	75	110	0	0	40.54	0.0	0.0	1149.65	0.404018
+aggregate-mistral	meta-question_id	9	92	23	69	0	0	25.0	0.0	0.0	638.12	0.207402
+aggregate-mistral	category	harmony	377	130	247	0	0	34.48	0.0	0.0	2413.27	0.832539
+aggregate-mistral	category	pitch	369	138	231	2	0	37.4	0.87	0.0	2956.08	0.778727
+aggregate-mistral	category	rhythm	377	106	271	0	0	28.12	0.0	0.0	2184.85	0.849312
+aggregate-mistral	subcategory	harmony-absolute	185	75	110	0	0	40.54	0.0	0.0	1149.65	0.404018
+aggregate-mistral	subcategory	harmony-relative	192	55	137	0	0	28.65	0.0	0.0	1263.61	0.428522
+aggregate-mistral	subcategory	pitch-absolute	186	64	122	1	0	34.41	0.82	0.0	1505.13	0.385263
+aggregate-mistral	subcategory	pitch-relative	183	74	109	1	0	40.44	0.92	0.0	1450.95	0.393464
+aggregate-mistral	subcategory	rhythm-absolute	182	69	113	0	0	37.91	0.0	0.0	965.79	0.407519
+aggregate-mistral	subcategory	rhythm-relative	195	37	158	0	0	18.97	0.0	0.0	1219.06	0.441793
+aggregate-mistral	skill	cadence recognition	92	23	69	0	0	25.0	0.0	0.0	638.12	0.207402
+aggregate-mistral	skill	chord recognition	185	75	110	0	0	40.54	0.0	0.0	1149.65	0.404018
+aggregate-mistral	skill	interval recognition	93	19	74	1	0	20.43	1.35	0.0	785.62	0.188598
+aggregate-mistral	skill	interval statistics	90	55	35	0	0	61.11	0.0	0.0	665.34	0.204866
+aggregate-mistral	skill	note length	182	69	113	0	0	37.91	0.0	0.0	965.79	0.407519
+aggregate-mistral	skill	pitch recognition	95	16	79	0	0	16.84	0.0	0.0	305.05	0.183969
+aggregate-mistral	skill	pitch statistics	91	48	43	1	0	52.75	2.33	0.0	1200.08	0.201294
+aggregate-mistral	skill	rhythm pattern	158	18	140	0	0	11.39	0.0	0.0	1083.28	0.366054
+aggregate-mistral	skill	time signature	37	19	18	0	0	51.35	0.0	0.0	135.77	0.075738
+aggregate-mistral	skill	tonality recognition	100	32	68	0	0	32.0	0.0	0.0	625.5	0.221119
+aggregate-mistral	rel/abs	absolute	553	208	345	1	0	37.61	0.29	0.0	3620.57	1.1968
+aggregate-mistral	rel/abs	relative	570	166	404	1	0	29.12	0.25	0.0	3933.62	1.263778

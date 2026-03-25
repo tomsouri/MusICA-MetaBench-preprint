@@ -1,0 +1,48 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-aggregate-gpt-5	OVERALL	ALL	112	13	99	38	36	11.61	38.38	36.36	10748.84	0.225691
+text-only-aggregate-gpt-5	submodality	audio.mastermix.wav	36	0	36	0	36	0.0	0.0	100.0	9933.58	0.0
+text-only-aggregate-gpt-5	submodality	symbolic.musicxml	38	6	32	19	0	15.79	59.38	0.0	366.2	0.093418
+text-only-aggregate-gpt-5	submodality	visual.short.png	38	7	31	19	0	18.42	61.29	0.0	449.06	0.132273
+text-only-aggregate-gpt-5	piece_id	Anonymous_AusMeinesHerzensGrunde	8	2	6	2	3	25.0	33.33	50.0	894.53	0.012735
+text-only-aggregate-gpt-5	piece_id	Bach_IchStehAnDeinerKrippe	10	2	8	2	2	20.0	25.0	25.0	631.57	0.019294
+text-only-aggregate-gpt-5	piece_id	Crueger_AufAufMeinHerzMitFreuden	11	1	10	4	3	9.09	40.0	30.0	954.39	0.021294
+text-only-aggregate-gpt-5	piece_id	Drese_JesuGehVoran	23	1	22	11	7	4.35	50.0	31.82	2034.4	0.036121
+text-only-aggregate-gpt-5	piece_id	Gesius_BefiehlDuDeineWege	7	2	5	2	3	28.57	40.0	60.0	899.46	0.008829
+text-only-aggregate-gpt-5	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	15	1	14	4	6	6.67	28.57	42.86	1690.67	0.021484
+text-only-aggregate-gpt-5	piece_id	Jan_DuGrosserSchmerzensmann	5	1	4	3	1	20.0	75.0	25.0	324.44	0.013225
+text-only-aggregate-gpt-5	piece_id	Telemann_DerLiebenSonneLichtUndPracht	13	2	11	4	4	15.38	36.36	36.36	1225.68	0.060736
+text-only-aggregate-gpt-5	piece_id	Vulpius_ChristusDerIstMeinLeben	6	0	6	2	2	0.0	33.33	33.33	648.84	0.011446
+text-only-aggregate-gpt-5	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	14	1	13	4	5	7.14	30.77	38.46	1444.86	0.020528
+text-only-aggregate-gpt-5	is_nota_correct	0	90	11	79	27	30	12.22	34.18	37.97	8895.95	0.185557
+text-only-aggregate-gpt-5	is_nota_correct	1	22	2	20	11	6	9.09	55.0	30.0	1852.88	0.040134
+text-only-aggregate-gpt-5	meta-question_id	0	11	3	8	0	5	27.27	0.0	62.5	1477.84	0.01467
+text-only-aggregate-gpt-5	meta-question_id	1	6	1	5	2	2	16.67	40.0	40.0	604.38	0.009936
+text-only-aggregate-gpt-5	meta-question_id	2	9	0	9	4	3	0.0	44.44	33.33	872.86	0.01541
+text-only-aggregate-gpt-5	meta-question_id	3	9	1	8	2	2	11.11	25.0	25.0	589.51	0.017563
+text-only-aggregate-gpt-5	meta-question_id	4	19	1	18	11	5	5.26	61.11	27.78	1461.0	0.030825
+text-only-aggregate-gpt-5	meta-question_id	5	12	1	11	3	4	8.33	27.27	36.36	1219.68	0.020585
+text-only-aggregate-gpt-5	meta-question_id	6	7	1	6	1	3	14.29	16.67	50.0	883.73	0.010216
+text-only-aggregate-gpt-5	meta-question_id	7	13	1	12	4	5	7.69	33.33	41.67	1418.01	0.018712
+text-only-aggregate-gpt-5	meta-question_id	8	18	2	16	9	5	11.11	56.25	31.25	1504.8	0.031831
+text-only-aggregate-gpt-5	meta-question_id	9	8	2	6	2	2	25.0	33.33	33.33	717.02	0.055941
+text-only-aggregate-gpt-5	category	harmony	39	5	34	15	12	12.82	44.12	35.29	3639.83	0.106484
+text-only-aggregate-gpt-5	category	pitch	35	5	30	8	12	14.29	26.67	40.0	3544.58	0.05758
+text-only-aggregate-gpt-5	category	rhythm	38	3	35	15	12	7.89	42.86	34.29	3564.42	0.061627
+text-only-aggregate-gpt-5	subcategory	harmony-absolute	18	2	16	9	5	11.11	56.25	31.25	1504.8	0.031831
+text-only-aggregate-gpt-5	subcategory	harmony-relative	21	3	18	6	7	14.29	33.33	38.89	2135.03	0.074653
+text-only-aggregate-gpt-5	subcategory	pitch-absolute	17	4	13	2	7	23.53	15.38	53.85	2082.22	0.024607
+text-only-aggregate-gpt-5	subcategory	pitch-relative	18	1	17	6	5	5.56	35.29	29.41	1462.36	0.032973
+text-only-aggregate-gpt-5	subcategory	rhythm-absolute	19	1	18	11	5	5.26	61.11	27.78	1461.0	0.030825
+text-only-aggregate-gpt-5	subcategory	rhythm-relative	19	2	17	4	7	10.53	23.53	41.18	2103.42	0.030801
+text-only-aggregate-gpt-5	skill	cadence recognition	8	2	6	2	2	25.0	33.33	33.33	717.02	0.055941
+text-only-aggregate-gpt-5	skill	chord recognition	18	2	16	9	5	11.11	56.25	31.25	1504.8	0.031831
+text-only-aggregate-gpt-5	skill	interval recognition	9	0	9	4	3	0.0	44.44	33.33	872.86	0.01541
+text-only-aggregate-gpt-5	skill	interval statistics	9	1	8	2	2	11.11	25.0	25.0	589.51	0.017563
+text-only-aggregate-gpt-5	skill	note length	19	1	18	11	5	5.26	61.11	27.78	1461.0	0.030825
+text-only-aggregate-gpt-5	skill	pitch recognition	11	3	8	0	5	27.27	0.0	62.5	1477.84	0.01467
+text-only-aggregate-gpt-5	skill	pitch statistics	6	1	5	2	2	16.67	40.0	40.0	604.38	0.009936
+text-only-aggregate-gpt-5	skill	rhythm pattern	7	1	6	1	3	14.29	16.67	50.0	883.73	0.010216
+text-only-aggregate-gpt-5	skill	time signature	12	1	11	3	4	8.33	27.27	36.36	1219.68	0.020585
+text-only-aggregate-gpt-5	skill	tonality recognition	13	1	12	4	5	7.69	33.33	41.67	1418.01	0.018712
+text-only-aggregate-gpt-5	rel/abs	absolute	54	7	47	22	17	12.96	46.81	36.17	5048.02	0.087264
+text-only-aggregate-gpt-5	rel/abs	relative	58	6	52	16	19	10.34	30.77	36.54	5700.81	0.138428

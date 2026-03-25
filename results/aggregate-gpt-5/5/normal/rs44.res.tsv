@@ -1,0 +1,47 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+aggregate-gpt-5	OVERALL	ALL	119	39	80	14	0	32.77	17.5	0.0	1645.16	2.105366
+aggregate-gpt-5	submodality	audio.mastermix.wav	44	7	37	14	0	15.91	37.84	0.0	337.82	0.028062
+aggregate-gpt-5	submodality	symbolic.musicxml	38	19	19	0	0	50.0	0.0	0.0	699.26	1.943156
+aggregate-gpt-5	submodality	visual.short.png	37	13	24	0	0	35.14	0.0	0.0	608.09	0.134147
+aggregate-gpt-5	piece_id	Bach_IchStehAnDeinerKrippe	9	2	7	0	0	22.22	0.0	0.0	130.72	0.183655
+aggregate-gpt-5	piece_id	Crueger_AufAufMeinHerzMitFreuden	10	4	6	1	0	40.0	16.67	0.0	217.77	0.279332
+aggregate-gpt-5	piece_id	Drese_JesuGehVoran	14	7	7	3	0	50.0	42.86	0.0	178.65	0.198816
+aggregate-gpt-5	piece_id	Gesius_BefiehlDuDeineWege	9	5	4	0	0	55.56	0.0	0.0	116.75	0.181422
+aggregate-gpt-5	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	7	2	5	1	0	28.57	20.0	0.0	89.79	0.112805
+aggregate-gpt-5	piece_id	Jan_DuGrosserSchmerzensmann	15	3	12	2	0	20.0	16.67	0.0	246.04	0.2726
+aggregate-gpt-5	piece_id	Telemann_DerLiebenSonneLichtUndPracht	18	6	12	1	0	33.33	8.33	0.0	225.78	0.398784
+aggregate-gpt-5	piece_id	Vulpius_ChristusDerIstMeinLeben	27	7	20	3	0	25.93	15.0	0.0	353.6	0.345052
+aggregate-gpt-5	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	10	3	7	3	0	30.0	42.86	0.0	86.06	0.132899
+aggregate-gpt-5	is_nota_correct	0	90	31	59	8	0	34.44	13.56	0.0	1260.61	1.687298
+aggregate-gpt-5	is_nota_correct	1	29	8	21	6	0	27.59	28.57	0.0	384.55	0.418067
+aggregate-gpt-5	meta-question_id	0	11	4	7	0	0	36.36	0.0	0.0	132.1	0.175147
+aggregate-gpt-5	meta-question_id	1	9	4	5	2	0	44.44	40.0	0.0	90.95	0.147679
+aggregate-gpt-5	meta-question_id	2	12	3	9	3	0	25.0	33.33	0.0	165.2	0.201454
+aggregate-gpt-5	meta-question_id	3	9	6	3	2	0	66.67	66.67	0.0	204.97	0.24153
+aggregate-gpt-5	meta-question_id	4	19	4	15	2	0	21.05	13.33	0.0	266.78	0.383832
+aggregate-gpt-5	meta-question_id	5	13	6	7	2	0	46.15	28.57	0.0	93.8	0.209186
+aggregate-gpt-5	meta-question_id	6	8	1	7	1	0	12.5	14.29	0.0	81.1	0.120735
+aggregate-gpt-5	meta-question_id	7	10	4	6	2	0	40.0	33.33	0.0	126.12	0.182558
+aggregate-gpt-5	meta-question_id	8	20	7	13	0	0	35.0	0.0	0.0	335.27	0.332621
+aggregate-gpt-5	meta-question_id	9	8	0	8	0	0	0.0	0.0	0.0	148.88	0.110624
+aggregate-gpt-5	category	harmony	38	11	27	2	0	28.95	7.41	0.0	610.26	0.625804
+aggregate-gpt-5	category	pitch	41	17	24	7	0	41.46	29.17	0.0	593.22	0.76581
+aggregate-gpt-5	category	rhythm	40	11	29	5	0	27.5	17.24	0.0	441.68	0.713752
+aggregate-gpt-5	subcategory	harmony-absolute	20	7	13	0	0	35.0	0.0	0.0	335.27	0.332621
+aggregate-gpt-5	subcategory	harmony-relative	18	4	14	2	0	22.22	14.29	0.0	275.0	0.293182
+aggregate-gpt-5	subcategory	pitch-absolute	20	8	12	2	0	40.0	16.67	0.0	223.06	0.322826
+aggregate-gpt-5	subcategory	pitch-relative	21	9	12	5	0	42.86	41.67	0.0	370.16	0.442984
+aggregate-gpt-5	subcategory	rhythm-absolute	19	4	15	2	0	21.05	13.33	0.0	266.78	0.383832
+aggregate-gpt-5	subcategory	rhythm-relative	21	7	14	3	0	33.33	21.43	0.0	174.9	0.32992
+aggregate-gpt-5	skill	cadence recognition	8	0	8	0	0	0.0	0.0	0.0	148.88	0.110624
+aggregate-gpt-5	skill	chord recognition	20	7	13	0	0	35.0	0.0	0.0	335.27	0.332621
+aggregate-gpt-5	skill	interval recognition	12	3	9	3	0	25.0	33.33	0.0	165.2	0.201454
+aggregate-gpt-5	skill	interval statistics	9	6	3	2	0	66.67	66.67	0.0	204.97	0.24153
+aggregate-gpt-5	skill	note length	19	4	15	2	0	21.05	13.33	0.0	266.78	0.383832
+aggregate-gpt-5	skill	pitch recognition	11	4	7	0	0	36.36	0.0	0.0	132.1	0.175147
+aggregate-gpt-5	skill	pitch statistics	9	4	5	2	0	44.44	40.0	0.0	90.95	0.147679
+aggregate-gpt-5	skill	rhythm pattern	8	1	7	1	0	12.5	14.29	0.0	81.1	0.120735
+aggregate-gpt-5	skill	time signature	13	6	7	2	0	46.15	28.57	0.0	93.8	0.209186
+aggregate-gpt-5	skill	tonality recognition	10	4	6	2	0	40.0	33.33	0.0	126.12	0.182558
+aggregate-gpt-5	rel/abs	absolute	59	19	40	4	0	32.2	10.0	0.0	825.1	1.039279
+aggregate-gpt-5	rel/abs	relative	60	20	40	10	0	33.33	25.0	0.0	820.06	1.066087
