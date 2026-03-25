@@ -10,7 +10,7 @@ Implement  further results aggregation script (for single benchmark instance) (#
 
 ## Done:
 - get the convenient model running script ready:
-- a to-be-run script that accepts the model, size, seed, and setup (text-only/normal), and runs the selected model on the selected benchmark (todo: how to mark the api key? And how to resolve ZDR? turn it off for these experiments?) and then updates the aggreagted results from above
+- a to-be-run script that accepts the model, size, seed, and setup (text-only/normal), and runs the selected model on the selected benchmark (todo: how to mark the api key? And how to resolve ZDR? turn it off for these experiments?) and then updates the aggregated results from above
 - a batch submitting script that configures the seed and size, a list of models and setups, and then submits a job for
   each model-setup combination (while passing the model and setup as cmdline arg)
 
