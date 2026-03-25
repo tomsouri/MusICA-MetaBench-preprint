@@ -17,7 +17,7 @@ Implement  further results aggregation script (for single benchmark instance) (#
 ## To run
 - adjust the script `submit-jobs.sh` to fit your needs (e.g., the usage of `sbatch` command)
 - to use it as it is, you need to have an API key defined in your `~/.bashrc` file for each model-size-setup tuple, in
-  the following format: <model_name_with_underscores>_<count>[_to]
+  the following format: `<model_name_with_underscores>_<count>[_to]`
     - e.g., among many others, I have the following lines in my `~/.bashrc` file:
     export xiaomi_mimo_v2_omni_20_to="sk-or-v1..."
     export google_gemini_3_1_flash_lite_preview_20="sk-or-v1..."
