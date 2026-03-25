@@ -419,7 +419,8 @@ def main():
     # Check API key presence 
     api_key_name = config.get("env_api_key_name", "OPENROUTER_API_KEY")
     if not os.environ.get(api_key_name) and not config.get('dry_run'):
-        print(f"Warning: Environment variable {api_key_name} is missing!")
+        # print(f"Warning: Environment variable {api_key_name} is missing!")
+        raise ValueError(f"Environment variable {api_key_name} is required for API calls but not found. Please set it before running the benchmark.")
 
     # Read Benchmark TSV
     items = []
