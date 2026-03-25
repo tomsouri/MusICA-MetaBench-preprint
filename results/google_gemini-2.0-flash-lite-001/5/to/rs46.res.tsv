@@ -1,0 +1,38 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-google/gemini-2.0-flash-lite-001	OVERALL	ALL	115	31	84	7	0	26.96	8.33	0.0	270.25	0.009843
+text-only-google/gemini-2.0-flash-lite-001	submodality	audio.mastermix.wav	33	8	25	1	0	24.24	4.0	0.0	74.5	0.00265
+text-only-google/gemini-2.0-flash-lite-001	submodality	symbolic.musicxml	41	14	27	4	0	34.15	14.81	0.0	109.58	0.004086
+text-only-google/gemini-2.0-flash-lite-001	submodality	visual.short.png	41	9	32	2	0	21.95	6.25	0.0	86.17	0.003107
+text-only-google/gemini-2.0-flash-lite-001	is_nota_correct	0	90	22	68	4	0	24.44	5.88	0.0	216.21	0.007925
+text-only-google/gemini-2.0-flash-lite-001	is_nota_correct	1	25	9	16	3	0	36.0	18.75	0.0	54.04	0.001918
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	0	11	2	9	0	0	18.18	0.0	0.0	23.51	0.000867
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	1	10	1	9	1	0	10.0	11.11	0.0	18.76	0.000674
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	2	11	2	9	0	0	18.18	0.0	0.0	27.54	0.00104
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	3	7	2	5	0	0	28.57	0.0	0.0	11.31	0.000397
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	4	21	6	15	0	0	28.57	0.0	0.0	54.66	0.002075
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	5	11	3	8	0	0	27.27	0.0	0.0	24.19	0.000815
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	6	7	0	7	1	0	0.0	14.29	0.0	16.48	0.000598
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	7	10	4	6	1	0	40.0	16.67	0.0	25.82	0.000926
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	8	19	11	8	2	0	57.89	25.0	0.0	53.04	0.001929
+text-only-google/gemini-2.0-flash-lite-001	meta-question_id	9	8	0	8	2	0	0.0	25.0	0.0	14.94	0.000523
+text-only-google/gemini-2.0-flash-lite-001	category	harmony	37	15	22	5	0	40.54	22.73	0.0	93.8	0.003378
+text-only-google/gemini-2.0-flash-lite-001	category	pitch	39	7	32	1	0	17.95	3.12	0.0	81.13	0.002977
+text-only-google/gemini-2.0-flash-lite-001	category	rhythm	39	9	30	1	0	23.08	3.33	0.0	95.32	0.003488
+text-only-google/gemini-2.0-flash-lite-001	subcategory	harmony-absolute	19	11	8	2	0	57.89	25.0	0.0	53.04	0.001929
+text-only-google/gemini-2.0-flash-lite-001	subcategory	harmony-relative	18	4	14	3	0	22.22	21.43	0.0	40.76	0.001449
+text-only-google/gemini-2.0-flash-lite-001	subcategory	pitch-absolute	21	3	18	1	0	14.29	5.56	0.0	42.27	0.001541
+text-only-google/gemini-2.0-flash-lite-001	subcategory	pitch-relative	18	4	14	0	0	22.22	0.0	0.0	38.85	0.001436
+text-only-google/gemini-2.0-flash-lite-001	subcategory	rhythm-absolute	21	6	15	0	0	28.57	0.0	0.0	54.66	0.002075
+text-only-google/gemini-2.0-flash-lite-001	subcategory	rhythm-relative	18	3	15	1	0	16.67	6.67	0.0	40.67	0.001413
+text-only-google/gemini-2.0-flash-lite-001	skill	cadence recognition	8	0	8	2	0	0.0	25.0	0.0	14.94	0.000523
+text-only-google/gemini-2.0-flash-lite-001	skill	chord recognition	19	11	8	2	0	57.89	25.0	0.0	53.04	0.001929
+text-only-google/gemini-2.0-flash-lite-001	skill	interval recognition	11	2	9	0	0	18.18	0.0	0.0	27.54	0.00104
+text-only-google/gemini-2.0-flash-lite-001	skill	interval statistics	7	2	5	0	0	28.57	0.0	0.0	11.31	0.000397
+text-only-google/gemini-2.0-flash-lite-001	skill	note length	21	6	15	0	0	28.57	0.0	0.0	54.66	0.002075
+text-only-google/gemini-2.0-flash-lite-001	skill	pitch recognition	11	2	9	0	0	18.18	0.0	0.0	23.51	0.000867
+text-only-google/gemini-2.0-flash-lite-001	skill	pitch statistics	10	1	9	1	0	10.0	11.11	0.0	18.76	0.000674
+text-only-google/gemini-2.0-flash-lite-001	skill	rhythm pattern	7	0	7	1	0	0.0	14.29	0.0	16.48	0.000598
+text-only-google/gemini-2.0-flash-lite-001	skill	time signature	11	3	8	0	0	27.27	0.0	0.0	24.19	0.000815
+text-only-google/gemini-2.0-flash-lite-001	skill	tonality recognition	10	4	6	1	0	40.0	16.67	0.0	25.82	0.000926
+text-only-google/gemini-2.0-flash-lite-001	rel/abs	absolute	61	20	41	3	0	32.79	7.32	0.0	149.97	0.005545
+text-only-google/gemini-2.0-flash-lite-001	rel/abs	relative	54	11	43	4	0	20.37	9.3	0.0	120.28	0.004298
