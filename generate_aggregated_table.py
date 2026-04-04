@@ -1,3 +1,8 @@
+"""
+For a single size and seed (that is, for a single instance of benchmark),
+aggregate the results across all the models and setups.
+"""
+
 import pandas as pd
 import argparse
 from pathlib import Path
