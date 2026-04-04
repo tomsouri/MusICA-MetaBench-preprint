@@ -1,3 +1,11 @@
+"""
+Generates TSV tables for the results of 10-times-experiments (10 different instances of the same-size benchmark):
+- For each criterion (e.g., "ALL", "audio.mastermix.wav", etc.), it creates a table:
+- rows = models;
+- columns = benchmark sizes, 
+- cell = "mean_acc (stddev)".
+"""
+
 import pandas as pd
 import os
 import glob
@@ -93,20 +101,6 @@ if __name__ == "__main__":
             }
             process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename)
 
-
-
-    # if args.gsheet_id_to_upload is None:
-    #     if args.results_filename == "res.tsv":
-    #         args.gsheet_id_to_upload = "1ewsxVxOc69i2JTfHJCeSTeEos5teZlqezjS1EVySul4"
-        
-    #     if args.results_filename == "textonly.tsv":
-    #         args.gsheet_id_to_upload = "1WN3-4Cjm8SwV2OTCqM_nbLHbc5bkolxxl0SDFLq0OOs"
-
-    # config = {
-    #     'credentials_location': args.gspread_credentials_location,
-    #     'sheet_id': args.gsheet_id_to_upload
-    # }
-    # process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename)
 
 
 
