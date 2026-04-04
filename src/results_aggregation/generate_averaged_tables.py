@@ -87,8 +87,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     sheet_ids_to_upload = {
-        "normal.tsv": "1ewsxVxOc69i2JTfHJCeSTeEos5teZlqezjS1EVySul4",
-        "text-only.tsv": "1WN3-4Cjm8SwV2OTCqM_nbLHbc5bkolxxl0SDFLq0OOs"
+        "normal.tsv": "1QDJj7BP074IjWv9jAzjWHT4a2bjWCqtqbTeZJ6jWVPA",
+        "text-only.tsv": "1U0D2MLGffnxcHTe-WPWpUCXnRIdo4dlmnFyHWyePNGQ"
     }  
 
     if args.results_filename is None:

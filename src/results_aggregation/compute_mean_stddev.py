@@ -133,7 +133,7 @@ def main():
     parser.add_argument("--output_file", type=str, required=True,
                         help="Path to output file")
     
-    parser.add_argument("--gsheet_id_to_upload", type=str, default="14uUleePBCZMJOn1BuH9OM1NA8L0NcBbjLpi4lHGapd0",
+    parser.add_argument("--gsheet_id_to_upload", type=str, default="1XLzAl7jxcZo62vXn7Q_wrjUt5cp3uXTUwHmTXb-IT78",
                         help="Google Sheet ID to upload results to")
     parser.add_argument("--gsheet_tab_name", type=str,
                         help="Tab name in the Google Sheet to upload results to")
