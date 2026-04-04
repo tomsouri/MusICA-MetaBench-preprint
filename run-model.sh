@@ -1,36 +1,36 @@
 #!/bin/bash
 
-# Usage: ./run-model.sh -m "model_name" -s 5 -e 42 -t "normal"
+# Usage: ./run-model.sh -m "model_name" -s 5 -e 42 -t "normal" -r "path/to/result/file.tsv"
 
-while getopts m:s:e:t: flag
+while getopts m:s:e:t:r: flag
 do
     case "${flag}" in
         m) model=${OPTARG};;
         s) size=${OPTARG};;
         e) seed=${OPTARG};;
         t) setup=${OPTARG};; # "normal" or "text-only"
+        r) resfile=${OPTARG};; # result file path
     esac
 done
 
 # echo "Running model: $model | Size: $size | Seed: $seed | Setup: $setup"
 
+# API key env variable is derived from the model name, by keeping only alphanumeric characters and replacing others with underscores, and prefixing with "KEY"
+
 safe_model="${model//\//_}"
 safe_model="${safe_model// /_}"
 clean_string="${model//[^a-zA-Z0-9]/_}"
-apikey="${clean_string}_${size}"
+apikey="${clean_string}"
 
-benchmark_file="benchmark_count_${size}_${seed}.tsv"
-setup_dir="normal"
+benchmark_file="benchmarks/qs_per_subcat_${size}/seed_${seed}.tsv"
+
+# setup_dir="normal"
 text_only_flag=""
 
 if [ "$setup" == "text-only" ]; then
-    setup_dir="to"
+    # setup_dir="to"
     text_only_flag="--text_only_baseline"
-    apikey="${apikey}_to"
 fi
-
-mkdir -p "results/${safe_model}/${size}/${setup_dir}/"
-resfile="results/${safe_model}/${size}/${setup_dir}/rs${seed}.res.tsv"
 
 
 # echo "${apikey}" 
