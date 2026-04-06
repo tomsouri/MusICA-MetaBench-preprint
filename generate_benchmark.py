@@ -567,25 +567,32 @@ def step_4_final_options(data, config, fields):
 def step_5_nota_correct(data, config, fields):
     T = config.get('nota_correct_percentage', 0.0)
     out_data = []
-    
+
     if T > 0:
-        P = T / (1.0 - T)
         N = config['num_options']
         nota_text = config['nota_text']
-        
-        for row in data:
-            out_data.append(dict(row)) 
-            
-            if config['rng'].random() < P:
-                new_row = dict(row)
+
+        # 1) Determine number of items to select
+        expected_count = round(len(data) * T)
+
+        # 2) Select items in a single step
+        all_indices = list(range(len(data)))
+        selected_indices = set(config['rng'].choice(
+            all_indices, expected_count, replace=False
+        ))
+
+        # 3) Iterate through all rows, replacing selected ones with derived rows
+        for idx, row in enumerate(data):
+            new_row = dict(row)
+
+            if idx in selected_indices:
                 distractors = json.loads(row['sorted_distractors'])
-                
                 options = [nota_text] + distractors[:N-1]
                 new_row['final_correct_option'] = nota_text
                 new_row['final_options'] = json.dumps(options)
                 new_row['is_nota_correct'] = 1
-                
-                out_data.append(new_row)
+
+            out_data.append(new_row)
     else:
         out_data = data
 
