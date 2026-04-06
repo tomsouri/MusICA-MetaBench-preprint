@@ -30,8 +30,6 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
 
     all_data = []
     search_path = os.path.join(root_dir, "*", "*", filename)
-
-    benchmarks_counter = 0
     
     for file_path in glob.glob(search_path):
         parts = file_path.split(os.sep)
@@ -42,16 +40,21 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
         df['model'] = model_name
         df['size'] = benchmark_size
         all_data.append(df)
-        benchmarks_counter += 1
 
     if not all_data:
         print("No files found.")
         return
 
     full_df = pd.concat(all_data, ignore_index=True)
+
+    # in the full_df, find a column with the name "Mean_Accuracy ({integer} runs)", and a column with the name "StdDev_Accuracy ({integer} runs)". Use these to create a new column "display_val" with the format "mean (stddev)". This will be the value displayed in the final tables.
+    # Find columns matching "Mean_Accuracy ({n} runs)" and "StdDev_Accuracy ({n} runs)"
+    mean_col = [c for c in full_df.columns if c.startswith("Mean_Accuracy")][0]
+    std_col = [c for c in full_df.columns if c.startswith("StdDev_Accuracy")][0]
+
     full_df['display_val'] = (
-        full_df[f"Mean_Accuracy ({benchmarks_counter} runs)"].apply(lambda x: f"{x:.2f}") + 
-        " (" + full_df[f"StdDev_Accuracy ({benchmarks_counter} runs)"].apply(lambda x: f"{x:.2f}") + ")"
+        full_df[mean_col].apply(lambda x: f"{x:.2f}") + 
+        " (" + full_df[std_col].apply(lambda x: f"{x:.2f}") + ")"
     )
 
     # 1. Custom sorting for sizes
