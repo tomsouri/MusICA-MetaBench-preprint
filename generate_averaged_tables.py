@@ -49,8 +49,22 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
 
     # in the full_df, find a column with the name "Mean_Accuracy ({integer} runs)", and a column with the name "StdDev_Accuracy ({integer} runs)". Use these to create a new column "display_val" with the format "mean (stddev)". This will be the value displayed in the final tables.
     # Find columns matching "Mean_Accuracy ({n} runs)" and "StdDev_Accuracy ({n} runs)"
-    mean_col = [c for c in full_df.columns if c.startswith("Mean_Accuracy")][0]
-    std_col = [c for c in full_df.columns if c.startswith("StdDev_Accuracy")][0]
+    mean_cols = [c for c in full_df.columns if c.startswith("Mean_Accuracy")]
+    std_cols = [c for c in full_df.columns if c.startswith("StdDev_Accuracy")]
+
+    default_mean_col = "Mean_Accuracy (10 runs)"
+    default_std_col = "StdDev_Accuracy (10 runs)"
+
+    if default_mean_col not in full_df.columns or default_std_col not in full_df.columns:
+        # Fallback for the case that it was not run for 10 runs.
+        print(f"Expected columns '{default_mean_col}' and '{default_std_col}' not found. Available mean columns: {mean_cols}, stddev columns: {std_cols}, using the first ones found.")
+        mean_col = mean_cols[0] if mean_cols else None
+        std_col = std_cols[0] if std_cols else None
+    else:
+        mean_col = default_mean_col
+        std_col = default_std_col
+    
+    print(f"Using mean column: {mean_col}, stddev column: {std_col}")
 
     full_df['display_val'] = (
         full_df[mean_col].apply(lambda x: f"{x:.2f}") + 
