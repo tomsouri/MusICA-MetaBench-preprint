@@ -30,6 +30,8 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
 
     all_data = []
     search_path = os.path.join(root_dir, "*", "*", filename)
+
+    benchmarks_counter = 0
     
     for file_path in glob.glob(search_path):
         parts = file_path.split(os.sep)
@@ -40,6 +42,7 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
         df['model'] = model_name
         df['size'] = benchmark_size
         all_data.append(df)
+        benchmarks_counter += 1
 
     if not all_data:
         print("No files found.")
@@ -47,8 +50,8 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
 
     full_df = pd.concat(all_data, ignore_index=True)
     full_df['display_val'] = (
-        full_df['Mean_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + 
-        " (" + full_df['StdDev_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + ")"
+        full_df[f"Mean_Accuracy ({benchmarks_counter} runs)"].apply(lambda x: f"{x:.2f}") + 
+        " (" + full_df[f"StdDev_Accuracy ({benchmarks_counter} runs)"].apply(lambda x: f"{x:.2f}") + ")"
     )
 
     # 1. Custom sorting for sizes
