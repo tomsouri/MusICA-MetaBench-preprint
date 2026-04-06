@@ -75,7 +75,7 @@ for size in "${sizes[@]}"; do
                 mkdir -p "results/${safe_model}/${size}/${setup}/"
                 # TODO: use the slurm job id in the resfile name, to avoid overwriting results when running multiple jobs in parallel.
 
-                resfile="results/${safe_model}/${size}/${setup}/rs${seed}.rep${i}.jobid_${SLURM_JOB_ID:-local}.res.tsv"
+                resfile="results/${safe_model}/${size}/${setup}/jobid_${SLURM_JOB_ID:-local}.rs${seed}.rep${i}.res.tsv"
                 
                 current_setup_size_seed_resfiles+=("$resfile")
                 current_setup_size_resfiles+=("$resfile")
