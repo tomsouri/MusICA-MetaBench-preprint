@@ -75,7 +75,7 @@ for size in "${sizes[@]}"; do
                 mkdir -p "results/${safe_model}/${size}/${setup}/"
                 # TODO: use the slurm job id in the resfile name, to avoid overwriting results when running multiple jobs in parallel.
 
-                resfile="results/${safe_model}/${size}/${setup}/rs${seed}.rep${i}.jobid_${SLURM_JOB_ID}.res.tsv"
+                resfile="results/${safe_model}/${size}/${setup}/rs${seed}.rep${i}.jobid_${SLURM_JOB_ID:-local}.res.tsv"
                 
                 current_setup_size_seed_resfiles+=("$resfile")
                 current_setup_size_resfiles+=("$resfile")
@@ -90,7 +90,7 @@ for size in "${sizes[@]}"; do
 
                 tabname="10repetitions.${safe_model}.${size}.${setup}.seed${seed}"
 
-                .venv/bin/python3 src/results_aggregation/compute_mean_stddev.py --list_of_tsvs "${current_setup_size_seed_resfiles[@]}" --output_file "${dir}/res.tsv" --gsheet_tab_name "${tabname}"
+                .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${current_setup_size_seed_resfiles[@]}" --output_file "${dir}/res.tsv" --gsheet_tab_name "${tabname}"
                 
                 echo "Results written to $dir"
             fi
@@ -103,11 +103,11 @@ for size in "${sizes[@]}"; do
 
             tabname="comparison_between_seeds.${safe_model}.${size}.${setup}"
 
-            .venv/bin/python3 src/results_aggregation/compute_mean_stddev.py --list_of_tsvs "${current_setup_size_resfiles[@]}" --output_file "${dir}/${setup}.tsv" --gsheet_tab_name "${tabname}"
+            .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${current_setup_size_resfiles[@]}" --output_file "${dir}/${setup}.tsv" --gsheet_tab_name "${tabname}"
             
             echo "Results written to $dir"
 
-            .venv/bin/python3 src/results_aggregation/generate_averaged_tables.py --input_dir "aggregated/comparison_between_seeds/"
+            .venv/bin/python3 generate_averaged_tables.py --input_dir "aggregated/comparison_between_seeds/"
         fi
 
     done
