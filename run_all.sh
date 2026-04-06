@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # run_all.sh
 #
+# THIS IS THE ENTRY POINT FOR RUNNING ALL THE EXPERIMENTS.
+#
 # Convenience wrapper: generates benchmarks first, then submits experiment jobs.
 # Edit the variables below (or override them from the command line in a future
 # iteration) to configure a full experiment run.
