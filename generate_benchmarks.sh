@@ -93,13 +93,16 @@ for size in "${sizes[@]}"; do
         echo "================================================================================"
     done
 
+    # TODO: include the number of compared benchmark to the benchmark-comparisons filename.
+
+
     # Cross-seed comparison (only meaningful when there are ≥ 2 seeds)
     if [[ ${#benchmarks[@]} -ge 2 ]]; then
         mkdir -p benchmark-comparisons
-        .venv/bin/python3 src/results_aggregation/compare_benchmark_files.py \
+        .venv/bin/python3 compare_benchmark_files.py \
             --list_of_tsvs "${benchmarks[@]}" \
-            | tee "benchmark-comparisons/${size}qs.txt"
-        echo "Comparison written to benchmark-comparisons/${size}qs.txt"
+            | tee "benchmark-comparisons/${size}qs_${#benchmarks[@]}_benchmarks.txt"
+        echo "Comparison written to benchmark-comparisons/${size}qs_${#benchmarks[@]}_benchmarks.txt"
     fi
 
     echo "================================================================================"
