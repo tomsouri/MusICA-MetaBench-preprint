@@ -9,7 +9,7 @@
 #       --sizes 20 25 \
 #       --seeds 55 56 57 \
 #       [--submodalities "audio.mastermix.wav" "symbolic.abc.txt" "visual.short.png"] \
-#       [--allowed_metaq_ids 0 1 2 3 4 5 6 7 8 9] \
+#       [--allowed_metaq_ids 1 2 3 4 5 6 7 8 9] \
 #       [--config benchmark-generation-config.yaml]
 
 set -euo pipefail
@@ -18,7 +18,7 @@ set -euo pipefail
 declare -a sizes=()
 declare -a seeds=()
 declare -a submodalities=("audio.mastermix.wav" "symbolic.abc.txt" "visual.short.png")
-declare -a allowed_metaq_ids=(0 1 2 3 4 5 6 7 8 9)
+declare -a allowed_metaq_ids=(1 2 3 4 5 6 7 8 9)
 config="benchmark-generation-config.yaml"
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
@@ -92,9 +92,6 @@ for size in "${sizes[@]}"; do
         benchmarks+=("$benchmark_file")
         echo "================================================================================"
     done
-
-    # TODO: include the number of compared benchmark to the benchmark-comparisons filename.
-
 
     # Cross-seed comparison (only meaningful when there are ≥ 2 seeds)
     if [[ ${#benchmarks[@]} -ge 2 ]]; then
