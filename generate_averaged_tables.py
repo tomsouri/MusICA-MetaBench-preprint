@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate TSV benchmark tables.")
     parser.add_argument("--input_dir", default="averaged/", help="Path to the directory containing averaged data")
     parser.add_argument("--output_dir", default="tables/", help="Directory where TSV tables will be saved")
-    parser.add_argument("--criteria", nargs='+', default=["ALL", "audio.mastermix.wav", "symbolic.musicxml", "visual.short.png"], 
+    parser.add_argument("--criteria", nargs='+', default=["ALL", "audio.mastermix.wav", "symbolic.abc.txt", "visual.short.png"], 
                         help="List of Criterion_Values to generate tables for (e.g., ALL submodality)")
     parser.add_argument("--gsheet_id_to_upload", type=str, default=None,
                         help="Google Sheet ID to upload results to")
