@@ -301,7 +301,9 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
                 elif part.get('type') == 'file':
                     part['file']['file_data'] = '[BASE64_FILE_STRIPPED]'
                 elif part.get('type') == 'text' and part.get('text').startswith("--- Attached Symbolic Data ---"):
-                    part['text'] = '[SYMBOLIC_FILE_STRIPPED]'
+                    # No stripping for symbolic notation as abc notation is short
+                    #part['text'] = '[SYMBOLIC_FILE_STRIPPED]'
+                    ...
     return sanitized
 
 # =========================================================================
