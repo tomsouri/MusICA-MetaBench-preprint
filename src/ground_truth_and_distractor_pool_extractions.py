@@ -220,9 +220,12 @@ def get_cadence_types():
         "V - IV", "V - iv", "ii - V7", "ii - V7",
         "iii - IV", "III - IV"
     ]
+    items_to_add = []
     for _k in selected_list:
         first_chord = _k.split(" - ")[0]
-        selected_list.append(f"{first_chord}:f{first_chord}")
+        items_to_add.append(f"{first_chord} - f{first_chord}")
+
+    selected_list += items_to_add
     selected_list = set(selected_list)
     selected_list = list(selected_list)
     ontology = {cad: cad for cad in selected_list}
@@ -1091,10 +1094,20 @@ class AnswerDistractorExtractors:
                             break
 
             if target_cadence is None:
-                self.dict_cadence_ontology[f"{p1} - {p2}"] = f"{p1} - {p2}"
-                target_cadence = f"{p1} - {p2}"
+                
+                new_rn1 = extract_roman_numerals(rn1)
+                new_rn2 = extract_roman_numerals(rn2)
+
+                # print(rn1, rn2)
+                # print(new_rn1, new_rn2)
+                # input("Press Enter to continue...")
+
+                self.dict_cadence_ontology[f"{new_rn1} - {new_rn2}"] = f"{new_rn1} - {new_rn2}"
+                target_cadence = f"{new_rn1} - {new_rn2}"
+
                 if self.config.get('verbose', False):
-                    print(f"Could not match detected cadence '{target_cadence_str}' to any ontology entry. Consider expanding the cadence ontology or check the parsing logic. Added pattern f\"{p1} - {p2}\" to ontology.")
+                    print(f"Could not match detected cadence '{target_cadence_str}' to any ontology entry. Consider expanding the cadence ontology or check the parsing logic. Added pattern f\"{new_rn1} - {new_rn2}\" to ontology.")
+                
                 with open("selected_cadences.yaml", "w") as f:
                     yaml.dump(self.dict_cadence_ontology, f)
             
@@ -1189,3 +1202,27 @@ class AnswerDistractorExtractors:
         ground_truth_pool = sorted(ground_truth_pool)
         
         return ground_truth, ground_truth_pool, new_values, new_words
+
+
+def remove_lowercase_and_digits(text):
+    # Pattern explanation:
+    # [a-z0-9] matches any lowercase letter OR any digit
+    pattern = r'[a-z0-9]'
+    
+    # re.sub(pattern, replacement, string)
+    # We replace any matched character with an empty string ''
+    cleaned = re.sub(pattern, '', text)
+    
+    return cleaned
+
+def extract_roman_numerals(text):
+    # Pattern explanation:
+    # [IVXLCDM]+ matches one or more characters from the set
+    # re.IGNORECASE makes it count 'i', 'v', etc. if desired
+    pattern = r'[IVXLCDM]+'
+    
+    # findall returns a list of all matches found
+    matches = re.findall(pattern, text, flags=re.IGNORECASE)
+    
+    return matches[0]
+
