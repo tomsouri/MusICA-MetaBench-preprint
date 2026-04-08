@@ -265,7 +265,7 @@ def get_cadences():
 def get_rhythm_props():
     # Define the rhythmic proportions to consider
     rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0]  # e.g., half, equal, double
-    ontology = {str(prop) : (f"1:{prop}") for prop in rhythmic_proportions if prop >=1}
+    ontology = {str(prop) : (f"1:{round(prop)}") for prop in rhythmic_proportions if prop >=1}
 
     ontology.update({str(prop) : (f"{str(round(1/prop))}:1") for prop in rhythmic_proportions if prop < 1})
     ontology.update({'0.67': "2:3"})
