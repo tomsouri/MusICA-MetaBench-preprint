@@ -131,12 +131,13 @@ musical_piece_format_info:
     visual.pdf: "a rendered score (PDF format)"
   symbolic:
     symbolic.musicxml: "a musical score (MusicXML format)"
+    symbolic.abc.txt: "a musical score (ABC notation format)"
     symbolic.midi: "a musical score (MIDI format represented as CSV)"
     symbolic.abc: "a musical score (ABC notation format)"
 
 # Google Sheets Logging
 log_to_google_sheet: true
-sheet_id: "1UMw6xgduiloDhO9kZdU4bI10Mtmaw7yRcrHdB8spsmM"
+sheet_id: "1KzX89Hv6E6FqH_baJ_WtyJhnWVqTCY-9C5jVgCUOrpU"
 sheet_name: "original-do-not-modify-nor-hide-columns"
 credentials_location: "logs/protobenchmark-logging-aa9418338494.json"
 force_header_print: false
