@@ -10,7 +10,7 @@ num_options: 5
 nota_text: "none of the other options is correct"
 add_nota: true
 
-questions_per_subcategory_count: 20 # number of questions to generate per subcategory (for the draft, we can keep it small, e.g. 10, and then scale up after analyzing the results and iterating on the question templates)
+questions_per_subcategory_count: 40 # number of questions to generate per subcategory (for the draft, we can keep it small, e.g. 10, and then scale up after analyzing the results and iterating on the question templates)
 
 ontology_path: "ontology.yaml" # Add this to specify the path to the ontology file
 
@@ -31,7 +31,7 @@ min_num_distractors: 4
 distractor_pool_size: 5 # number of distractors to sample from the ontology for each question (before sorting and selecting the final options)
 random_distractors: false # whether to sample distractors randomly from the ontology (instead of using piece specific distractors)
 cmdline_args:
-  meta: "meta-questions-K.tsv"
+  meta: "meta-questions.tsv"
   pieces: "pieces.tsv"
   methods_path: "src/ground_truth_and_distractor_pool_extractions.py"
   output: "benchmark_v1.tsv"
