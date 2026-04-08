@@ -802,7 +802,7 @@ def main():
     nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
-    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
+    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality", "specification"]
 
     # print("\n--- NOTA-incorrect items ---")
     print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})

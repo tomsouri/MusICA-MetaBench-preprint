@@ -82,6 +82,7 @@ evaluation_criteria:
   - "subcategory"
   - "skill"
   - "rel/abs"
+  - "specification"
 
 # Specify where to save the tabular evaluation summary
 evaluation_output_file: "evaluation_summary.tsv"
