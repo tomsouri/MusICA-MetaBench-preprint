@@ -390,6 +390,8 @@ class AnswerDistractorExtractors:
             "get_rhythm_pattern": list(self.dict_rhythm_prop_ontology.values()),
             "get_harmonic_chord": list(self.dict_chord_ontology.values()),
             "get_harmonic_cadence": list(self.dict_cadence_ontology.values()),
+            "get_rhythm_pattern_count" : dummy_quantity_pool,
+            "get_rhythm_count": dummy_quantity_pool,
         }
         return random_distractor_pools
 
@@ -858,7 +860,7 @@ class AnswerDistractorExtractors:
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
         
-        count = int(sum(1 for n in notes if n.quarterLength == values.get('length')))
+        count = int(sum(1 for n in notes if n.quarterLength == values.get('rhythm')))
     
         if not self.random_distractors:
             all_notes = []
@@ -1007,10 +1009,10 @@ class AnswerDistractorExtractors:
     
             props.append(str(round(rhythmic_proportion, 2)))
     
-        target_pattern = question_values.get('rhythm_pattern')
+        target_pattern = question_values.get('rhythm_proportion')
         # go through ontology and find the corresponding key for the target_pattern value
-        target_prop = [k for k, v in self.dict_rhythm_prop_ontology.items() if v == target_pattern]
-        count = int(sum(1 for n in props if n == target_prop[0]))
+        
+        count = int(sum(1 for n in props if n == target_pattern))
             
         if not self.random_distractors:
             all_props = []
@@ -1020,9 +1022,11 @@ class AnswerDistractorExtractors:
                 for note_idx in range(len(other_notes)-1):
                     n1 = other_notes[note_idx].quarterLength
                     n2 = other_notes[note_idx + 1].quarterLength
+                    tmp = []
                     if n1 and n2 != 0:
                         rhythmic_proporton= n2/n1
-                    all_props.append(rhythmic_proporton)
+                        tmp.append(str(round(rhythmic_proporton, 2)))
+                    all_props.append(tmp)
             possible_values = []
             for line in all_props:
                 for _n in list(set(line)):
