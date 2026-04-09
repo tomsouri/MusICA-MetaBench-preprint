@@ -18,7 +18,7 @@ set -euo pipefail
 declare -a sizes=()
 declare -a seeds=()
 declare -a submodalities=("audio.mastermix.wav" "symbolic.abc.txt" "visual.short.png")
-declare -a allowed_metaq_ids=(1 2 3 4 5 6 7 8 9)
+declare -a allowed_metaq_ids=(1 2 3 4 5 6 7 8 9 10 11)
 config="benchmark-generation-config.yaml"
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
