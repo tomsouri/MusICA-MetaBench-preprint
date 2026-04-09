@@ -820,6 +820,65 @@ class AnswerDistractorExtractors:
             
         return self.dict_rhythm_ontology[target_rhythm], distractor_pool, values
 
+    def get_rhythm_count(self, path: str, values: dict) -> str:
+        """
+        Logic: Parses a MusicXML file and returns the rhythm (e.g., quarter, eighth) of the index-th note in the specified voice part.
+
+        Args:
+            path (str): The path to the directory of the piece, which contains the MusicXML file.
+            values (dict): A dictionary containing the value for {index} and {voice}, e.g., {"target_index": 1, "voice": "S"}
+
+        Returns:
+            str: return RHYTHM ONLY (e.g., "quarter", "eighth").
+        """
+        # Get the path to the MusicXML file
+        musicxml_path = get_musicxml_file_path(path)
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+
+        # Parse the MusicXML file into a music21 Stream
+        score = converter.parse(musicxml_path)
+
+        voice_key = values.get('voice')
+        if voice_key not in self.voice_mapping:
+            raise ValueError(f"Invalid voice specified: {voice_key}. Expected one of 'S', 'A', 'T', 'B'.")
+
+        part_index = self.voice_mapping[voice_key]
+
+        # Check if the score has the expected number of parts
+        if part_index >= len(score.parts):
+            raise IndexError(f"The parsed score does not contain a part for voice '{voice_key}'.")
+
+        target_part = score.parts[part_index]
+
+        # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
+        notes = list(target_part.flatten().getElementsByClass(note.Note))
+
+        if not notes:
+            raise ValueError(f"No valid notes found in part '{voice_key}'.")
+        
+        count = int(sum(1 for n in notes if n.quarterLength == values.get('length')))
+    
+        if not self.random_distractors:
+            all_notes = []
+            for vv in self.voice_mapping.keys():
+                other_part = score.parts[self.voice_mapping[vv]]
+                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                all_notes.append([n.quarterLength for n in other_notes])
+            possible_values = []
+            for line in all_notes:
+                for _n in list(set(line)):
+                    possible_values.append(int(sum(1 for n in line if n == _n)))
+            possible_values = list(set(possible_values))
+            possible_values = [c for c in possible_values if c != count]
+            distractor_pool = possible_values
+            
+        else:
+            distractor_pool = [] #self.rng.choice(list(self.dict_rhythm_ontology.values()), len(list(self.dict_rhythm_ontology.values())), replace=False).tolist()
+            
+        return count, distractor_pool, values
+
     def get_rhythm_pattern(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         
         musicxml_path = get_musicxml_file_path(path)
@@ -907,6 +966,75 @@ class AnswerDistractorExtractors:
             distractor_pool = []
 
         return target_prop_name, distractor_pool, question_values
+    
+    def get_rhythm_pattern_count(self, path: str, question_values: dict) -> tuple[str, list[str]]:
+        
+        musicxml_path = get_musicxml_file_path(path)
+        score = converter.parse(musicxml_path)
+        # # target_rhythm = question_values.get('rhythm')
+       
+        # if target_rhythm not in self.dict_rhythm_ontology.keys():
+        #     raise ValueError(f"Invalid rhythm specified: {target_rhythm}. Expected one of {self.dict_rhythm_ontology}.")
+        
+        voice_key = question_values.get('voice')
+        if voice_key not in self.voice_mapping:
+            raise ValueError(f"Invalid voice specified: {voice_key}. Expected one of 'S', 'A', 'T', 'B'.")
+        
+        part_index = self.voice_mapping[voice_key]
+        
+        # Check if the score has the expected number of parts
+        if part_index >= len(score.parts):
+            raise IndexError(f"The parsed score does not contain a part for voice '{voice_key}'.")
+            
+        target_part = score.parts[part_index]
+        
+        # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
+        notes = list(target_part.flatten().getElementsByClass(note.Note))
+        
+        if not notes:
+            raise ValueError(f"No valid notes found in part '{voice_key}'")           
+
+        if not os.path.exists(musicxml_path):
+            raise FileNotFoundError(f"Could not find file: {musicxml_path}")
+        
+
+        props = []
+        for note_idx in range(len(notes)-1):
+            n1 = notes[note_idx].quarterLength
+            n2 = notes[note_idx + 1].quarterLength
+            if n1 and n2 != 0:
+                rhythmic_proportion = n2/n1
+    
+            props.append(str(round(rhythmic_proportion, 2)))
+    
+        target_pattern = question_values.get('rhythm_pattern')
+        # go through ontology and find the corresponding key for the target_pattern value
+        target_prop = [k for k, v in self.dict_rhythm_prop_ontology.items() if v == target_pattern]
+        count = int(sum(1 for n in props if n == target_prop[0]))
+            
+        if not self.random_distractors:
+            all_props = []
+            for vv in self.voice_mapping.keys():
+                other_part = score.parts[self.voice_mapping[vv]]
+                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                for note_idx in range(len(other_notes)-1):
+                    n1 = other_notes[note_idx].quarterLength
+                    n2 = other_notes[note_idx + 1].quarterLength
+                    if n1 and n2 != 0:
+                        rhythmic_proporton= n2/n1
+                    all_props.append(rhythmic_proporton)
+            possible_values = []
+            for line in all_props:
+                for _n in list(set(line)):
+                    possible_values.append(int(sum(1 for n in line if n == _n)))
+            possible_values = list(set(possible_values))
+            possible_values = [c for c in possible_values if c != count]
+            distractor_pool = possible_values
+
+        else:
+            distractor_pool = []
+
+        return count, distractor_pool, question_values
 
     def get_time_signature(self, path: str, question_values: dict) -> tuple[str, list[str]]:
         musicxml_path = get_musicxml_file_path(path)
