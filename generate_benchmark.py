@@ -567,25 +567,32 @@ def step_4_final_options(data, config, fields):
 def step_5_nota_correct(data, config, fields):
     T = config.get('nota_correct_percentage', 0.0)
     out_data = []
-    
+
     if T > 0:
-        P = T / (1.0 - T)
         N = config['num_options']
         nota_text = config['nota_text']
-        
-        for row in data:
-            out_data.append(dict(row)) 
-            
-            if config['rng'].random() < P:
-                new_row = dict(row)
+
+        # 1) Determine number of items to select
+        expected_count = round(len(data) * T)
+
+        # 2) Select items in a single step
+        all_indices = list(range(len(data)))
+        selected_indices = set(config['rng'].choice(
+            all_indices, expected_count, replace=False
+        ))
+
+        # 3) Iterate through all rows, replacing selected ones with derived rows
+        for idx, row in enumerate(data):
+            new_row = dict(row)
+
+            if idx in selected_indices:
                 distractors = json.loads(row['sorted_distractors'])
-                
                 options = [nota_text] + distractors[:N-1]
                 new_row['final_correct_option'] = nota_text
                 new_row['final_options'] = json.dumps(options)
                 new_row['is_nota_correct'] = 1
-                
-                out_data.append(new_row)
+
+            out_data.append(new_row)
     else:
         out_data = data
 
@@ -685,6 +692,25 @@ def print_formatted_statistics(data, fields, filters=None):
     
     print(f"{'='*55}")
 
+def step_1_8_remove_items_with_ground_truth_0(data, config, fields):
+    """Removes a given percentage of items where ground truth is 0."""
+    percentage_to_remove = config.get('percentage_gt_zero_to_remove', 0.0)
+
+    if percentage_to_remove > 0:
+        # First decide how many items to remove
+        # then, randomly select the indiced of items to be removed
+        # and then remove the items based on the selected indices
+        gt_zero_indices = [i for i, row in enumerate(data) if str(row.get('ground_truth')) == '0']
+        num_to_remove = round(len(gt_zero_indices) * percentage_to_remove)
+        indices_to_remove = set(config['rng'].choice(gt_zero_indices, num_to_remove, replace=False))
+        out_data = [row for i, row in enumerate(data) if i not in indices_to_remove]
+    else:
+        out_data = data
+
+    save_intermediate(out_data, "01_8_benchmark_no_gt_zero.tsv", fields)
+    print_checkpoint(1.8, f"Remove some ({percentage_to_remove*100:.2f}%) of GT=0 items", "01_8_benchmark_no_gt_zero.tsv")
+    return out_data, fields
+
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Generator Pipeline")
     parser.add_argument("--config", required=True, help="Path to YAML config file")
@@ -750,9 +776,7 @@ def main():
     
     # 4. Generate the product of meta-questions and pieces, and compute the ground truth and distractor pool for each question-piece pair using the methods specified in the meta-questions file.
     data, fields = step_1_generate_product(data, config, fields)
-    
-    # 5. Subsample the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config (this is to control the size of the benchmark, and to ensure diversity across different subcategories). 
-    data, fields = step_1_4_subsample(data, config, fields)
+
     
     # 6. For each question-piece pair, extract the ground truth answer and distractor pool using the specified method, and save them in new columns `ground_truth` and `distractor_pool`. The distractor pool should be saved as a JSON string (list of distractors).
     data, fields = step_1_5_extract_ground_truth_and_distractors(data, config, fields)
@@ -763,6 +787,13 @@ def main():
     # we regenerate the actual values (e.g. "2nd" and "soprano") for each question-piece pair during the
     # distractor-ground truth extraction, depending on the actual length of the piece
     data, fields = step_1_7_remove_duplicates(data, config, fields)
+
+
+    data, fields = step_1_8_remove_items_with_ground_truth_0(data, config, fields)
+
+    # 5. Subsample the benchmark to include a maximum of `questions_per_subcategory_count` items for each subcategory if instructed by the config (this is to control the size of the benchmark, and to ensure diversity across different subcategories). 
+    data, fields = step_1_4_subsample(data, config, fields)    
+
 
     # 8. Apply a method as specified in the config to sort the distractor pool for each question-piece pair (with preliminary dummy implementation of the method that just shuffles the distractor pool, to be replaced later with a real implementation). This method should be applied to each question-piece pair in the benchmark generated in step 1, the distractors sorted should be added to a new column "sorted_distractors" and the output should be saved in an intermediate benchmark file named "benchmark_distractors_sorted.tsv".
     data, fields = step_2_sort_distractors(data, config, fields)
@@ -795,7 +826,7 @@ def main():
     nota_correct_count = sum(1 for row in data if row.get('final_correct_option') == config.get('nota_text', 'None of the above'))
     nota_percent = (nota_correct_count / total_items * 100) if total_items > 0 else 0
 
-    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality"]
+    selected_fields = ["meta-question_id", "subcategory", "skill", "piece_id", "submodality", "specification"]
 
     # print("\n--- NOTA-incorrect items ---")
     print_formatted_statistics(data, selected_fields, filters={"is_nota_correct": 0})

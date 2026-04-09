@@ -133,7 +133,7 @@ def set_logdir(config: dict) -> str:
 # Core LLM Call & Payload Builder
 # =========================================================================
 
-def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False, zdr: bool = True) -> Tuple[Dict, str]:
+def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, content_file: str, modality: str, submodality: str, no_content_file: bool = False, zdr: bool = True, inference_seed: int = None) -> Tuple[Dict, str]:
     """Generates the messages payload based on the modality and files."""
     messages = []
     plugins = None
@@ -208,12 +208,17 @@ def prepare_llm_payload(model: str, user_prompt: str, system_prompt: str, conten
         "messages": messages,
         "provider": { 
              "require_parameters": True,
-            "zdr": zdr,
+             "zdr": zdr,
              "data_collection": "deny",
         }
     }
     if plugins:
         payload["plugins"] = plugins
+    
+    # Add seed if provided and not None
+    if inference_seed is not None:
+        payload["seed"] = int(inference_seed)
+
         
     return payload, user_prompt_clean
 
@@ -301,7 +306,9 @@ def sanitize_payload_for_logging(payload: dict) -> dict:
                 elif part.get('type') == 'file':
                     part['file']['file_data'] = '[BASE64_FILE_STRIPPED]'
                 elif part.get('type') == 'text' and part.get('text').startswith("--- Attached Symbolic Data ---"):
-                    part['text'] = '[SYMBOLIC_FILE_STRIPPED]'
+                    # No stripping for symbolic notation as abc notation is short
+                    #part['text'] = '[SYMBOLIC_FILE_STRIPPED]'
+                    ...
     return sanitized
 
 # =========================================================================
@@ -501,6 +508,9 @@ def main():
 
             print(f"Running model: #{model_name}#")
 
+            if config.get('seed', None) is None:
+                print("Warning: No seed provided for inference. The inference will be completely non-deterministic.")
+
             payload, final_prompt = prepare_llm_payload(
                 model=model_name, 
                 user_prompt=prompt, 
@@ -509,7 +519,8 @@ def main():
                 modality=modality, 
                 submodality=submodality,
                 no_content_file=text_only_baseline,
-                zdr=config.get('zdr', True)
+                zdr=config.get('zdr', True),
+                inference_seed=config.get('seed', None)
             )
 
             # Execute Request

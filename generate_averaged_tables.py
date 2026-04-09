@@ -1,3 +1,11 @@
+"""
+Generates TSV tables for the results of 10-times-experiments (10 different instances of the same-size benchmark):
+- For each criterion (e.g., "ALL", "audio.mastermix.wav", etc.), it creates a table:
+- rows = models;
+- columns = benchmark sizes, 
+- cell = "mean_acc (stddev)".
+"""
+
 import pandas as pd
 import os
 import glob
@@ -38,9 +46,29 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
         return
 
     full_df = pd.concat(all_data, ignore_index=True)
+
+    # in the full_df, find a column with the name "Mean_Accuracy ({integer} runs)", and a column with the name "StdDev_Accuracy ({integer} runs)". Use these to create a new column "display_val" with the format "mean (stddev)". This will be the value displayed in the final tables.
+    # Find columns matching "Mean_Accuracy ({n} runs)" and "StdDev_Accuracy ({n} runs)"
+    mean_cols = [c for c in full_df.columns if c.startswith("Mean_Accuracy")]
+    std_cols = [c for c in full_df.columns if c.startswith("StdDev_Accuracy")]
+
+    default_mean_col = "Mean_Accuracy (10 runs)"
+    default_std_col = "StdDev_Accuracy (10 runs)"
+
+    if default_mean_col not in full_df.columns or default_std_col not in full_df.columns:
+        # Fallback for the case that it was not run for 10 runs.
+        print(f"Expected columns '{default_mean_col}' and '{default_std_col}' not found. Available mean columns: {mean_cols}, stddev columns: {std_cols}, using the first ones found.")
+        mean_col = mean_cols[0] if mean_cols else None
+        std_col = std_cols[0] if std_cols else None
+    else:
+        mean_col = default_mean_col
+        std_col = default_std_col
+    
+    print(f"Using mean column: {mean_col}, stddev column: {std_col}")
+
     full_df['display_val'] = (
-        full_df['Mean_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + 
-        " (" + full_df['StdDev_Accuracy (10 runs)'].apply(lambda x: f"{x:.2f}") + ")"
+        full_df[mean_col].apply(lambda x: f"{x:.2f}") + 
+        " (" + full_df[std_col].apply(lambda x: f"{x:.2f}") + ")"
     )
 
     # 1. Custom sorting for sizes
@@ -67,24 +95,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate TSV benchmark tables.")
     parser.add_argument("--input_dir", default="averaged/", help="Path to the directory containing averaged data")
     parser.add_argument("--output_dir", default="tables/", help="Directory where TSV tables will be saved")
-    parser.add_argument("--criteria", nargs='+', default=["ALL", "audio.mastermix.wav", "symbolic.musicxml", "visual.short.png"], 
+    parser.add_argument("--criteria", nargs='+', default=["ALL", "audio.mastermix.wav", "symbolic.abc.txt", "visual.short.png"], 
                         help="List of Criterion_Values to generate tables for (e.g., ALL submodality)")
     parser.add_argument("--gsheet_id_to_upload", type=str, default=None,
                         help="Google Sheet ID to upload results to")
     parser.add_argument("--gspread_credentials_location", type=str, default="logs/protobenchmark-logging-aa9418338494.json",
                         help="Path to gspread credentials JSON file")
-    parser.add_argument("--results_filename", type=str, default=None, choices=[None, "res.tsv", "textonly.tsv"],
+    parser.add_argument("--results_filename", type=str, default=None, choices=[None, "normal.tsv", "text-only.tsv"],
                         help="From which files take the input results?")
     
     args = parser.parse_args()
 
     sheet_ids_to_upload = {
-        "res.tsv": "1ewsxVxOc69i2JTfHJCeSTeEos5teZlqezjS1EVySul4",
-        "textonly.tsv": "1WN3-4Cjm8SwV2OTCqM_nbLHbc5bkolxxl0SDFLq0OOs"
+        "normal.tsv": "1QDJj7BP074IjWv9jAzjWHT4a2bjWCqtqbTeZJ6jWVPA",
+        "text-only.tsv": "1U0D2MLGffnxcHTe-WPWpUCXnRIdo4dlmnFyHWyePNGQ"
     }  
 
     if args.results_filename is None:
-        for filename in ["res.tsv", "textonly.tsv"]:
+        for filename in ["normal.tsv", "text-only.tsv"]:
             args.results_filename = filename
             args.gsheet_id_to_upload = sheet_ids_to_upload[filename]
             config = {
@@ -93,20 +121,6 @@ if __name__ == "__main__":
             }
             process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename)
 
-
-
-    # if args.gsheet_id_to_upload is None:
-    #     if args.results_filename == "res.tsv":
-    #         args.gsheet_id_to_upload = "1ewsxVxOc69i2JTfHJCeSTeEos5teZlqezjS1EVySul4"
-        
-    #     if args.results_filename == "textonly.tsv":
-    #         args.gsheet_id_to_upload = "1WN3-4Cjm8SwV2OTCqM_nbLHbc5bkolxxl0SDFLq0OOs"
-
-    # config = {
-    #     'credentials_location': args.gspread_credentials_location,
-    #     'sheet_id': args.gsheet_id_to_upload
-    # }
-    # process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename)
 
 
 

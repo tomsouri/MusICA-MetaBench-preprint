@@ -1,10 +1,12 @@
-meta-question_id	perception	category	rel/abs	subcategory	simul/seq	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires	ontology_key
-1	perception	pitch	absolute	pitch-absolute		pitch recognition	What is the pitch name of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml	pitch
-2	perception	pitch	absolute	pitch-absolute		pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity		pitch
-3	perception	pitch	relative	pitch-relative		interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
-4	perception	pitch	relative	pitch-relative		interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
-5	perception	rhythm	absolute	rhythm-absolute		note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
-6	perception	rhythm	relative	rhythm-relative		rhythm pattern	How many times is the rhythmic pattern with proportion {rhythm_proportion} present in the {voice} line?	["voice", "rhythm_proportion"]	get_rhythm_pattern		rhythm
-7	perception	harmony	relative	harmony-relative		tonality recognition	What is the {function} harmony of the primary key of this piece?	["function"]	get_harmonic_tonality		
-8	perception	harmony	absolute	harmony-absolute		chord recognition	What is the chord at the {target_index} position considering all the voices?	["target_index"]	get_harmonic_chord		
-9	perception	harmony	relative	harmony-relative		cadence recognition	What is the chord progression between the {target_index} chord and the next one?	["target_index"]	get_harmonic_cadence		
+meta-question_id	perception	category	rel/abs	specification	subcategory	simul/seq	skill	text_with_wildcards	question_keys	method_for_ground_truth_extraction	requires	ontology_key
+1	perception	pitch	absolute	pitch-absolute	pitch-recognition		pitch recognition	What is the pitch name of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_note	symbolic.musicxml	pitch
+2	perception	pitch	absolute	pitch-absolute	pitch-recognition		pitch statistics	How many times is the note {pitch} present in the {voice} line?	["voice", "pitch"]	get_note_quantity		pitch
+3	perception	pitch	relative	pitch-relative	interval-recognition		interval recognition	What is the {target_index} interval in the {voice} line?	["target_index", "voice"]	get_nth_interval		interval
+4	perception	pitch	relative	pitch-relative	interval-recognition		interval statistics	How many times is the interval {interval} present in the {voice} line?	["voice", "interval"]	get_interval_quantity		interval
+5	perception	rhythm	absolute	rhythm-absolute	rhythmic-recognition		note length	What is the rhythmic notation of the {target_index} {voice} note in the provided excerpt?	["target_index", "voice"]	get_nth_rhythm		rhythm
+6	perception	rhythm	absolute	rhythm-absolute	rhythmic-recognition		note length statistics	What is the total count of {rhythm}-note units in the {voice} line?	["rhythm", "voice"]	get_rhythm_count		rhythm
+7	perception	rhythm	relative	rhythm-relative	proportion-recognition		rhythm pattern	What is the rhythmic pattern between the {target_index} note and the next one in the {voice} line?	["target_index", "voice"]	get_rhythm_pattern		rhythm
+8	perception	rhythm	relative	rhythm-relative	proportion-recognition		rhythm pattern statistics	How many rhythmic figures with a strict {rhythm_proportion} proportionality are there in the {voice} line?	["rhythm_proportion", "voice"]	get_rhythm_pattern_count		rhythm
+9	perception	harmony	relative	harmony-relative	harmonic-recognition		tonality recognition	What is the {function} harmony of the primary key of this piece?	["function"]	get_harmonic_tonality		
+10	perception	harmony	absolute	harmony-absolute	harmonic-recognition		chord recognition	What is the chord at the {target_index} position considering all the voices?	["target_index"]	get_harmonic_chord		
+11	perception	harmony	relative	harmony-relative	harmonic-recognition		cadence recognition	What is the chord progression between the {target_index} chord and the next one?	["target_index"]	get_harmonic_cadence		

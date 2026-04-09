@@ -1,4 +1,9 @@
 #!/bin/bash
+#SBATCH -J runAg      # name of job
+#SBATCH -p cpu-ms       # name of partition or queue (default=cpu-troja)
+#SBATCH -o runAg.out  # name of output file for this submission script
+#SBATCH -e runAg.err  # name of error file for this submission script
+
 
 # to submit the job, you need to be ssh-ed at one of the lrc or sol machines. (from geri/freki/blackbird, ssh lrc1 or sol1)
 # Then use: sbatch --dependency=afterany:<JOB_ID>
@@ -15,13 +20,13 @@
 
 # TODO: aggregate models need to be run with --disable_zdr in run_benchmark.py
 models=(
-    "aggregate-gpt-4o"
     "aggregate-mistral"
+    "aggregate-gpt-4o"
+    "xiaomi/mimo-v2-omni"
     "aggregate-gpt-5"
     # "google/gemini-2.0-flash-lite-001"
     # "google/gemini-2.5-flash-lite"
     # "google/gemini-2.5-pro"
-    # "xiaomi/mimo-v2-omni"
     # "google/gemini-2.5-flash"
     # "google/gemini-3.1-flash-lite-preview"
     # "google/gemini-3.1-pro-preview"
@@ -48,7 +53,7 @@ models=(
 
 
 qpersubcategory=5
-seeds=({42..51})
+seeds=({42..42})
 # seeds=({43..43})
 
 
@@ -58,22 +63,22 @@ for seed in "${seeds[@]}"; do
     benchmark_file="benchmark_count_${qpersubcategory}_${seed}.tsv"
     benchmarks+=("$benchmark_file")
 
-    echo "Generating a benchmark with random seed: $seed"
+    # echo "Generating a benchmark with random seed: $seed"
 
-    run .venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
-        --benchmark_file "$benchmark_file" \
-        --questions_per_subcategory_count "$qpersubcategory" \
-        --seed "$seed" \
-        --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.short.png" \
-        --allowed_metaq_ids 0 1 2 3 4 5 6 7 8 9
+    # run .venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml \
+    #     --benchmark_file "$benchmark_file" \
+    #     --questions_per_subcategory_count "$qpersubcategory" \
+    #     --seed "$seed" \
+    #     --submodalities "audio.mastermix.wav" "symbolic.musicxml" "visual.short.png" \
+    #     --allowed_metaq_ids 0 1 2 3 4 5 6 7 8 9
 
-    echo "================================================================================"
+    # echo "================================================================================"
 done
 
 
 
 
-.venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
+# .venv/bin/python3 compare_benchmark_files.py --list_of_tsvs "${benchmarks[@]}" | tee "benchmark_comparison_${qpersubcategory}qs.txt"
 
 
 for model in "${models[@]}"; do
@@ -107,11 +112,12 @@ for model in "${models[@]}"; do
             --api-key-env "OPENROUTER_API_KEY" \
             --benchmark_file "$benchmark_file" \
             --modalities "audio" "symbolic" "visual" \
-            --run_id "Omni-${safe_model}-${seed}"  \
+            --run_id "AGGR-${qpersubcategory}-${safe_model}-${seed}"  \
             --max_waiting_time_per_request 300 \
             --verbose \
             --evaluation_output_file "${resfile}" \
             --generate_new_list_with_logs \
+            --disable_zdr
         echo "================================================================================"
 
         mkdir -p "results/${safe_model}/${qpersubcategory}/to/"
@@ -124,25 +130,26 @@ for model in "${models[@]}"; do
             --api-key-env "OPENROUTER_API_KEY" \
             --benchmark_file "$benchmark_file" \
             --modalities "audio" "symbolic" "visual" \
-            --run_id "TO-Omni-${safe_model}-${seed}"  \
+            --run_id "TO-AGGR-${qpersubcategory}-${safe_model}-${seed}"  \
             --max_waiting_time_per_request 300 \
             --text_only_baseline \
             --verbose \
             --evaluation_output_file "${toresfile}" \
             --generate_new_list_with_logs \
+            --disable_zdr
 
         echo "================================================================================"
     done
 
-    dir="averaged/${safe_model}/${qpersubcategory}"
-    mkdir -p $dir
+    # dir="averaged/${safe_model}/${qpersubcategory}"
+    # mkdir -p $dir
 
-    tabname="${safe_model}.${qpersubcategory}"
+    # tabname="${safe_model}.${qpersubcategory}"
 
-    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${resfiles[@]}" --output_file "${dir}/res.tsv" --gsheet_tab_name "${tabname}"
-    .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${textonlyresfiles[@]}" --output_file "${dir}/textonly.tsv" --gsheet_tab_name "${tabname}.to"
+    # .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${resfiles[@]}" --output_file "${dir}/res.tsv" --gsheet_tab_name "${tabname}"
+    # .venv/bin/python3 compute_mean_stddev.py --list_of_tsvs "${textonlyresfiles[@]}" --output_file "${dir}/textonly.tsv" --gsheet_tab_name "${tabname}.to"
 
-    cp "benchmark_comparison_${qpersubcategory}qs.txt" $dir/
+    # cp "benchmark_comparison_${qpersubcategory}qs.txt" $dir/
 
 done
 

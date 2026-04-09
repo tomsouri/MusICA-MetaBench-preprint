@@ -14,58 +14,6 @@ from compare_benchmark_files import discover_tsv_files_from_patterns
 
 from utils import upload_tsv_to_gsheet, create_gsheet_tabs
 
-# def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str):
-#     """
-#     Aggregates multiple TSV experiment runs, verifies consistency across 
-#     Model and Criterion columns, and computes Mean/StdDev for Accuracy_Percent.
-#     """
-#     if not file_paths:
-#         print("No files provided.")
-#         return
-
-#     dataframes = []
-    
-#     target_col = "Accuracy_Percent"
-
-#     try:
-#         for path in file_paths:
-#             df = pd.read_csv(path, sep='\t')
-#             dataframes.append(df)
-
-#         # 1. Check consistency across files
-#         reference_df = dataframes[0][identity_cols]
-#         for i, df in enumerate(dataframes[1:], start=1):
-#             if not reference_df.equals(df[identity_cols]):
-#                 raise ValueError(f"Consistency check failed: File '{file_paths[i]}' "
-#                                  f"does not match the structure/values of the first file.")
-
-#         # 2. Extract values for computation
-#         # We stack the 'Accuracy_Percent' columns from all dataframes
-#         all_accuracies = pd.concat([df[target_col] for df in dataframes], axis=1)
-
-#         # 3. Compute Mean and StdDev
-#         # ddof=1 for sample standard deviation
-#         means = all_accuracies.mean(axis=1)
-#         stds = all_accuracies.std(axis=1, ddof=1)
-
-#         # 4. Prepare Output DataFrame
-#         # We take the metadata from the first file and attach the results
-#         output_df = dataframes[0].copy()
-        
-#         # We can drop the original Accuracy_Percent and replace it with Mean and Std
-#         output_df.drop(columns=[target_col], inplace=True)
-#         output_df["Mean_Accuracy"] = means.round(4)
-#         output_df["StdDev_Accuracy"] = stds.round(4)
-
-#         # 5. Print output as TSV
-#         # Using sys.stdout to print directly to the terminal/console
-#         with open(outfile, "w") as f:
-#             f.write(output_df.to_csv(sep='\t', index=False))
-
-#     except Exception as e:
-#         print(f"Error processing files: {e}", file=sys.stderr)
-
-
 
 def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: str, drop_inconsistent_rows: bool = False):
     dataframes = []
@@ -145,7 +93,9 @@ def aggregate_experiment_results(file_paths: List[str], identity_cols, outfile: 
             # Result is the sum across axis 1 (rows)
             result_df[f"Sum_{col}"] = combined.sum(axis=1).round(4)
 
+        # TODO: add the column of result files as an additional column, for traceability (maybe truncated if too long)
 
+        result_df.insert(0, "Source_Result_Files", ";".join(file_paths))
 
         # 4. Final Output
         # Re-ordering columns to put stats next to where Accuracy was
@@ -183,7 +133,7 @@ def main():
     parser.add_argument("--output_file", type=str, required=True,
                         help="Path to output file")
     
-    parser.add_argument("--gsheet_id_to_upload", type=str, default="14uUleePBCZMJOn1BuH9OM1NA8L0NcBbjLpi4lHGapd0",
+    parser.add_argument("--gsheet_id_to_upload", type=str, default="1XLzAl7jxcZo62vXn7Q_wrjUt5cp3uXTUwHmTXb-IT78",
                         help="Google Sheet ID to upload results to")
     parser.add_argument("--gsheet_tab_name", type=str,
                         help="Tab name in the Google Sheet to upload results to")

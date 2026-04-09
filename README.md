@@ -8,11 +8,6 @@ Implement  further results aggregation script (for single benchmark instance) (#
 - and one that gets specified the same but compare text-only and normal setup: for every model, print the whole column for text-only and for normal setup
 
 
-## Done:
-- get the convenient model running script ready:
-- a to-be-run script that accepts the model, size, seed, and setup (text-only/normal), and runs the selected model on the selected benchmark (todo: how to mark the api key? And how to resolve ZDR? turn it off for these experiments?) and then updates the aggregated results from above
-- a batch submitting script that configures the seed and size, a list of models and setups, and then submits a job for
-  each model-setup combination (while passing the model and setup as cmdline arg)
 
 ## To run
 - adjust the script `submit-jobs.sh` to fit your needs (e.g., the usage of `sbatch` command)
@@ -77,3 +72,26 @@ The interesting ones in the preliminary experiments are audio.mastermix.wav, ima
 - decide to which modalities is it applicable
 - decide which distractors to include in the pool
 - and put the question as a single row to the meta-questions.tsv
+
+
+## Guidelines for Custom Datasets
+
+1.  **Repository Setup**: Download the project's repository.
+2.  **Environment**: Install the required dependencies:
+    `bash prepare_venv.sh`
+3.  **Data Structure**: Place your data in the `data/` directory using the following structure:
+    `data/<dataset-name>/<piece-name>/<modality>.<format>`
+    *   *Example*: `data/asap/bwv846/symbolic.musicxml`
+    *   **Required**: A `symbolic.musicxml` file is mandatory, as the ground truth is extracted from it.
+    *   **Optional**: Additional modalities (e.g., `audio.wav`, `visual.png`) are optional. Note that modalities not provided cannot be used in evaluation.
+4.  **Configuration (Optional)**: Edit `generation-config.yaml` to customize generation parameters (such as benchmark size). If skipped, the default configuration is used.
+5.  **Define Ontology (Optional)**: Update the ontology of possible values for the wildcards used in prompts.
+6.  **Index Pieces**: Run `generate_pieces_list.sh` to generate the list of available pieces.
+    `bash generate_pieces_list.sh`
+7.  **Generate Benchmark**: Run the `generate_benchmark.py` script to execute the benchmark generation pipeline.
+    `.venv/bin/python generate_benchmark.py`
+8.  **Setup Evaluation**: Configure `eval-config.yaml` to specify which models to evaluate, including their API endpoint URLs and API keys.
+9.  **Run Evaluation**: Run the `run_benchmark.py` script to execute the selected models on the generated benchmark.
+    `.venv/bin/python run_benchmark.py`
+10. **Analyze**: Inspect the generated fine-grained results.
+
