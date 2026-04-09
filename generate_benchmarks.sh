@@ -20,6 +20,10 @@ declare -a seeds=()
 declare -a submodalities=("audio.mastermix.wav" "symbolic.abc.txt" "visual.short.png")
 declare -a allowed_metaq_ids=(1 2 3 4 5 6 7 8 9 10 11)
 config="benchmark-generation-config.yaml"
+path_to_pregenerated_full_benchmark="benchmarks/pre-generated_full_benchmark.tsv"
+
+
+
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -64,6 +68,16 @@ if [[ ${#sizes[@]} -eq 0 || ${#seeds[@]} -eq 0 ]]; then
     exit 1
 fi
 
+
+if [ -f "${path_to_pregenerated_full_benchmark}" ]; then
+    rm "${path_to_pregenerated_full_benchmark}"
+    echo "File ${path_to_pregenerated_full_benchmark} removed."
+else
+    echo "File ${path_to_pregenerated_full_benchmark} not found."
+fi
+
+
+
 # ── Generation ───────────────────────────────────────────────────────────────
 for size in "${sizes[@]}"; do
     benchmarks=()
@@ -87,7 +101,9 @@ for size in "${sizes[@]}"; do
             --questions_per_subcategory_count "$size" \
             --seed "$seed" \
             --submodalities "${submodalities[@]}" \
-            --allowed_metaq_ids "${allowed_metaq_ids[@]}"
+            --allowed_metaq_ids "${allowed_metaq_ids[@]}" \
+            --path_to_pregenerated_full_benchmark_file ${path_to_pregenerated_full_benchmark} \
+            --use_pregenerated_benchmark_file
 
         benchmarks+=("$benchmark_file")
         echo "================================================================================"
