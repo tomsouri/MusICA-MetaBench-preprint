@@ -267,7 +267,7 @@ def get_cadences():
 
 def get_rhythm_props():
     # Define the rhythmic proportions to consider
-    rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0]  # e.g., half, equal, double
+    rhythmic_proportions = [0.5, 1.0, 2.0, 3.0, 0.25, 0.33, 4.0, 6.0]  # e.g., half, equal, double
     ontology = {str(prop) : (f"1:{round(prop)}") for prop in rhythmic_proportions if prop >=1}
 
     ontology.update({str(prop) : (f"{str(round(1/prop))}:1") for prop in rhythmic_proportions if prop < 1})
@@ -362,7 +362,7 @@ class AnswerDistractorExtractors:
         self.min_num_distractors = self.config['min_num_distractors']
         self.random_distractors = self.config.get('random_distractors', False)
         self.verbose = self.config.get('verbose', False)
-        yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
+      #  yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
 
         # Added a predefined pools of random distractors.
         # Those will be used:
@@ -783,7 +783,7 @@ class AnswerDistractorExtractors:
         target_part = score.parts[part_index]
 
         # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
-        notes = list(target_part.flatten().getElementsByClass(note.Note))
+        notes = list(target_part.flatten().notesAndRests)
 
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
@@ -808,7 +808,7 @@ class AnswerDistractorExtractors:
             all_notes = []
             for vv in self.voice_mapping.keys():
                 other_part = score.parts[self.voice_mapping[vv]]
-                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                other_notes = list(other_part.flatten().notesAndRests)
                 all_notes += other_notes
             # Build a set of candidate distractor rhythms (exclude the true rhythm)
 
@@ -855,8 +855,7 @@ class AnswerDistractorExtractors:
         target_part = score.parts[part_index]
 
         # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
-        notes = list(target_part.flatten().getElementsByClass(note.Note))
-
+        notes = list(target_part.flatten().notesAndRests)
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'.")
         
@@ -866,7 +865,7 @@ class AnswerDistractorExtractors:
             all_notes = []
             for vv in self.voice_mapping.keys():
                 other_part = score.parts[self.voice_mapping[vv]]
-                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                other_notes = list(other_part.flatten().notesAndRests)
                 all_notes.append([n.quarterLength for n in other_notes])
             possible_values = []
             for line in all_notes:
@@ -903,8 +902,7 @@ class AnswerDistractorExtractors:
         target_part = score.parts[part_index]
         
         # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
-        notes = list(target_part.flatten().getElementsByClass(note.Note))
-        
+        notes = list(target_part.flatten().notesAndRests)                   
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'")           
 
@@ -938,18 +936,22 @@ class AnswerDistractorExtractors:
             # intervals.append(interval_name)
             props.append(str(round(rhythmic_proportion, 2)))
 
-        target_prop = props[note_index]
-
-        target_prop_name = self.dict_rhythm_prop_ontology[str(target_prop)]
-        # except:
-        #     breakpoint()
-        #     target_prop_name="other"
-            
+        target_prop = float(props[note_index])
+        try:
+            target_prop_name = self.dict_rhythm_prop_ontology[str(target_prop)]
+        except KeyError:
+            if target_prop >= 1:
+                self.dict_rhythm_prop_ontology[str(round(target_prop,2))] =f"1:{round(target_prop)}"
+            else:
+                self.dict_rhythm_prop_ontology[str(round(target_prop,2))] = f"{str(round(1/target_prop))}:1"
+            if self.config.get('verbose', False):
+                print(f"Could not match detected rhythm prop '{target_prop}' to any ontology entry. Added pattern {self.dict_rhythm_prop_ontology[str(round(target_prop,2))]} to ontology.")
+              
         if not self.random_distractors:
             all_props = []
             for vv in self.voice_mapping.keys():
                 other_part = score.parts[self.voice_mapping[vv]]
-                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                other_notes = list(other_part.flatten().notesAndRests)
                 for note_idx in range(len(other_notes)-1):
                     n1 = other_notes[note_idx].quarterLength
                     n2 = other_notes[note_idx + 1].quarterLength
@@ -958,8 +960,18 @@ class AnswerDistractorExtractors:
                     all_props.append(rhythmic_proporton)
             all_props_names = []
             for _p in all_props:
-                _key = str(round(_p,2))
-                all_props_names.append(self.dict_rhythm_prop_ontology[_key])
+                #_key = str(round(_p,2))
+                try:
+                    new_el = self.dict_rhythm_prop_ontology[str(round(_p,2))]
+                except KeyError:
+                    if _p >= 1:
+                        self.dict_rhythm_prop_ontology[str(round(_p,2))] =f"1:{round(_p)}"
+                    else:
+                        self.dict_rhythm_prop_ontology[str(round(_p,2))] = f"{str(round(1/_p))}:1"
+                    if self.config.get('verbose', False):
+                        print(f"Could not match detected rhythm prop '{_p}' to any ontology entry. Added pattern {self.dict_rhythm_prop_ontology[str(round(_p,2))]} to ontology.")
+                        
+                all_props_names.append(self.dict_rhythm_prop_ontology[str(round(_p,2))])
                 
             distractor_pool = set(all_props_names)
             distractor_pool.discard(target_prop_name)
@@ -991,7 +1003,7 @@ class AnswerDistractorExtractors:
         target_part = score.parts[part_index]
         
         # Flatten the part (to remove measure hierarchies) and extract only the notes (ignoring rests/chords)
-        notes = list(target_part.flatten().getElementsByClass(note.Note))
+        notes = list(target_part.flatten().notesAndRests)
         
         if not notes:
             raise ValueError(f"No valid notes found in part '{voice_key}'")           
@@ -1018,7 +1030,7 @@ class AnswerDistractorExtractors:
             all_props = []
             for vv in self.voice_mapping.keys():
                 other_part = score.parts[self.voice_mapping[vv]]
-                other_notes = list(other_part.flatten().getElementsByClass(note.Note))
+                other_notes = list(other_part.flatten().notesAndRests)
                 for note_idx in range(len(other_notes)-1):
                     n1 = other_notes[note_idx].quarterLength
                     n2 = other_notes[note_idx + 1].quarterLength
@@ -1332,7 +1344,9 @@ class AnswerDistractorExtractors:
 
         # Sort the distractor pool in order to ensure reproducibility, which is hindered by the use of sets.
         ground_truth_pool = sorted(ground_truth_pool)
-        
+        self.ontology['rhythm_proportion'] = [{k:v} for k,v in self.dict_rhythm_prop_ontology.items()]
+        self.ontology['cadence'] = [{k:v} for k,v in self.dict_cadence_ontology.items()]
+        yaml.dump(self.ontology, open('generated_ontology.yaml','w'))
         return ground_truth, ground_truth_pool, new_values, new_words
 
 
