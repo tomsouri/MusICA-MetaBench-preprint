@@ -720,6 +720,9 @@ def main():
     parser.add_argument("--seed", type=int, help="Override random seed for reproducibility")
     parser.add_argument("--allowed_metaq_ids", nargs='+', help="Override allowed metaq ids in config")
     parser.add_argument("--use_all_inds", default=False, action="store_true", help="Override `use_all_inds` setting from config.")
+    parser.add_argument("--path_to_pregenerated_full_benchmark_file", default=None, help="Potentially existing file with a pre-generated full benchmark file.")
+    parser.add_argument("--use_pregenerated_benchmark_file", default=False, action="store_true", help="Use the file specified above.")
+    
 
     args = parser.parse_args()
 
@@ -760,27 +763,56 @@ def main():
     # Pipeline Execution
     print("--- Starting Pipeline ---")
 
-    # TODO: is it strange that the AnswerQG is instantiated but not used after that?
+    # is it strange that the AnswerQG is instantiated but not used after that?
     # NO! It creates the whole ontology that is then used in the step 0 for question instantiation, and also the methods that are used for ground truth and distractor extraction in step 1.5 are methods of this class, so it needs to be instantiated before step 0 and step 1.5
     AnswerQuestionGenerator = ground_truth_and_distractor_pool_extractions.AnswerDistractorExtractors(config)
     ontology = AnswerQuestionGenerator.ontology
 
-    # 1. Load raw meta-questions
-    raw_meta, meta_fields = step_0_minus_2_load_meta(config)
-    
-    # 2. Filter out meta questions based on config (e.g., by allowed meta-question ids)
-    filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
+    # TODO: if the args.path_to_pregenerated_full_benchmark_file file exists and if we should use it, load it here and let the fields be the fields in the tsv
+    if (
+        args.use_pregenerated_benchmark_file
+        and args.path_to_pregenerated_full_benchmark_file is not None
+        and os.path.exists(args.path_to_pregenerated_full_benchmark_file)
+    ):
+        print(f"--- Loading pre-generated full benchmark from: {args.path_to_pregenerated_full_benchmark_file} ---")
+        with open(args.path_to_pregenerated_full_benchmark_file, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            fields = reader.fieldnames
+            data = [row for row in reader]
+        print(f"Loaded {len(data)} rows with fields: {fields}")
+    else:
+        # 1. Load raw meta-questions
+        raw_meta, meta_fields = step_0_minus_2_load_meta(config)
+        
+        # 2. Filter out meta questions based on config (e.g., by allowed meta-question ids)
+        filtered_meta, meta_fields = step_0_minus_1_filter_meta(raw_meta, config, meta_fields)
 
-    # 3. Instantiate questions from meta-questions by replacing wildcards with values from the ontology, and save the instantiated question text in a new column `question`.
-    data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
-    
-    # 4. Generate the product of meta-questions and pieces, and compute the ground truth and distractor pool for each question-piece pair using the methods specified in the meta-questions file.
-    data, fields = step_1_generate_product(data, config, fields)
+        # 3. Instantiate questions from meta-questions by replacing wildcards with values from the ontology, and save the instantiated question text in a new column `question`.
+        data, fields = step_0_instantiate_questions(filtered_meta, config, ontology)
+        
+        # 4. Generate the product of meta-questions and pieces, and compute the ground truth and distractor pool for each question-piece pair using the methods specified in the meta-questions file.
+        data, fields = step_1_generate_product(data, config, fields)
 
-    
-    # 6. For each question-piece pair, extract the ground truth answer and distractor pool using the specified method, and save them in new columns `ground_truth` and `distractor_pool`. The distractor pool should be saved as a JSON string (list of distractors).
-    data, fields = step_1_5_extract_ground_truth_and_distractors(data, config, fields)
-    
+        
+        # 6. For each question-piece pair, extract the ground truth answer and distractor pool using the specified method, and save them in new columns `ground_truth` and `distractor_pool`. The distractor pool should be saved as a JSON string (list of distractors).
+        data, fields = step_1_5_extract_ground_truth_and_distractors(data, config, fields)
+
+        
+        # If a path for the pre-generated benchmark was specified but the file didn't exist yet,
+        # save the freshly generated benchmark there for future reuse.
+        if args.path_to_pregenerated_full_benchmark_file is not None:
+            pregenerated_dir = os.path.dirname(args.path_to_pregenerated_full_benchmark_file)
+            if pregenerated_dir:
+                os.makedirs(pregenerated_dir, exist_ok=True)
+            print(f"--- Saving generated full benchmark to: {args.path_to_pregenerated_full_benchmark_file} ---")
+            with open(args.path_to_pregenerated_full_benchmark_file, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=fields, delimiter='\t')
+                writer.writeheader()
+                writer.writerows(data)
+            print(f"Saved {len(data)} rows.")
+
+
+
     # 7. Remove duplicates based on question text and piece path, to ensure that each question-piece pair is unique in the benchmark.
     # (duplicates are possible in case when we have "use_all_inds" set to true in config, then for the questions of type
     # "what is in the {order} {voice} note in the provided excerpt?" (e.g. "what is the 2nd soprano note"),
