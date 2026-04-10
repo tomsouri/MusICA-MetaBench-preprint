@@ -91,6 +91,7 @@ import uuid
 import random
 import shutil
 from typing import Dict, Tuple
+import numpy as np
 
 import requests
 import yaml
@@ -384,6 +385,9 @@ def main():
         
     config["benchmark_run_uuid"] = benchmark_run_uuid
 
+    rng = np.random.default_rng(config.get('seed', 42)) # to use for seed choice generate: rng.choice(list) / tested
+    config['rng'] = rng
+
     logdir = set_logdir(config)
     
     # ---------------------------------------------------------------------------------
@@ -510,6 +514,10 @@ def main():
 
             if config.get('seed', None) is None:
                 print("Warning: No seed provided for inference. The inference will be completely non-deterministic.")
+                current_seed_for_inference = None
+            else:
+                current_seed_for_inference = config['rng'].integers(0, 1e9)
+                print(f"Using seed {current_seed_for_inference} for inference.")
 
             payload, final_prompt = prepare_llm_payload(
                 model=model_name, 
@@ -520,7 +528,7 @@ def main():
                 submodality=submodality,
                 no_content_file=text_only_baseline,
                 zdr=config.get('zdr', True),
-                inference_seed=config.get('seed', None)
+                inference_seed=current_seed_for_inference
             )
 
             # Execute Request
