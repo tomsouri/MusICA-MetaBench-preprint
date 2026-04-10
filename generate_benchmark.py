@@ -336,8 +336,8 @@ def step_1_5_extract_ground_truth_and_distractors(data, config, fields):
         # try:
         ground_truth, distractor_pool, values_dict, new_values_word = AnswerDistractorExtractors.extract_answer_and_distractors(method_func, row['path'], values_dict)
         
-        #row['values']  = json.dumps(new_values_word)
-        #row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
+        row['values']  = json.dumps(new_values_word)
+        row['question'] = row['text_with_wildcards'].format(**{**values_dict, **new_values_word})
         
         if distractor_pool is not None:
             row['ground_truth'] = str(ground_truth)
