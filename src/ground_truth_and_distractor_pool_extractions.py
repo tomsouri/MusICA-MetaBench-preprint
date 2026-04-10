@@ -107,6 +107,7 @@ def get_tonality():
         for mode in modes:
             word = f"{p.name} {mode}"
             ontology[word] = word
+        ontology[p.name] = p.name # also include the pitch class name alone as a potential answer (e.g., for questions about key signatures without mode specified)
     return ontology
 
 def get_ordinal_suffix(n: int) -> str:
