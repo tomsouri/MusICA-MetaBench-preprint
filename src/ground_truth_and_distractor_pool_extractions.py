@@ -107,6 +107,7 @@ def get_tonality():
         for mode in modes:
             word = f"{p.name} {mode}"
             ontology[word] = word
+        ontology[p.name] = p.name # also include the pitch class name alone as a potential answer (e.g., for questions about key signatures without mode specified)
     return ontology
 
 def get_ordinal_suffix(n: int) -> str:
@@ -1100,7 +1101,8 @@ class AnswerDistractorExtractors:
         else:
 
             keys_dict["tonic"]  = key_signatures.name
-            keys_dict["dominant"]  = key.Key(key_signatures.getDominant().name, key_signatures.mode).asKey().name
+            #keys_dict["dominant"]  = key.Key(key_signatures.getDominant().name, key_signatures.mode).asKey().name
+            keys_dict["dominant"]  = key_signatures.getDominant().name
             keys_dict["relative minor/major"] = key_signatures.relative.name                    
             target_key_signature_name = self.dict_tonality_ontology[keys_dict[harmonic_function]]            
             if not(self.random_distractors):
