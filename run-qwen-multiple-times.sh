@@ -2,7 +2,7 @@
 
 # Default values
 model="Qwen/Qwen3-Omni-30B-A3B-Thinking"
-sizes=(5)
+sizes=(1 5 10 20 50 100 200 500)
 seeds=({42..51})
 setups=("normal" "text-only")
 repetitions=1
