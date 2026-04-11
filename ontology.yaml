@@ -26,5 +26,4 @@ modality:
 
 function:
   - tonic: "tonic"
-  - dominant: "dominant"
   - relative minor/major: "relative minor/major"
