@@ -13,7 +13,11 @@ from pathlib import Path
 
 def aggregate_results(base_path, b_size, seed, fields, setup, output, compare_mode):
     root = Path(base_path)
-    merge_keys = ['Criterion_Type', 'Criterion_Value', 'Total_Items']
+
+    if seed is None:
+        merge_keys = ['Criterion_Type', 'Criterion_Value']
+    else:
+        merge_keys = ['Criterion_Type', 'Criterion_Value', 'Total_Items']
     
     # Identify unique models
     all_models = [p.name for p in root.iterdir() if p.is_dir()]
@@ -23,11 +27,40 @@ def aggregate_results(base_path, b_size, seed, fields, setup, output, compare_mo
     base_df = None
 
     for model in all_models:
-        setups = ["normal", "to"] if compare_mode else [setup]
+        setups = ["normal", "text-only"] if compare_mode else [setup]
         
         for setup in setups:
-            file_path = root / model / b_size / setup / f"rs{seed}.res.tsv"
             
+            if seed is None:
+                file_path = root / model / b_size / f"{setup}.tsv"
+            else:
+                # TODO: this will not work as the filename now includes also the jobid
+                # we need to find a way to identify the correct file for the given seed
+                file_dir = root / model / b_size / setup
+                if not file_dir.exists():
+                    print(f"Warning: Missing directory {file_dir}. Skipping model {model} setup {setup}.")
+                    continue
+
+                # In this setting, only take the results from the first repetition (n=1) to avoid duplicates, since we are comparing across seeds
+                n = 1
+
+                # the filepath is in the format jobid_{id}.rs{seed}.rep{n}.res.tsv, but we do not know the id in advance
+                # find the file with the correct seed, and if there are multiple files with the same seed, take the one with highest jobid
+                candidate_files = list(file_dir.glob(f"jobid_*.rs{seed}.rep{n}.res.tsv"))
+                if not candidate_files:
+                    # fallback to older format if necessary or skip
+                    file_path = file_dir / f"rs{seed}.res.tsv"
+                else:
+                    # Sort by jobid (extracted from filename) descending
+                    def get_jobid(p):
+                        try:
+                            return int(p.name.split('_')[1].split('.')[0])
+                        except (IndexError, ValueError):
+                            return -1
+                    
+                    candidate_files.sort(key=get_jobid, reverse=True)
+                    file_path = candidate_files[0]
+
             if not file_path.exists():
                 print(f"Warning: Missing {file_path}. Skipping model {model} setup {setup}.")
                 continue
@@ -66,28 +99,39 @@ def aggregate_results(base_path, b_size, seed, fields, setup, output, compare_mo
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", required=True, help="Benchmark size")
-    parser.add_argument("--seed", required=True, help="Seed (e.g., 42)")
+    parser.add_argument("--seed", type=int, default=None, help="Seed (e.g., 42)")
     # parser.add_argument("--setup", default="normal", help="Setup name")
     # parser.add_argument("--field", nargs='+', default=["Accuracy_Percent", "Unparsable_Percent", "Model_Error_Percent", "Total_Time_s", "Total_Price"], help="List of fields to extract")
-    parser.add_argument("--path", default="results", help="Root results directory")
-    parser.add_argument("--output", default="aggregated_results", help="Path to save the output TSV")
+    parser.add_argument("--path", default="aggregated/comparison_between_seeds/", help="Root results directory")
+    parser.add_argument("--output", default="aggregated/models_comparison/", help="Path to save the output TSV")
     # parser.add_argument("--normal_vs_textonly_comparison", action="store_true")
 
     args = parser.parse_args()
 
-    interesting_fields = ["Accuracy_Percent", "Unparsable_Percent", "Model_Error_Percent", "Total_Time_s", "Total_Price"]
-    single_field = ["Accuracy_Percent"]
+    # Either seed should be None (then path should be aggregated/comparison_between_seeds/) 
+    # or seed should be provided (then path should be results/)
 
-    for setup in ["normal", "to"]:
+    
+    if args.seed is None:
+        interesting_fields = ["Mean_Accuracy (10 runs)", "Mean_Unparsable_Percent", "Mean_Model_Error_Percent", "Sum_Total_Time_s", "Sum_Total_Price"]
+        single_field = ["Mean_Accuracy (10 runs)"]
+        outdir= Path(args.output) / f"size_{args.size}" / "mean_over_seeds"
+    else:
+        single_field = ["Accuracy_Percent"]
+        interesting_fields = ["Accuracy_Percent", "Unparsable_Percent", "Model_Error_Percent", "Total_Time_s", "Total_Price"]
+        outdir= Path(args.output) / f"size_{args.size}" / f"seed_{args.seed}"
+    
+
+    for setup in ["normal", "text-only"]:
         print(f"Aggregating results for setup: {setup}")
         for fields in [interesting_fields, single_field]:
             print(f"Processing fields: {fields}")
-            outfile = args.output + f"{setup}"
-            outfile = outfile + "_all_fields.tsv" if len(fields) > 1 else outfile + "_accuracy_only.tsv"
+            outfile = outdir / f"{setup}"
+            outfile = (outfile / "all_fields.tsv") if len(fields) > 1 else (outfile / "accuracy_only.tsv")
 
             aggregate_results(args.path, args.size, args.seed, fields, setup, outfile, False)
     
-    outfile = args.output + "comparison_normal_vs_textonly.tsv"
+    outfile = outdir / "comparison_normal_vs_textonly.tsv"
     aggregate_results(args.path, args.size, args.seed, single_field, None, outfile, True)
 
 # example usage:

@@ -95,6 +95,9 @@ for size in "${sizes[@]}"; do
                 echo "Results written to $dir"
             fi
 
+            # Update the comparison of all models for given size of benchmarks, for the given seed.
+            .venv/bin/python3 generate_aggregated_table.py --size "${size}" --seed "${seed}" --path results/
+
         done
         # do the aggregation of results for the given setup and size, across seeds
         if [[ ${#seeds[@]} -gt 1 ]]; then
@@ -111,5 +114,8 @@ for size in "${sizes[@]}"; do
         fi
 
     done
+
+    # Generate comparison of all models for given size of benchmarks, on the average results across seeds.
+    .venv/bin/python3 generate_aggregated_table.py --size "${size}" --path aggregated/comparison_between_seeds/
 done
 
