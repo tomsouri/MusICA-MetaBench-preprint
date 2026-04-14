@@ -101,18 +101,19 @@ if __name__ == "__main__":
                         help="Google Sheet ID to upload results to")
     parser.add_argument("--gspread_credentials_location", type=str, default="logs/protobenchmark-logging-aa9418338494.json",
                         help="Path to gspread credentials JSON file")
-    parser.add_argument("--results_filename", type=str, default=None, choices=[None, "normal.tsv", "text-only.tsv"],
+    parser.add_argument("--results_filename", type=str, default=None, choices=[None, "normal.tsv", "text-only.tsv", "white-noise.tsv"],
                         help="From which files take the input results?")
     
     args = parser.parse_args()
 
     sheet_ids_to_upload = {
         "normal.tsv": "1QDJj7BP074IjWv9jAzjWHT4a2bjWCqtqbTeZJ6jWVPA",
-        "text-only.tsv": "1U0D2MLGffnxcHTe-WPWpUCXnRIdo4dlmnFyHWyePNGQ"
+        "text-only.tsv": "1U0D2MLGffnxcHTe-WPWpUCXnRIdo4dlmnFyHWyePNGQ",
+        "white-noise.tsv": "1EHKMVQTV4qUl2CpjV67zYrGHyzlmzgpIBy_ISOZQdZw"
     }  
 
     if args.results_filename is None:
-        for filename in ["normal.tsv", "text-only.tsv"]:
+        for filename in ["normal.tsv", "text-only.tsv", "white-noise.tsv"]:
             args.results_filename = filename
             args.gsheet_id_to_upload = sheet_ids_to_upload[filename]
             config = {
