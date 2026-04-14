@@ -27,7 +27,7 @@ def aggregate_results(base_path, b_size, seed, fields, setup, output, compare_mo
     base_df = None
 
     for model in all_models:
-        setups = ["normal", "text-only"] if compare_mode else [setup]
+        setups = ["normal", "text-only", "white-noise"] if compare_mode else [setup]
         
         for setup in setups:
             
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         outdir= Path(args.output) / f"size_{args.size}" / f"seed_{args.seed}"
     
 
-    for setup in ["normal", "text-only"]:
+    for setup in ["normal", "text-only", "white-noise"]:
         print(f"Aggregating results for setup: {setup}")
         for fields in [interesting_fields, single_field]:
             print(f"Processing fields: {fields}")
