@@ -32,6 +32,11 @@ if [ "$setup" == "text-only" ]; then
     text_only_flag="--text_only_baseline"
 fi
 
+if [ "$setup" == "white-noise" ]; then
+    text_only_flag="--white_noise_baseline"
+fi
+
+
 
 # echo "${apikey}" 
 
