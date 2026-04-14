@@ -25,6 +25,10 @@ for dataset_path in "$DATA_DIR"/*/; do
     if [ "$dataset_name" = "original" ]; then
         continue
     fi
+    # Skip the "white_noise" directory
+    if [ "$dataset_name" = "white_noise" ]; then
+        continue
+    fi
 
     # Iterate over all piece directories inside the current dataset
     for piece_path in "$dataset_path"*/; do
