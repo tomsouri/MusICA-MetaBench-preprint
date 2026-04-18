@@ -326,6 +326,7 @@ def main():
     parser.add_argument("--benchmark_file", help="Path to benchmark to be generated (overrides config)")
     parser.add_argument("--sheet_name", help="Override Google Sheet name in config")
     parser.add_argument("--text_only_baseline", help="Override text_only_baseline flag in config", action='store_true')
+    parser.add_argument("--white_noise_baseline", help="Override white_noise_baseline flag in config", action='store_true')
     parser.add_argument("--modalities", nargs='+', help="Override modalities filter in config")
     parser.add_argument("--run_id", help="Optional run ID to use in logs (overrides random UUID generation)")
     # New arg for GSheet generation tracking
@@ -361,6 +362,8 @@ def main():
         config['sheet_name'] = cmdline_args.sheet_name
     if cmdline_args.text_only_baseline:
         config['text_only_baseline'] = True
+    if cmdline_args.white_noise_baseline:
+        config['white_noise_baseline'] = True
     if cmdline_args.modalities:
         config['filters'] = config.get('filters', {})
         config['filters']['modality'] = cmdline_args.modalities
@@ -504,6 +507,23 @@ def main():
             content_file = item['path_to_question_context_file']
             text_only_baseline = config.get('text_only_baseline', False)
 
+            white_noise_baseline = config.get('white_noise_baseline', False)
+            if text_only_baseline and white_noise_baseline:
+                raise ValueError("Both text_only_baseline and white_noise_baseline cannot be true at the same time. Please choose one baseline or neither.")
+
+            if white_noise_baseline:
+                print("White noise baseline is enabled. Replacing content file with white noise.")
+                if submodality == "audio.mastermix.wav":
+                    content_file = "data/white_noise/audio.mastermix.wav"
+                elif submodality == "visual.short.png":
+                    content_file = "data/white_noise/visual.short.png"
+                elif submodality == "symbolic.musicxml":
+                    content_file = "data/white_noise/symbolic.musicxml"
+                elif submodality == "symbolic.abc.txt":
+                    content_file = "data/white_noise/symbolic.abc.txt"
+                else:
+                    raise ValueError(f"No white noise file available for submodality {submodality}. Please check the config or provide a white noise file for this submodality.")
+
             if model in supported_aggregate_models:
                 print(f"Model {model} is an aggregate model. Using supported aggregate model {supported_aggregate_models[model]} for payload preparation.")
                 model_name = supported_aggregate_models[model][modality]
@@ -552,7 +572,7 @@ def main():
 
             # Logging Logic
             log_row = item.copy()
-            model_str = "text-only-" + model if text_only_baseline else model
+            model_str = "text-only-" + model if text_only_baseline else ("white-noise-" + model if white_noise_baseline else model)
             log_row.update({
                 "benchmark_run_uuid": benchmark_run_uuid,
                 "datetime": datetime.datetime.now().isoformat(),
@@ -561,7 +581,7 @@ def main():
                 "model": model_str,
                 "full_json_response": json.dumps(full_json),
                 "extracted_response": resp_text,
-                "config_info": json.dumps({"text-only-baseline": text_only_baseline, "dry_run": config['dry_run'], "url": config['url'], "seed": config['seed']}),                
+                "config_info": json.dumps({"text-only-baseline": text_only_baseline, "dry_run": config['dry_run'], "url": config['url'], "seed": config['seed'], "white-noise-baseline": white_noise_baseline, "content_file_used": content_file}),                
                 "label_of_answer": extracted_answer,
                 "price": cost,
                 "time_taken": time_taken,

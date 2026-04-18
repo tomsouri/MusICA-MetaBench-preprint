@@ -99,6 +99,9 @@ dry_run: false
 # correct answer without seeing the musical material.
 text_only_baseline: false
 
+white_noise_baseline: false # If true, the model will receive white noise as the content file (instead of the actual musical material). To be used as a baseline to evaluate how well the model can guess the correct answer when the content is completely uninformative.
+
+
 
 logdir: "logs"
 
