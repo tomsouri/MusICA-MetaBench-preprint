@@ -36,6 +36,8 @@ DEFAULT_MODELS = [
 
 DEFAULT_SETUPS = [
     "normal",
+    "text-only",
+    "white-noise"
 ]
 
 
@@ -244,6 +246,8 @@ def create_aggregated_tsv(
     
     for benchmark_size in sorted_benchmark_sizes:
         row = {'benchmark_size': benchmark_size}
+
+        some_seed_missing = False
         
         for seed in seeds:
             col_name = f'seed_{seed}'
@@ -256,8 +260,13 @@ def create_aggregated_tsv(
                 print(f"Warning: Missing data for {model}/{benchmark_size}/{setup}/seed{seed}", 
                       file=sys.stderr)
                 row[col_name] = None
-        
-        rows.append(row)
+                some_seed_missing = True
+
+        if not some_seed_missing:
+            rows.append(row)
+        else:
+            print(f"Skipping benchmark_size={benchmark_size} for model={model}, setup={setup} due to missing seeds", 
+                  file=sys.stderr)
     
     if not rows:
         print(f"No data extracted for model={model}, setup={setup}", file=sys.stderr)
@@ -272,8 +281,14 @@ def create_aggregated_tsv(
     
     # Save to file
     if output_file is None:
-        output_file = results_dir / f"{model}_{setup}_aggregated.tsv"
+        output_file = results_dir / f"{model}.{setup}.tsv"
     
+    # if df is empty, skip saving
+    if df.empty:
+        print(f"No valid data to save for model={model}, setup={setup}", file=sys.stderr)
+        return None
+    
+
     output_file.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_file, sep='\t', index=False)
     print(f"Created: {output_file}")
@@ -309,7 +324,7 @@ def process_multiple_combinations(
     for model in models:
         for setup in setups:
             print(f"\nProcessing model={model}, setup={setup}...")
-            output_file = output_dir / f"{model}_{setup}_aggregated.tsv"
+            output_file = output_dir / f"{setup}" / f"{model}.tsv"
             
             df = create_aggregated_tsv(results_dir, model, setup, seeds, output_file)
             
@@ -331,10 +346,10 @@ def process_multiple_combinations(
         summary_df = pd.DataFrame(summary)
         print(summary_df.to_string(index=False))
         
-        # Save summary
-        summary_file = output_dir / "processing_summary.tsv"
-        summary_df.to_csv(summary_file, sep='\t', index=False)
-        print(f"\nSummary saved to: {summary_file}")
+        #  summary
+        # summary_file = output_dir / "processing_summary.tsv"
+        # summary_df.to_csv(summary_file, sep='\t', index=False)
+        # print(f"\nSummary saved to: {summary_file}")
 
 
 def main():
@@ -368,7 +383,7 @@ Examples:
         '--output-dir',
         type=Path,
         default="aggregated/10-times-runs/",
-        help='Path to output directory (default: same as results-dir)'
+        help='Path to output directory (default: aggregated/10-times-runs/)'
     )
     
     parser.add_argument(
