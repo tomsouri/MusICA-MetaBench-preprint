@@ -1,0 +1,7 @@
+alpha=0.005000	Qwen_Qwen3-Omni-30B-A3B-Thinking	aggregate-gpt-4o	aggregate-mistral	google_gemini-2.0-flash-lite-001	google_gemini-2.5-flash-lite	google_gemini-3.1-flash-lite-preview
+Qwen_Qwen3-Omni-30B-A3B-Thinking	-	SKIP	SKIP	SKIP	SKIP	S (p=0.0000)
+aggregate-gpt-4o	SKIP	-	SKIP	SKIP	SKIP	S (p=0.0000)
+aggregate-mistral	S (p=0.0008)	S (p=0.0016)	-	SKIP	S (p=0.0001)	S (p=0.0000)
+google_gemini-2.0-flash-lite-001	S (p=0.0010)	SKIP	SKIP	-	N (p=0.0089)	S (p=0.0000)
+google_gemini-2.5-flash-lite	SKIP	SKIP	SKIP	SKIP	-	S (p=0.0000)
+google_gemini-3.1-flash-lite-preview	SKIP	SKIP	SKIP	SKIP	SKIP	-

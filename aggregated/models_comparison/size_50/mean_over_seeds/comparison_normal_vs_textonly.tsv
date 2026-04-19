@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001_normal	google_gemini-2.0-flash-lite-001_text-only	google_gemini-2.0-flash-lite-001_white-noise	google_gemini-3.1-flash-lite-preview_normal	google_gemini-3.1-flash-lite-preview_text-only	google_gemini-3.1-flash-lite-preview_white-noise	aggregate-mistral_normal
+OVERALL	ALL	35.279	23.213	26.08	45.268	31.027	27.039	32.24
+submodality	audio.mastermix.wav	29.12	23.76	27.48	33.28	29.08	30.28	27.8
+submodality	symbolic.abc.txt	43.2	22.32	27.52	59.72	31.2	26.92	42.04
+submodality	visual.short.png	33.52	23.56	23.24	42.8	32.8	23.92	26.88
+piece_id	Anonymous_AusMeinesHerzensGrunde	33.311	23.48	24.632	40.545	30.581	25.016	29.621
+piece_id	Bach_IchStehAnDeinerKrippe	32.866	24.974	26.169	39.937	29.436	24.415	30.864
+piece_id	Crueger_AufAufMeinHerzMitFreuden	31.148	20.194	24.282	42.433	28.135	26.892	30.23
+piece_id	Drese_JesuGehVoran	37.645	26.699	25.383	46.472	32.747	27.375	31.878
+piece_id	Gesius_BefiehlDuDeineWege	35.616	22.247	28.539	47.394	30.748	27.991	31.969
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	35.667	20.341	26.111	49.195	28.844	27.248	29.775
+piece_id	Jan_DuGrosserSchmerzensmann	30.743	22.194	24.985	40.612	29.783	25.272	27.58
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	42.343	24.404	29.535	52.714	35.523	28.976	42.747
+piece_id	Vulpius_ChristusDerIstMeinLeben	37.658	23.202	26.264	50.375	31.867	28.748	34.518
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	36.46	25.641	25.001	45.187	33.488	28.447	33.031
+is_nota_correct	0	37.018	19.367	19.032	44.817	34.467	24.084	31.516
+is_nota_correct	1	28.334	38.599	54.266	47.067	17.265	38.867	35.135
+meta-question_id	1	30.132	21.867	21.064	36.8	25.067	21.333	26.266
+meta-question_id	10	37.451	22.158	26.862	46.47	34.51	28.235	33.727
+meta-question_id	11	24.167	19.375	24.166	26.042	26.041	25.208	24.168
+meta-question_id	2	32.267	22.933	23.735	49.066	23.2	26.533	29.334
+meta-question_id	3	27.2	14.0	19.2	35.867	31.067	19.6	22.668
+meta-question_id	4	42.401	26.668	33.6	53.866	40.267	36.666	32.0
+meta-question_id	5	37.868	22.134	23.866	61.867	39.601	32.267	48.001
+meta-question_id	6	55.2	40.665	47.067	51.867	38.933	41.066	43.2
+meta-question_id	7	36.401	25.733	29.201	46.268	36.932	28.933	39.333
+meta-question_id	8	16.8	13.601	13.467	22.267	13.468	12.932	15.598
+meta-question_id	9	49.412	25.098	23.334	68.433	31.763	23.138	40.589
+category	harmony	37.268	22.267	24.798	47.4	30.867	25.534	33.0
+category	pitch	33.0	21.366	24.4	43.9	29.899	26.034	27.568
+category	rhythm	36.565	25.534	28.4	45.568	32.235	28.801	36.533
+subcategory	harmonic-recognition	37.268	22.267	24.798	47.4	30.867	25.534	33.0
+subcategory	interval-recognition	34.801	20.334	26.4	44.866	35.668	28.133	27.333
+subcategory	pitch-recognition	31.201	22.4	22.399	42.935	24.133	23.933	27.8
+subcategory	proportion-recognition	26.602	19.666	21.331	34.267	25.2	20.934	27.468
+subcategory	rhythmic-recognition	46.533	31.4	35.468	56.865	39.266	36.668	45.6
+skill	cadence recognition	24.167	19.375	24.166	26.042	26.041	25.208	24.168
+skill	chord recognition	37.451	22.158	26.862	46.47	34.51	28.235	33.727
+skill	interval recognition	27.2	14.0	19.2	35.867	31.067	19.6	22.668
+skill	interval statistics	42.401	26.668	33.6	53.866	40.267	36.666	32.0
+skill	note length	37.868	22.134	23.866	61.867	39.601	32.267	48.001
+skill	note length statistics	55.2	40.665	47.067	51.867	38.933	41.066	43.2
+skill	pitch recognition	30.132	21.867	21.064	36.8	25.067	21.333	26.266
+skill	pitch statistics	32.267	22.933	23.735	49.066	23.2	26.533	29.334
+skill	rhythm pattern	36.401	25.733	29.201	46.268	36.932	28.933	39.333
+skill	rhythm pattern statistics	16.8	13.601	13.467	22.267	13.468	12.932	15.598
+skill	tonality recognition	49.412	25.098	23.334	68.433	31.763	23.138	40.589
+rel/abs	absolute	38.662	26.212	28.632	49.403	32.107	30.0	36.267
+rel/abs	relative	32.305	20.577	23.835	41.628	30.074	24.437	28.696
+specification	harmony-absolute	37.451	22.158	26.862	46.47	34.51	28.235	33.727
+specification	harmony-relative	37.168	22.321	23.735	47.877	28.987	24.139	32.623
+specification	pitch-absolute	31.201	22.4	22.399	42.935	24.133	23.933	27.8
+specification	pitch-relative	34.801	20.334	26.4	44.866	35.668	28.133	27.333
+specification	rhythm-absolute	46.533	31.4	35.468	56.865	39.266	36.668	45.6
+specification	rhythm-relative	26.602	19.666	21.331	34.267	25.2	20.934	27.468

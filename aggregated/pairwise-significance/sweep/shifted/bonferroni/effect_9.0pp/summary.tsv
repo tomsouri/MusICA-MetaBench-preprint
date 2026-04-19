@@ -1,0 +1,10 @@
+size	n_models	n_significant	n_not_significant	n_skip	n_tested	all_significant	alpha_corrected
+1	6	0	30	0	30	NO	0.001667
+5	6	22	8	0	30	NO	0.001667
+10	6	30	0	0	30	YES	0.001667
+20	6	30	0	0	30	YES	0.001667
+50	4	12	0	0	12	YES	0.004167
+100	3	6	0	0	6	YES	0.008333
+
+# effect_size=9.0pp  |  alpha=0.05  |  mode=shifted  |  bonferroni=yes
+# minimum_size_all_significant=10

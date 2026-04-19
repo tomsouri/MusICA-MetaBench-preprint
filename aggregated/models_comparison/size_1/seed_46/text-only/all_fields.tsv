@@ -1,0 +1,36 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview_Accuracy_Percent	google_gemini-3.1-flash-lite-preview_Unparsable_Percent	google_gemini-3.1-flash-lite-preview_Model_Error_Percent	google_gemini-3.1-flash-lite-preview_Total_Time_s	google_gemini-3.1-flash-lite-preview_Total_Price	Qwen_Qwen3-Omni-30B-A3B-Thinking_Accuracy_Percent	Qwen_Qwen3-Omni-30B-A3B-Thinking_Unparsable_Percent	Qwen_Qwen3-Omni-30B-A3B-Thinking_Model_Error_Percent	Qwen_Qwen3-Omni-30B-A3B-Thinking_Total_Time_s	Qwen_Qwen3-Omni-30B-A3B-Thinking_Total_Price	google_gemini-2.0-flash-lite-001_Accuracy_Percent	google_gemini-2.0-flash-lite-001_Unparsable_Percent	google_gemini-2.0-flash-lite-001_Model_Error_Percent	google_gemini-2.0-flash-lite-001_Total_Time_s	google_gemini-2.0-flash-lite-001_Total_Price
+OVERALL	ALL	15	33.33	0.0	0.0	53.13	0.007627	20.0	0.0	0.0	197.63	0.0	13.33	7.69	0.0	46.43	0.001692
+submodality	audio.mastermix.wav	5	40.0	0.0	0.0	19.9	0.002327	0.0	0.0	0.0	25.42	0.0	0.0	0.0	0.0	13.47	0.000473
+submodality	symbolic.abc.txt	5	20.0	0.0	0.0	13.23	0.002643	40.0	0.0	0.0	100.38	0.0	0.0	20.0	0.0	16.56	0.000607
+submodality	visual.short.png	5	40.0	0.0	0.0	20.0	0.002657	20.0	0.0	0.0	71.83	0.0	40.0	0.0	0.0	16.4	0.000612
+piece_id	Bach_IchStehAnDeinerKrippe	3	33.33	0.0	0.0	17.32	0.001867	33.33	0.0	0.0	14.7	0.0	0.0	33.33	0.0	4.04	0.000111
+piece_id	Drese_JesuGehVoran	6	33.33	0.0	0.0	23.14	0.003103	33.33	0.0	0.0	83.8	0.0	16.67	0.0	0.0	21.48	0.000783
+piece_id	Vulpius_ChristusDerIstMeinLeben	3	66.67	0.0	0.0	6.34	0.001384	0.0	0.0	0.0	42.31	0.0	0.0	0.0	0.0	10.69	0.000369
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	3	0.0	0.0	0.0	6.32	0.001272	0.0	0.0	0.0	56.83	0.0	33.33	0.0	0.0	10.22	0.000428
+is_nota_correct	0	12	41.67	0.0	0.0	37.73	0.005816	16.67	0.0	0.0	149.3	0.0	16.67	0.0	0.0	37.96	0.001415
+is_nota_correct	1	3	0.0	0.0	0.0	15.4	0.001811	33.33	0.0	0.0	48.33	0.0	0.0	33.33	0.0	8.47	0.000277
+meta-question_id	1	3	0.0	0.0	0.0	15.15	0.001517	0.0	0.0	0.0	42.89	0.0	0.0	0.0	0.0	8.89	0.000298
+meta-question_id	3	3	33.33	0.0	0.0	17.32	0.001867	33.33	0.0	0.0	14.7	0.0	0.0	33.33	0.0	4.04	0.000111
+meta-question_id	5	3	66.67	0.0	0.0	6.34	0.001384	0.0	0.0	0.0	42.31	0.0	0.0	0.0	0.0	10.69	0.000369
+meta-question_id	7	3	0.0	0.0	0.0	6.32	0.001272	0.0	0.0	0.0	56.83	0.0	33.33	0.0	0.0	10.22	0.000428
+meta-question_id	9	3	66.67	0.0	0.0	7.99	0.001586	66.67	0.0	0.0	40.91	0.0	33.33	0.0	0.0	12.59	0.000485
+category	harmony	3	66.67	0.0	0.0	7.99	0.001586	66.67	0.0	0.0	40.91	0.0	33.33	0.0	0.0	12.59	0.000485
+category	pitch	6	16.67	0.0	0.0	32.47	0.003385	16.67	0.0	0.0	57.59	0.0	0.0	16.67	0.0	12.93	0.00041
+category	rhythm	6	33.33	0.0	0.0	12.66	0.002657	0.0	0.0	0.0	99.13	0.0	16.67	0.0	0.0	20.91	0.000797
+subcategory	harmonic-recognition	3	66.67	0.0	0.0	7.99	0.001586	66.67	0.0	0.0	40.91	0.0	33.33	0.0	0.0	12.59	0.000485
+subcategory	interval-recognition	3	33.33	0.0	0.0	17.32	0.001867	33.33	0.0	0.0	14.7	0.0	0.0	33.33	0.0	4.04	0.000111
+subcategory	pitch-recognition	3	0.0	0.0	0.0	15.15	0.001517	0.0	0.0	0.0	42.89	0.0	0.0	0.0	0.0	8.89	0.000298
+subcategory	proportion-recognition	3	0.0	0.0	0.0	6.32	0.001272	0.0	0.0	0.0	56.83	0.0	33.33	0.0	0.0	10.22	0.000428
+subcategory	rhythmic-recognition	3	66.67	0.0	0.0	6.34	0.001384	0.0	0.0	0.0	42.31	0.0	0.0	0.0	0.0	10.69	0.000369
+skill	interval recognition	3	33.33	0.0	0.0	17.32	0.001867	33.33	0.0	0.0	14.7	0.0	0.0	33.33	0.0	4.04	0.000111
+skill	note length	3	66.67	0.0	0.0	6.34	0.001384	0.0	0.0	0.0	42.31	0.0	0.0	0.0	0.0	10.69	0.000369
+skill	pitch recognition	3	0.0	0.0	0.0	15.15	0.001517	0.0	0.0	0.0	42.89	0.0	0.0	0.0	0.0	8.89	0.000298
+skill	rhythm pattern	3	0.0	0.0	0.0	6.32	0.001272	0.0	0.0	0.0	56.83	0.0	33.33	0.0	0.0	10.22	0.000428
+skill	tonality recognition	3	66.67	0.0	0.0	7.99	0.001586	66.67	0.0	0.0	40.91	0.0	33.33	0.0	0.0	12.59	0.000485
+rel/abs	absolute	6	33.33	0.0	0.0	21.49	0.002902	0.0	0.0	0.0	85.2	0.0	0.0	0.0	0.0	19.58	0.000667
+rel/abs	relative	9	33.33	0.0	0.0	31.63	0.004725	33.33	0.0	0.0	112.43	0.0	22.22	14.29	0.0	26.85	0.001025
+specification	harmony-relative	3	66.67	0.0	0.0	7.99	0.001586	66.67	0.0	0.0	40.91	0.0	33.33	0.0	0.0	12.59	0.000485
+specification	pitch-absolute	3	0.0	0.0	0.0	15.15	0.001517	0.0	0.0	0.0	42.89	0.0	0.0	0.0	0.0	8.89	0.000298
+specification	pitch-relative	3	33.33	0.0	0.0	17.32	0.001867	33.33	0.0	0.0	14.7	0.0	0.0	33.33	0.0	4.04	0.000111
+specification	rhythm-absolute	3	66.67	0.0	0.0	6.34	0.001384	0.0	0.0	0.0	42.31	0.0	0.0	0.0	0.0	10.69	0.000369
+specification	rhythm-relative	3	0.0	0.0	0.0	6.32	0.001272	0.0	0.0	0.0	56.83	0.0	33.33	0.0	0.0	10.22	0.000428

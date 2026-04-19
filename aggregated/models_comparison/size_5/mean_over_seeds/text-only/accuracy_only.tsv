@@ -1,0 +1,49 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview	Qwen_Qwen3-Omni-30B-A3B-Thinking
+OVERALL	ALL	24.266	31.467	24.0
+submodality	audio.mastermix.wav	22.4	29.2	24.0
+submodality	symbolic.abc.txt	25.2	32.4	26.4
+submodality	visual.short.png	25.2	32.8	21.6
+piece_id	Anonymous_AusMeinesHerzensGrunde	32.461	29.554	28.436
+piece_id	Bach_IchStehAnDeinerKrippe	24.388	38.167	25.277
+piece_id	Gesius_BefiehlDuDeineWege	32.22	37.5	26.666
+piece_id	Jan_DuGrosserSchmerzensmann	26.056	29.888	20.888
+is_nota_correct	0	21.166	34.5	19.333
+is_nota_correct	1	36.667	19.335	42.667
+meta-question_id	1	23.331	19.998	27.776
+meta-question_id	10	31.665	39.998	16.668
+meta-question_id	11	29.999	26.665	9.999
+meta-question_id	2	23.335	21.668	16.668
+meta-question_id	3	17.776	25.555	23.331
+meta-question_id	4	35.0	51.665	38.334
+meta-question_id	5	16.665	38.888	15.554
+meta-question_id	6	26.668	39.999	39.999
+meta-question_id	7	18.887	27.775	23.331
+meta-question_id	8	21.667	21.668	5.001
+meta-question_id	9	35.0	36.666	43.332
+category	harmony	32.667	36.0	26.0
+category	pitch	24.001	28.333	26.331
+category	rhythm	20.333	32.334	20.666
+subcategory	harmonic-recognition	32.667	36.0	26.0
+subcategory	interval-recognition	24.667	36.0	29.335
+subcategory	pitch-recognition	23.333	20.668	23.333
+subcategory	proportion-recognition	20.0	25.334	16.0
+subcategory	rhythmic-recognition	20.666	39.334	25.334
+skill	cadence recognition	29.999	26.665	9.999
+skill	chord recognition	31.665	39.998	16.668
+skill	interval recognition	17.776	25.555	23.331
+skill	interval statistics	35.0	51.665	38.334
+skill	note length	16.665	38.888	15.554
+skill	note length statistics	26.668	39.999	39.999
+skill	pitch recognition	23.331	19.998	27.776
+skill	pitch statistics	23.335	21.668	16.668
+skill	rhythm pattern	18.887	27.775	23.331
+skill	rhythm pattern statistics	21.667	21.668	5.001
+skill	tonality recognition	35.0	36.666	43.332
+rel/abs	absolute	23.61	31.667	23.054
+rel/abs	relative	24.872	31.283	24.872
+specification	harmony-absolute	31.665	39.998	16.668
+specification	harmony-relative	33.333	33.331	32.219
+specification	pitch-absolute	23.333	20.668	23.333
+specification	pitch-relative	24.667	36.0	29.335
+specification	rhythm-absolute	20.666	39.334	25.334
+specification	rhythm-relative	20.0	25.334	16.0

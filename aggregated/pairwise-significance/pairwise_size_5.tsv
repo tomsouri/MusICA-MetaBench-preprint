@@ -1,0 +1,7 @@
+	Qwen_Qwen3-Omni-30B-A3B-Thinking	aggregate-gpt-4o	aggregate-mistral	google_gemini-2.0-flash-lite-001	google_gemini-2.5-flash-lite	google_gemini-3.1-flash-lite-preview
+Qwen_Qwen3-Omni-30B-A3B-Thinking	-	N (p=0.1785)	N (p=0.2459)	N (p=0.1728)	N (p=0.1487)	N (p=0.2202)
+aggregate-gpt-4o	N (p=0.1785)	-	N (p=0.1222)	N (p=0.1659)	N (p=0.0870)	N (p=0.1298)
+aggregate-mistral	N (p=0.2459)	N (p=0.1222)	-	N (p=0.1882)	N (p=0.1913)	N (p=0.2157)
+google_gemini-2.0-flash-lite-001	N (p=0.1728)	N (p=0.1659)	N (p=0.1882)	-	N (p=0.1894)	N (p=0.2333)
+google_gemini-2.5-flash-lite	N (p=0.1487)	N (p=0.0870)	N (p=0.1913)	N (p=0.1894)	-	N (p=0.1352)
+google_gemini-3.1-flash-lite-preview	N (p=0.2202)	N (p=0.1298)	N (p=0.2157)	N (p=0.2333)	N (p=0.1352)	-

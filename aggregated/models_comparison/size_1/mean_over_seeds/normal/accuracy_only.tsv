@@ -1,0 +1,32 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview	aggregate-mistral	google_gemini-2.5-flash-lite	aggregate-gpt-4o	Qwen_Qwen3-Omni-30B-A3B-Thinking
+OVERALL	ALL	33.999	42.0	34.0	38.001	33.998	38.666
+submodality	audio.mastermix.wav	24.0	22.0	38.0	34.0	22.0	22.0
+submodality	symbolic.abc.txt	50.0	68.0	32.0	56.0	46.0	64.0
+submodality	visual.short.png	28.0	36.0	32.0	24.0	34.0	30.0
+is_nota_correct	0	35.833	43.333	33.334	43.333	35.0	33.332
+is_nota_correct	1	26.665	36.666	36.665	16.666	29.999	60.001
+meta-question_id	1	13.333	40.0	36.666	26.666	36.665	50.0
+meta-question_id	3	40.0	36.666	19.998	26.666	20.0	26.665
+meta-question_id	5	46.667	43.334	46.667	46.667	39.999	36.666
+meta-question_id	7	36.666	36.667	26.666	36.667	33.333	36.666
+meta-question_id	9	33.332	53.335	40.0	53.333	40.001	43.333
+category	harmony	33.332	53.335	40.0	53.333	40.001	43.333
+category	pitch	26.665	38.333	28.332	26.668	28.335	38.333
+category	rhythm	41.666	40.0	36.667	41.666	36.666	36.665
+subcategory	harmonic-recognition	33.332	53.335	40.0	53.333	40.001	43.333
+subcategory	interval-recognition	40.0	36.666	19.998	26.666	20.0	26.665
+subcategory	pitch-recognition	13.333	40.0	36.666	26.666	36.665	50.0
+subcategory	proportion-recognition	36.666	36.667	26.666	36.667	33.333	36.666
+subcategory	rhythmic-recognition	46.667	43.334	46.667	46.667	39.999	36.666
+skill	interval recognition	40.0	36.666	19.998	26.666	20.0	26.665
+skill	note length	46.667	43.334	46.667	46.667	39.999	36.666
+skill	pitch recognition	13.333	40.0	36.666	26.666	36.665	50.0
+skill	rhythm pattern	36.666	36.667	26.666	36.667	33.333	36.666
+skill	tonality recognition	33.332	53.335	40.0	53.333	40.001	43.333
+rel/abs	absolute	30.0	41.666	41.668	36.668	38.332	43.333
+rel/abs	relative	36.664	42.221	28.889	38.889	31.11	35.553
+specification	harmony-relative	33.332	53.335	40.0	53.333	40.001	43.333
+specification	pitch-absolute	13.333	40.0	36.666	26.666	36.665	50.0
+specification	pitch-relative	40.0	36.666	19.998	26.666	20.0	26.665
+specification	rhythm-absolute	46.667	43.334	46.667	46.667	39.999	36.666
+specification	rhythm-relative	36.666	36.667	26.666	36.667	33.333	36.666

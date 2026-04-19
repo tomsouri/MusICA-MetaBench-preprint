@@ -1,0 +1,10 @@
+size	n_models	n_significant	n_not_significant	n_skip	n_tested	all_significant
+1	6	1	10	19	11	NO
+5	6	11	4	15	15	NO
+10	6	12	2	16	14	NO
+20	6	13	1	16	14	NO
+50	4	6	0	6	6	YES
+100	3	3	0	3	3	YES
+
+# effect_size=1.0pp  |  alpha=0.05  |  mode=standard  |  bonferroni=no
+# minimum_size_all_significant=50

@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview_Accuracy_Percent	google_gemini-3.1-flash-lite-preview_Unparsable_Percent	google_gemini-3.1-flash-lite-preview_Model_Error_Percent	google_gemini-3.1-flash-lite-preview_Total_Time_s	google_gemini-3.1-flash-lite-preview_Total_Price	google_gemini-2.0-flash-lite-001_Accuracy_Percent	google_gemini-2.0-flash-lite-001_Unparsable_Percent	google_gemini-2.0-flash-lite-001_Model_Error_Percent	google_gemini-2.0-flash-lite-001_Total_Time_s	google_gemini-2.0-flash-lite-001_Total_Price
+OVERALL	ALL	1500	33.6	0.4	0.0	4374.4	0.818535	23.27	12.86	0.0	4095.44	0.138813
+submodality	audio.mastermix.wav	500	29.8	0.28	0.0	1272.5	0.211847	26.4	3.8	0.0	1194.64	0.039184
+submodality	symbolic.abc.txt	500	35.2	0.31	0.0	1564.45	0.297063	21.2	24.62	0.0	1628.29	0.057663
+submodality	visual.short.png	500	35.8	0.62	0.0	1537.46	0.309624	22.2	9.51	0.0	1272.51	0.041966
+piece_id	Anonymous_AusMeinesHerzensGrunde	153	32.03	0.96	0.0	429.54	0.085068	24.84	15.65	0.0	384.69	0.013929
+piece_id	Bach_IchStehAnDeinerKrippe	201	34.33	0.76	0.0	616.12	0.111794	23.88	11.11	0.0	578.69	0.020185
+piece_id	Crueger_AufAufMeinHerzMitFreuden	174	34.48	0.88	0.0	517.5	0.096543	23.56	9.02	0.0	472.86	0.015702
+piece_id	Drese_JesuGehVoran	123	34.15	0.0	0.0	373.6	0.067199	22.76	9.47	0.0	352.24	0.012559
+piece_id	Gesius_BefiehlDuDeineWege	144	34.72	0.0	0.0	405.48	0.077116	22.22	9.82	0.0	383.55	0.012922
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	141	23.4	0.0	0.0	386.88	0.073955	24.11	11.21	0.0	391.16	0.013016
+piece_id	Jan_DuGrosserSchmerzensmann	153	33.99	0.0	0.0	474.45	0.084045	22.22	10.08	0.0	446.71	0.015346
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	135	38.52	0.0	0.0	389.16	0.075572	17.04	18.75	0.0	334.24	0.011142
+piece_id	Vulpius_ChristusDerIstMeinLeben	159	40.88	0.0	0.0	452.21	0.084447	29.56	20.54	0.0	437.0	0.013939
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	117	27.35	1.18	0.0	329.45	0.062797	20.51	13.98	0.0	314.3	0.010075
+is_nota_correct	0	1200	36.25	0.39	0.0	3443.04	0.652148	17.75	12.56	0.0	3268.48	0.110269
+is_nota_correct	1	300	23.0	0.43	0.0	931.36	0.166387	45.33	14.63	0.0	826.96	0.028545
+meta-question_id	1	150	22.0	0.0	0.0	399.99	0.079027	23.33	0.0	0.0	501.33	0.013315
+meta-question_id	10	120	42.5	0.0	0.0	318.72	0.062754	22.5	31.18	0.0	299.12	0.01107
+meta-question_id	11	120	26.67	0.0	0.0	326.46	0.066364	20.0	29.17	0.0	253.74	0.008701
+meta-question_id	2	150	23.33	0.87	0.0	442.08	0.077782	23.33	4.35	0.0	366.55	0.011965
+meta-question_id	3	150	24.67	0.88	0.0	460.28	0.091551	18.0	24.39	0.0	401.66	0.014072
+meta-question_id	4	150	51.33	0.0	0.0	465.65	0.078752	33.33	7.0	0.0	399.97	0.012803
+meta-question_id	5	150	40.67	0.0	0.0	422.17	0.080361	19.33	27.27	0.0	362.36	0.011819
+meta-question_id	6	150	40.0	0.0	0.0	476.61	0.084744	26.0	3.6	0.0	431.33	0.015475
+meta-question_id	7	150	46.0	1.23	0.0	450.66	0.091539	25.33	10.71	0.0	474.22	0.018274
+meta-question_id	8	150	16.67	0.8	0.0	454.21	0.07906	17.33	0.0	0.0	430.4	0.01495
+meta-question_id	9	60	40.0	0.0	0.0	157.58	0.0266	31.67	0.0	0.0	174.76	0.006369
+category	harmony	300	35.67	0.0	0.0	802.75	0.155719	23.33	24.78	0.0	727.62	0.02614
+category	pitch	600	30.33	0.48	0.0	1768.01	0.327112	24.5	9.27	0.0	1669.52	0.052156
+category	rhythm	600	35.83	0.52	0.0	1803.64	0.335704	22.0	10.47	0.0	1698.31	0.060518
+subcategory	harmonic-recognition	300	35.67	0.0	0.0	802.75	0.155719	23.33	24.78	0.0	727.62	0.02614
+subcategory	interval-recognition	300	38.0	0.54	0.0	925.93	0.170304	25.67	16.59	0.0	801.64	0.026875
+subcategory	pitch-recognition	300	22.67	0.43	0.0	842.07	0.156809	23.33	2.17	0.0	867.88	0.025281
+subcategory	proportion-recognition	300	31.33	0.97	0.0	904.87	0.170599	21.33	5.08	0.0	904.62	0.033224
+subcategory	rhythmic-recognition	300	40.33	0.0	0.0	898.78	0.165105	22.67	15.95	0.0	793.69	0.027294
+skill	cadence recognition	120	26.67	0.0	0.0	326.46	0.066364	20.0	29.17	0.0	253.74	0.008701
+skill	chord recognition	120	42.5	0.0	0.0	318.72	0.062754	22.5	31.18	0.0	299.12	0.01107
+skill	interval recognition	150	24.67	0.88	0.0	460.28	0.091551	18.0	24.39	0.0	401.66	0.014072
+skill	interval statistics	150	51.33	0.0	0.0	465.65	0.078752	33.33	7.0	0.0	399.97	0.012803
+skill	note length	150	40.67	0.0	0.0	422.17	0.080361	19.33	27.27	0.0	362.36	0.011819
+skill	note length statistics	150	40.0	0.0	0.0	476.61	0.084744	26.0	3.6	0.0	431.33	0.015475
+skill	pitch recognition	150	22.0	0.0	0.0	399.99	0.079027	23.33	0.0	0.0	501.33	0.013315
+skill	pitch statistics	150	23.33	0.87	0.0	442.08	0.077782	23.33	4.35	0.0	366.55	0.011965
+skill	rhythm pattern	150	46.0	1.23	0.0	450.66	0.091539	25.33	10.71	0.0	474.22	0.018274
+skill	rhythm pattern statistics	150	16.67	0.8	0.0	454.21	0.07906	17.33	0.0	0.0	430.4	0.01495
+skill	tonality recognition	60	40.0	0.0	0.0	157.58	0.0266	31.67	0.0	0.0	174.76	0.006369
+rel/abs	absolute	720	33.33	0.21	0.0	2059.57	0.384668	22.92	12.79	0.0	1960.69	0.063644
+rel/abs	relative	780	33.85	0.58	0.0	2314.84	0.433867	23.59	12.92	0.0	2134.76	0.075169
+specification	harmony-absolute	120	42.5	0.0	0.0	318.72	0.062754	22.5	31.18	0.0	299.12	0.01107
+specification	harmony-relative	180	31.11	0.0	0.0	484.04	0.092965	23.89	20.44	0.0	428.5	0.01507
+specification	pitch-absolute	300	22.67	0.43	0.0	842.07	0.156809	23.33	2.17	0.0	867.88	0.025281
+specification	pitch-relative	300	38.0	0.54	0.0	925.93	0.170304	25.67	16.59	0.0	801.64	0.026875
+specification	rhythm-absolute	300	40.33	0.0	0.0	898.78	0.165105	22.67	15.95	0.0	793.69	0.027294
+specification	rhythm-relative	300	31.33	0.97	0.0	904.87	0.170599	21.33	5.08	0.0	904.62	0.033224

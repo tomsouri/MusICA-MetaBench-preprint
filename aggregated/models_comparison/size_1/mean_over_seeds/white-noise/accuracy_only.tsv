@@ -1,0 +1,32 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview
+OVERALL	ALL	19.333	20.666
+submodality	audio.mastermix.wav	22.0	22.0
+submodality	symbolic.abc.txt	18.0	22.0
+submodality	visual.short.png	18.0	18.0
+is_nota_correct	0	11.665	17.501
+is_nota_correct	1	50.0	33.332
+meta-question_id	1	29.999	26.665
+meta-question_id	3	16.666	9.999
+meta-question_id	5	13.333	26.666
+meta-question_id	7	23.333	20.0
+meta-question_id	9	13.332	19.998
+category	harmony	13.332	19.998
+category	pitch	23.334	18.336
+category	rhythm	18.334	23.334
+subcategory	harmonic-recognition	13.332	19.998
+subcategory	interval-recognition	16.666	9.999
+subcategory	pitch-recognition	29.999	26.665
+subcategory	proportion-recognition	23.333	20.0
+subcategory	rhythmic-recognition	13.333	26.666
+skill	interval recognition	16.666	9.999
+skill	note length	13.333	26.666
+skill	pitch recognition	29.999	26.665
+skill	rhythm pattern	23.333	20.0
+skill	tonality recognition	13.332	19.998
+rel/abs	absolute	21.667	26.667
+rel/abs	relative	17.776	16.665
+specification	harmony-relative	13.332	19.998
+specification	pitch-absolute	29.999	26.665
+specification	pitch-relative	16.666	9.999
+specification	rhythm-absolute	13.333	26.666
+specification	rhythm-relative	23.333	20.0

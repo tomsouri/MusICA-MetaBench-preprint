@@ -1,0 +1,32 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview	Qwen_Qwen3-Omni-30B-A3B-Thinking
+OVERALL	ALL	20.666	22.665	24.0
+submodality	audio.mastermix.wav	16.0	22.0	22.0
+submodality	symbolic.abc.txt	12.0	16.0	28.0
+submodality	visual.short.png	34.0	30.0	22.0
+is_nota_correct	0	16.666	27.501	17.499
+is_nota_correct	1	36.666	3.333	49.999
+meta-question_id	1	29.999	23.333	29.999
+meta-question_id	3	16.665	19.999	16.665
+meta-question_id	5	9.999	29.999	16.666
+meta-question_id	7	19.999	16.666	13.333
+meta-question_id	9	26.665	23.332	43.333
+category	harmony	26.665	23.332	43.333
+category	pitch	23.334	21.667	23.335
+category	rhythm	15.002	23.334	15.001
+subcategory	harmonic-recognition	26.665	23.332	43.333
+subcategory	interval-recognition	16.665	19.999	16.665
+subcategory	pitch-recognition	29.999	23.333	29.999
+subcategory	proportion-recognition	19.999	16.666	13.333
+subcategory	rhythmic-recognition	9.999	29.999	16.666
+skill	interval recognition	16.665	19.999	16.665
+skill	note length	9.999	29.999	16.666
+skill	pitch recognition	29.999	23.333	29.999
+skill	rhythm pattern	19.999	16.666	13.333
+skill	tonality recognition	26.665	23.332	43.333
+rel/abs	absolute	20.002	26.666	23.333
+rel/abs	relative	21.109	19.998	24.443
+specification	harmony-relative	26.665	23.332	43.333
+specification	pitch-absolute	29.999	23.333	29.999
+specification	pitch-relative	16.665	19.999	16.665
+specification	rhythm-absolute	9.999	29.999	16.666
+specification	rhythm-relative	19.999	16.666	13.333
