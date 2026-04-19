@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+aggregate-gpt-4o	OVERALL	ALL	150	46	104	0	0	30.67	0.0	0.0	583.44	1.35219
+aggregate-gpt-4o	submodality	audio.mastermix.wav	50	15	35	0	0	30.0	0.0	0.0	244.74	0.933808
+aggregate-gpt-4o	submodality	symbolic.abc.txt	50	21	29	0	0	42.0	0.0	0.0	200.45	0.312157
+aggregate-gpt-4o	submodality	visual.short.png	50	10	40	0	0	20.0	0.0	0.0	138.25	0.106225
+aggregate-gpt-4o	piece_id	Anonymous_AusMeinesHerzensGrunde	12	4	8	0	0	33.33	0.0	0.0	46.02	0.1306
+aggregate-gpt-4o	piece_id	Bach_IchStehAnDeinerKrippe	18	5	13	0	0	27.78	0.0	0.0	69.84	0.167708
+aggregate-gpt-4o	piece_id	Crueger_AufAufMeinHerzMitFreuden	24	7	17	0	0	29.17	0.0	0.0	96.07	0.236402
+aggregate-gpt-4o	piece_id	Drese_JesuGehVoran	6	5	1	0	0	83.33	0.0	0.0	24.98	0.049418
+aggregate-gpt-4o	piece_id	Gesius_BefiehlDuDeineWege	24	9	15	0	0	37.5	0.0	0.0	91.06	0.220745
+aggregate-gpt-4o	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	15	5	10	0	0	33.33	0.0	0.0	66.26	0.135595
+aggregate-gpt-4o	piece_id	Jan_DuGrosserSchmerzensmann	15	5	10	0	0	33.33	0.0	0.0	55.24	0.129503
+aggregate-gpt-4o	piece_id	Telemann_DerLiebenSonneLichtUndPracht	12	1	11	0	0	8.33	0.0	0.0	50.09	0.131865
+aggregate-gpt-4o	piece_id	Vulpius_ChristusDerIstMeinLeben	15	3	12	0	0	20.0	0.0	0.0	56.61	0.105222
+aggregate-gpt-4o	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	9	2	7	0	0	22.22	0.0	0.0	27.29	0.045132
+aggregate-gpt-4o	is_nota_correct	0	120	39	81	0	0	32.5	0.0	0.0	464.56	1.050933
+aggregate-gpt-4o	is_nota_correct	1	30	7	23	0	0	23.33	0.0	0.0	118.88	0.301257
+aggregate-gpt-4o	meta-question_id	1	15	2	13	0	0	13.33	0.0	0.0	57.42	0.146885
+aggregate-gpt-4o	meta-question_id	10	9	1	8	0	0	11.11	0.0	0.0	34.18	0.073235
+aggregate-gpt-4o	meta-question_id	11	9	2	7	0	0	22.22	0.0	0.0	31.87	0.079122
+aggregate-gpt-4o	meta-question_id	2	15	8	7	0	0	53.33	0.0	0.0	54.5	0.142653
+aggregate-gpt-4o	meta-question_id	3	15	4	11	0	0	26.67	0.0	0.0	58.91	0.13683
+aggregate-gpt-4o	meta-question_id	4	15	7	8	0	0	46.67	0.0	0.0	56.78	0.128245
+aggregate-gpt-4o	meta-question_id	5	15	6	9	0	0	40.0	0.0	0.0	56.68	0.126672
+aggregate-gpt-4o	meta-question_id	6	15	5	10	0	0	33.33	0.0	0.0	71.68	0.136323
+aggregate-gpt-4o	meta-question_id	7	15	3	12	0	0	20.0	0.0	0.0	66.92	0.147795
+aggregate-gpt-4o	meta-question_id	8	15	3	12	0	0	20.0	0.0	0.0	60.44	0.140283
+aggregate-gpt-4o	meta-question_id	9	12	5	7	0	0	41.67	0.0	0.0	34.08	0.094148
+aggregate-gpt-4o	category	harmony	30	8	22	0	0	26.67	0.0	0.0	100.13	0.246505
+aggregate-gpt-4o	category	pitch	60	21	39	0	0	35.0	0.0	0.0	227.61	0.554613
+aggregate-gpt-4o	category	rhythm	60	17	43	0	0	28.33	0.0	0.0	255.71	0.551073
+aggregate-gpt-4o	subcategory	harmonic-recognition	30	8	22	0	0	26.67	0.0	0.0	100.13	0.246505
+aggregate-gpt-4o	subcategory	interval-recognition	30	11	19	0	0	36.67	0.0	0.0	115.68	0.265075
+aggregate-gpt-4o	subcategory	pitch-recognition	30	10	20	0	0	33.33	0.0	0.0	111.93	0.289538
+aggregate-gpt-4o	subcategory	proportion-recognition	30	6	24	0	0	20.0	0.0	0.0	127.35	0.288077
+aggregate-gpt-4o	subcategory	rhythmic-recognition	30	11	19	0	0	36.67	0.0	0.0	128.36	0.262995
+aggregate-gpt-4o	skill	cadence recognition	9	2	7	0	0	22.22	0.0	0.0	31.87	0.079122
+aggregate-gpt-4o	skill	chord recognition	9	1	8	0	0	11.11	0.0	0.0	34.18	0.073235
+aggregate-gpt-4o	skill	interval recognition	15	4	11	0	0	26.67	0.0	0.0	58.91	0.13683
+aggregate-gpt-4o	skill	interval statistics	15	7	8	0	0	46.67	0.0	0.0	56.78	0.128245
+aggregate-gpt-4o	skill	note length	15	6	9	0	0	40.0	0.0	0.0	56.68	0.126672
+aggregate-gpt-4o	skill	note length statistics	15	5	10	0	0	33.33	0.0	0.0	71.68	0.136323
+aggregate-gpt-4o	skill	pitch recognition	15	2	13	0	0	13.33	0.0	0.0	57.42	0.146885
+aggregate-gpt-4o	skill	pitch statistics	15	8	7	0	0	53.33	0.0	0.0	54.5	0.142653
+aggregate-gpt-4o	skill	rhythm pattern	15	3	12	0	0	20.0	0.0	0.0	66.92	0.147795
+aggregate-gpt-4o	skill	rhythm pattern statistics	15	3	12	0	0	20.0	0.0	0.0	60.44	0.140283
+aggregate-gpt-4o	skill	tonality recognition	12	5	7	0	0	41.67	0.0	0.0	34.08	0.094148
+aggregate-gpt-4o	rel/abs	absolute	69	22	47	0	0	31.88	0.0	0.0	274.46	0.625767
+aggregate-gpt-4o	rel/abs	relative	81	24	57	0	0	29.63	0.0	0.0	308.98	0.726423
+aggregate-gpt-4o	specification	harmony-absolute	9	1	8	0	0	11.11	0.0	0.0	34.18	0.073235
+aggregate-gpt-4o	specification	harmony-relative	21	7	14	0	0	33.33	0.0	0.0	65.95	0.17327
+aggregate-gpt-4o	specification	pitch-absolute	30	10	20	0	0	33.33	0.0	0.0	111.93	0.289538
+aggregate-gpt-4o	specification	pitch-relative	30	11	19	0	0	36.67	0.0	0.0	115.68	0.265075
+aggregate-gpt-4o	specification	rhythm-absolute	30	11	19	0	0	36.67	0.0	0.0	128.36	0.262995
+aggregate-gpt-4o	specification	rhythm-relative	30	6	24	0	0	20.0	0.0	0.0	127.35	0.288077

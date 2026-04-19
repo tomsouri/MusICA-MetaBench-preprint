@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-deepseek/deepseek-v3.2	OVERALL	ALL	300	73	227	0	0	24.33	0.0	0.0	5721.35	0.081912
+text-only-deepseek/deepseek-v3.2	submodality	audio.mastermix.wav	100	16	84	0	0	16.0	0.0	0.0	924.73	0.015617
+text-only-deepseek/deepseek-v3.2	submodality	symbolic.abc.txt	100	34	66	0	0	34.0	0.0	0.0	3096.67	0.041739
+text-only-deepseek/deepseek-v3.2	submodality	visual.short.png	100	23	77	0	0	23.0	0.0	0.0	1699.95	0.024556
+text-only-deepseek/deepseek-v3.2	piece_id	Anonymous_AusMeinesHerzensGrunde	18	2	16	0	0	11.11	0.0	0.0	340.38	0.004337
+text-only-deepseek/deepseek-v3.2	piece_id	Bach_IchStehAnDeinerKrippe	33	4	29	0	0	12.12	0.0	0.0	531.06	0.00812
+text-only-deepseek/deepseek-v3.2	piece_id	Crueger_AufAufMeinHerzMitFreuden	30	3	27	0	0	10.0	0.0	0.0	877.74	0.009772
+text-only-deepseek/deepseek-v3.2	piece_id	Drese_JesuGehVoran	39	13	26	0	0	33.33	0.0	0.0	644.81	0.010174
+text-only-deepseek/deepseek-v3.2	piece_id	Gesius_BefiehlDuDeineWege	24	6	18	0	0	25.0	0.0	0.0	237.91	0.00501
+text-only-deepseek/deepseek-v3.2	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	42	11	31	0	0	26.19	0.0	0.0	972.32	0.014206
+text-only-deepseek/deepseek-v3.2	piece_id	Jan_DuGrosserSchmerzensmann	42	16	26	0	0	38.1	0.0	0.0	779.91	0.011627
+text-only-deepseek/deepseek-v3.2	piece_id	Telemann_DerLiebenSonneLichtUndPracht	27	10	17	0	0	37.04	0.0	0.0	367.8	0.006813
+text-only-deepseek/deepseek-v3.2	piece_id	Vulpius_ChristusDerIstMeinLeben	21	5	16	0	0	23.81	0.0	0.0	392.26	0.00568
+text-only-deepseek/deepseek-v3.2	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	24	3	21	0	0	12.5	0.0	0.0	577.17	0.006173
+text-only-deepseek/deepseek-v3.2	is_nota_correct	0	240	30	210	0	0	12.5	0.0	0.0	4459.51	0.064547
+text-only-deepseek/deepseek-v3.2	is_nota_correct	1	60	43	17	0	0	71.67	0.0	0.0	1261.84	0.017365
+text-only-deepseek/deepseek-v3.2	meta-question_id	1	30	8	22	0	0	26.67	0.0	0.0	756.41	0.006512
+text-only-deepseek/deepseek-v3.2	meta-question_id	10	21	5	16	0	0	23.81	0.0	0.0	224.79	0.006891
+text-only-deepseek/deepseek-v3.2	meta-question_id	11	18	3	15	0	0	16.67	0.0	0.0	249.47	0.005238
+text-only-deepseek/deepseek-v3.2	meta-question_id	2	30	7	23	0	0	23.33	0.0	0.0	532.91	0.007079
+text-only-deepseek/deepseek-v3.2	meta-question_id	3	30	6	24	0	0	20.0	0.0	0.0	1023.55	0.006791
+text-only-deepseek/deepseek-v3.2	meta-question_id	4	30	9	21	0	0	30.0	0.0	0.0	542.48	0.008067
+text-only-deepseek/deepseek-v3.2	meta-question_id	5	30	9	21	0	0	30.0	0.0	0.0	617.45	0.007557
+text-only-deepseek/deepseek-v3.2	meta-question_id	6	30	12	18	0	0	40.0	0.0	0.0	367.91	0.008628
+text-only-deepseek/deepseek-v3.2	meta-question_id	7	30	4	26	0	0	13.33	0.0	0.0	439.4	0.010089
+text-only-deepseek/deepseek-v3.2	meta-question_id	8	30	4	26	0	0	13.33	0.0	0.0	744.84	0.011004
+text-only-deepseek/deepseek-v3.2	meta-question_id	9	21	6	15	0	0	28.57	0.0	0.0	222.13	0.004057
+text-only-deepseek/deepseek-v3.2	category	harmony	60	14	46	0	0	23.33	0.0	0.0	696.39	0.016186
+text-only-deepseek/deepseek-v3.2	category	pitch	120	30	90	0	0	25.0	0.0	0.0	2855.36	0.028449
+text-only-deepseek/deepseek-v3.2	category	rhythm	120	29	91	0	0	24.17	0.0	0.0	2169.61	0.037277
+text-only-deepseek/deepseek-v3.2	subcategory	harmonic-recognition	60	14	46	0	0	23.33	0.0	0.0	696.39	0.016186
+text-only-deepseek/deepseek-v3.2	subcategory	interval-recognition	60	15	45	0	0	25.0	0.0	0.0	1566.03	0.014858
+text-only-deepseek/deepseek-v3.2	subcategory	pitch-recognition	60	15	45	0	0	25.0	0.0	0.0	1289.32	0.01359
+text-only-deepseek/deepseek-v3.2	subcategory	proportion-recognition	60	8	52	0	0	13.33	0.0	0.0	1184.25	0.021093
+text-only-deepseek/deepseek-v3.2	subcategory	rhythmic-recognition	60	21	39	0	0	35.0	0.0	0.0	985.36	0.016185
+text-only-deepseek/deepseek-v3.2	skill	cadence recognition	18	3	15	0	0	16.67	0.0	0.0	249.47	0.005238
+text-only-deepseek/deepseek-v3.2	skill	chord recognition	21	5	16	0	0	23.81	0.0	0.0	224.79	0.006891
+text-only-deepseek/deepseek-v3.2	skill	interval recognition	30	6	24	0	0	20.0	0.0	0.0	1023.55	0.006791
+text-only-deepseek/deepseek-v3.2	skill	interval statistics	30	9	21	0	0	30.0	0.0	0.0	542.48	0.008067
+text-only-deepseek/deepseek-v3.2	skill	note length	30	9	21	0	0	30.0	0.0	0.0	617.45	0.007557
+text-only-deepseek/deepseek-v3.2	skill	note length statistics	30	12	18	0	0	40.0	0.0	0.0	367.91	0.008628
+text-only-deepseek/deepseek-v3.2	skill	pitch recognition	30	8	22	0	0	26.67	0.0	0.0	756.41	0.006512
+text-only-deepseek/deepseek-v3.2	skill	pitch statistics	30	7	23	0	0	23.33	0.0	0.0	532.91	0.007079
+text-only-deepseek/deepseek-v3.2	skill	rhythm pattern	30	4	26	0	0	13.33	0.0	0.0	439.4	0.010089
+text-only-deepseek/deepseek-v3.2	skill	rhythm pattern statistics	30	4	26	0	0	13.33	0.0	0.0	744.84	0.011004
+text-only-deepseek/deepseek-v3.2	skill	tonality recognition	21	6	15	0	0	28.57	0.0	0.0	222.13	0.004057
+text-only-deepseek/deepseek-v3.2	rel/abs	absolute	141	41	100	0	0	29.08	0.0	0.0	2499.47	0.036666
+text-only-deepseek/deepseek-v3.2	rel/abs	relative	159	32	127	0	0	20.13	0.0	0.0	3221.88	0.045246
+text-only-deepseek/deepseek-v3.2	specification	harmony-absolute	21	5	16	0	0	23.81	0.0	0.0	224.79	0.006891
+text-only-deepseek/deepseek-v3.2	specification	harmony-relative	39	9	30	0	0	23.08	0.0	0.0	471.6	0.009295
+text-only-deepseek/deepseek-v3.2	specification	pitch-absolute	60	15	45	0	0	25.0	0.0	0.0	1289.32	0.01359
+text-only-deepseek/deepseek-v3.2	specification	pitch-relative	60	15	45	0	0	25.0	0.0	0.0	1566.03	0.014858
+text-only-deepseek/deepseek-v3.2	specification	rhythm-absolute	60	21	39	0	0	35.0	0.0	0.0	985.36	0.016185
+text-only-deepseek/deepseek-v3.2	specification	rhythm-relative	60	8	52	0	0	13.33	0.0	0.0	1184.25	0.021093

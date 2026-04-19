@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-google/gemini-3.1-flash-lite-preview	OVERALL	ALL	150	43	107	1	0	28.67	0.93	0.0	391.05	0.079021
+text-only-google/gemini-3.1-flash-lite-preview	submodality	audio.mastermix.wav	50	13	37	0	0	26.0	0.0	0.0	118.13	0.02068
+text-only-google/gemini-3.1-flash-lite-preview	submodality	symbolic.abc.txt	50	13	37	0	0	26.0	0.0	0.0	138.63	0.029098
+text-only-google/gemini-3.1-flash-lite-preview	submodality	visual.short.png	50	17	33	1	0	34.0	3.03	0.0	134.28	0.029243
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Anonymous_AusMeinesHerzensGrunde	39	11	28	0	0	28.21	0.0	0.0	107.57	0.020701
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Bach_IchStehAnDeinerKrippe	12	5	7	1	0	41.67	14.29	0.0	29.7	0.006294
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Crueger_AufAufMeinHerzMitFreuden	9	4	5	0	0	44.44	0.0	0.0	27.81	0.005278
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Drese_JesuGehVoran	9	2	7	0	0	22.22	0.0	0.0	23.66	0.005051
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Gesius_BefiehlDuDeineWege	9	2	7	0	0	22.22	0.0	0.0	23.14	0.004476
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	9	1	8	0	0	11.11	0.0	0.0	19.52	0.004016
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Jan_DuGrosserSchmerzensmann	18	2	16	0	0	11.11	0.0	0.0	44.11	0.009368
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Telemann_DerLiebenSonneLichtUndPracht	18	8	10	0	0	44.44	0.0	0.0	46.38	0.010121
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Vulpius_ChristusDerIstMeinLeben	9	6	3	0	0	66.67	0.0	0.0	24.81	0.004838
+text-only-google/gemini-3.1-flash-lite-preview	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	18	2	16	0	0	11.11	0.0	0.0	44.34	0.008877
+text-only-google/gemini-3.1-flash-lite-preview	is_nota_correct	0	120	38	82	0	0	31.67	0.0	0.0	309.4	0.063227
+text-only-google/gemini-3.1-flash-lite-preview	is_nota_correct	1	30	5	25	1	0	16.67	4.0	0.0	81.65	0.015794
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	1	15	3	12	0	0	20.0	0.0	0.0	34.08	0.008207
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	10	9	1	8	0	0	11.11	0.0	0.0	23.12	0.004706
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	11	9	1	8	0	0	11.11	0.0	0.0	24.82	0.004649
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	2	15	1	14	0	0	6.67	0.0	0.0	32.92	0.006882
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	3	15	5	10	0	0	33.33	0.0	0.0	38.48	0.007766
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	4	15	6	9	0	0	40.0	0.0	0.0	45.73	0.007958
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	5	15	7	8	0	0	46.67	0.0	0.0	38.78	0.008167
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	6	15	7	8	0	0	46.67	0.0	0.0	41.22	0.007914
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	7	15	6	9	0	0	40.0	0.0	0.0	42.67	0.009528
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	8	15	1	14	0	0	6.67	0.0	0.0	38.48	0.00773
+text-only-google/gemini-3.1-flash-lite-preview	meta-question_id	9	12	5	7	1	0	41.67	14.29	0.0	30.73	0.005513
+text-only-google/gemini-3.1-flash-lite-preview	category	harmony	30	7	23	1	0	23.33	4.35	0.0	78.67	0.014868
+text-only-google/gemini-3.1-flash-lite-preview	category	pitch	60	15	45	0	0	25.0	0.0	0.0	151.22	0.030814
+text-only-google/gemini-3.1-flash-lite-preview	category	rhythm	60	21	39	0	0	35.0	0.0	0.0	161.16	0.033338
+text-only-google/gemini-3.1-flash-lite-preview	subcategory	harmonic-recognition	30	7	23	1	0	23.33	4.35	0.0	78.67	0.014868
+text-only-google/gemini-3.1-flash-lite-preview	subcategory	interval-recognition	30	11	19	0	0	36.67	0.0	0.0	84.21	0.015725
+text-only-google/gemini-3.1-flash-lite-preview	subcategory	pitch-recognition	30	4	26	0	0	13.33	0.0	0.0	67.01	0.015089
+text-only-google/gemini-3.1-flash-lite-preview	subcategory	proportion-recognition	30	7	23	0	0	23.33	0.0	0.0	81.15	0.017258
+text-only-google/gemini-3.1-flash-lite-preview	subcategory	rhythmic-recognition	30	14	16	0	0	46.67	0.0	0.0	80.01	0.01608
+text-only-google/gemini-3.1-flash-lite-preview	skill	cadence recognition	9	1	8	0	0	11.11	0.0	0.0	24.82	0.004649
+text-only-google/gemini-3.1-flash-lite-preview	skill	chord recognition	9	1	8	0	0	11.11	0.0	0.0	23.12	0.004706
+text-only-google/gemini-3.1-flash-lite-preview	skill	interval recognition	15	5	10	0	0	33.33	0.0	0.0	38.48	0.007766
+text-only-google/gemini-3.1-flash-lite-preview	skill	interval statistics	15	6	9	0	0	40.0	0.0	0.0	45.73	0.007958
+text-only-google/gemini-3.1-flash-lite-preview	skill	note length	15	7	8	0	0	46.67	0.0	0.0	38.78	0.008167
+text-only-google/gemini-3.1-flash-lite-preview	skill	note length statistics	15	7	8	0	0	46.67	0.0	0.0	41.22	0.007914
+text-only-google/gemini-3.1-flash-lite-preview	skill	pitch recognition	15	3	12	0	0	20.0	0.0	0.0	34.08	0.008207
+text-only-google/gemini-3.1-flash-lite-preview	skill	pitch statistics	15	1	14	0	0	6.67	0.0	0.0	32.92	0.006882
+text-only-google/gemini-3.1-flash-lite-preview	skill	rhythm pattern	15	6	9	0	0	40.0	0.0	0.0	42.67	0.009528
+text-only-google/gemini-3.1-flash-lite-preview	skill	rhythm pattern statistics	15	1	14	0	0	6.67	0.0	0.0	38.48	0.00773
+text-only-google/gemini-3.1-flash-lite-preview	skill	tonality recognition	12	5	7	1	0	41.67	14.29	0.0	30.73	0.005513
+text-only-google/gemini-3.1-flash-lite-preview	rel/abs	absolute	69	19	50	0	0	27.54	0.0	0.0	170.13	0.035876
+text-only-google/gemini-3.1-flash-lite-preview	rel/abs	relative	81	24	57	1	0	29.63	1.75	0.0	220.91	0.043145
+text-only-google/gemini-3.1-flash-lite-preview	specification	harmony-absolute	9	1	8	0	0	11.11	0.0	0.0	23.12	0.004706
+text-only-google/gemini-3.1-flash-lite-preview	specification	harmony-relative	21	6	15	1	0	28.57	6.67	0.0	55.55	0.010162
+text-only-google/gemini-3.1-flash-lite-preview	specification	pitch-absolute	30	4	26	0	0	13.33	0.0	0.0	67.01	0.015089
+text-only-google/gemini-3.1-flash-lite-preview	specification	pitch-relative	30	11	19	0	0	36.67	0.0	0.0	84.21	0.015725
+text-only-google/gemini-3.1-flash-lite-preview	specification	rhythm-absolute	30	14	16	0	0	46.67	0.0	0.0	80.01	0.01608
+text-only-google/gemini-3.1-flash-lite-preview	specification	rhythm-relative	30	7	23	0	0	23.33	0.0	0.0	81.15	0.017258

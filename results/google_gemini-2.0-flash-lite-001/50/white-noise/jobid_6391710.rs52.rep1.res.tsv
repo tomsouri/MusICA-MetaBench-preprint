@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+white-noise-google/gemini-2.0-flash-lite-001	OVERALL	ALL	750	205	545	3	0	27.33	0.55	0.0	2043.54	0.223645
+white-noise-google/gemini-2.0-flash-lite-001	submodality	audio.mastermix.wav	250	74	176	3	0	29.6	1.7	0.0	894.21	0.033541
+white-noise-google/gemini-2.0-flash-lite-001	submodality	symbolic.abc.txt	250	68	182	0	0	27.2	0.0	0.0	619.04	0.160146
+white-noise-google/gemini-2.0-flash-lite-001	submodality	visual.short.png	250	63	187	0	0	25.2	0.0	0.0	530.29	0.029958
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Anonymous_AusMeinesHerzensGrunde	84	28	56	0	0	33.33	0.0	0.0	232.84	0.024674
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Bach_IchStehAnDeinerKrippe	102	25	77	0	0	24.51	0.0	0.0	318.85	0.032196
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Crueger_AufAufMeinHerzMitFreuden	57	14	43	0	0	24.56	0.0	0.0	165.62	0.016974
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Drese_JesuGehVoran	84	21	63	0	0	25.0	0.0	0.0	223.01	0.024876
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Gesius_BefiehlDuDeineWege	84	29	55	0	0	34.52	0.0	0.0	220.31	0.0246
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	45	8	37	0	0	17.78	0.0	0.0	119.0	0.013355
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Jan_DuGrosserSchmerzensmann	75	15	60	2	0	20.0	3.33	0.0	195.99	0.021953
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Telemann_DerLiebenSonneLichtUndPracht	75	24	51	0	0	32.0	0.0	0.0	192.42	0.022197
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Vulpius_ChristusDerIstMeinLeben	69	22	47	1	0	31.88	2.13	0.0	182.41	0.020323
+white-noise-google/gemini-2.0-flash-lite-001	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	75	19	56	0	0	25.33	0.0	0.0	193.09	0.022496
+white-noise-google/gemini-2.0-flash-lite-001	is_nota_correct	0	600	121	479	3	0	20.17	0.63	0.0	1644.66	0.180493
+white-noise-google/gemini-2.0-flash-lite-001	is_nota_correct	1	150	84	66	0	0	56.0	0.0	0.0	398.88	0.043153
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	1	75	14	61	0	0	18.67	0.0	0.0	238.2	0.024568
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	10	51	17	34	0	0	33.33	0.0	0.0	151.73	0.015194
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	11	48	7	41	0	0	14.58	0.0	0.0	123.84	0.014133
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	2	75	21	54	0	0	28.0	0.0	0.0	188.43	0.021755
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	3	75	17	58	0	0	22.67	0.0	0.0	212.1	0.022394
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	4	75	26	49	2	0	34.67	4.08	0.0	179.88	0.021973
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	5	75	24	51	0	0	32.0	0.0	0.0	200.06	0.022058
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	6	75	32	43	1	0	42.67	2.33	0.0	206.56	0.022342
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	7	75	27	48	0	0	36.0	0.0	0.0	214.73	0.022751
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	8	75	11	64	0	0	14.67	0.0	0.0	197.05	0.021802
+white-noise-google/gemini-2.0-flash-lite-001	meta-question_id	9	51	9	42	0	0	17.65	0.0	0.0	130.96	0.014675
+white-noise-google/gemini-2.0-flash-lite-001	category	harmony	150	33	117	0	0	22.0	0.0	0.0	406.53	0.044001
+white-noise-google/gemini-2.0-flash-lite-001	category	pitch	300	78	222	2	0	26.0	0.9	0.0	818.61	0.09069
+white-noise-google/gemini-2.0-flash-lite-001	category	rhythm	300	94	206	1	0	31.33	0.49	0.0	818.4	0.088954
+white-noise-google/gemini-2.0-flash-lite-001	subcategory	harmonic-recognition	150	33	117	0	0	22.0	0.0	0.0	406.53	0.044001
+white-noise-google/gemini-2.0-flash-lite-001	subcategory	interval-recognition	150	43	107	2	0	28.67	1.87	0.0	391.98	0.044368
+white-noise-google/gemini-2.0-flash-lite-001	subcategory	pitch-recognition	150	35	115	0	0	23.33	0.0	0.0	426.63	0.046322
+white-noise-google/gemini-2.0-flash-lite-001	subcategory	proportion-recognition	150	38	112	0	0	25.33	0.0	0.0	411.78	0.044554
+white-noise-google/gemini-2.0-flash-lite-001	subcategory	rhythmic-recognition	150	56	94	1	0	37.33	1.06	0.0	406.62	0.0444
+white-noise-google/gemini-2.0-flash-lite-001	skill	cadence recognition	48	7	41	0	0	14.58	0.0	0.0	123.84	0.014133
+white-noise-google/gemini-2.0-flash-lite-001	skill	chord recognition	51	17	34	0	0	33.33	0.0	0.0	151.73	0.015194
+white-noise-google/gemini-2.0-flash-lite-001	skill	interval recognition	75	17	58	0	0	22.67	0.0	0.0	212.1	0.022394
+white-noise-google/gemini-2.0-flash-lite-001	skill	interval statistics	75	26	49	2	0	34.67	4.08	0.0	179.88	0.021973
+white-noise-google/gemini-2.0-flash-lite-001	skill	note length	75	24	51	0	0	32.0	0.0	0.0	200.06	0.022058
+white-noise-google/gemini-2.0-flash-lite-001	skill	note length statistics	75	32	43	1	0	42.67	2.33	0.0	206.56	0.022342
+white-noise-google/gemini-2.0-flash-lite-001	skill	pitch recognition	75	14	61	0	0	18.67	0.0	0.0	238.2	0.024568
+white-noise-google/gemini-2.0-flash-lite-001	skill	pitch statistics	75	21	54	0	0	28.0	0.0	0.0	188.43	0.021755
+white-noise-google/gemini-2.0-flash-lite-001	skill	rhythm pattern	75	27	48	0	0	36.0	0.0	0.0	214.73	0.022751
+white-noise-google/gemini-2.0-flash-lite-001	skill	rhythm pattern statistics	75	11	64	0	0	14.67	0.0	0.0	197.05	0.021802
+white-noise-google/gemini-2.0-flash-lite-001	skill	tonality recognition	51	9	42	0	0	17.65	0.0	0.0	130.96	0.014675
+white-noise-google/gemini-2.0-flash-lite-001	rel/abs	absolute	351	108	243	1	0	30.77	0.41	0.0	984.98	0.105917
+white-noise-google/gemini-2.0-flash-lite-001	rel/abs	relative	399	97	302	2	0	24.31	0.66	0.0	1058.56	0.117729
+white-noise-google/gemini-2.0-flash-lite-001	specification	harmony-absolute	51	17	34	0	0	33.33	0.0	0.0	151.73	0.015194
+white-noise-google/gemini-2.0-flash-lite-001	specification	harmony-relative	99	16	83	0	0	16.16	0.0	0.0	254.8	0.028807
+white-noise-google/gemini-2.0-flash-lite-001	specification	pitch-absolute	150	35	115	0	0	23.33	0.0	0.0	426.63	0.046322
+white-noise-google/gemini-2.0-flash-lite-001	specification	pitch-relative	150	43	107	2	0	28.67	1.87	0.0	391.98	0.044368
+white-noise-google/gemini-2.0-flash-lite-001	specification	rhythm-absolute	150	56	94	1	0	37.33	1.06	0.0	406.62	0.0444
+white-noise-google/gemini-2.0-flash-lite-001	specification	rhythm-relative	150	38	112	0	0	25.33	0.0	0.0	411.78	0.044554

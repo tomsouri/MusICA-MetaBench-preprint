@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-meta-llama/llama-4-scout	OVERALL	ALL	300	92	208	0	0	30.67	0.0	0.0	1979.36	0.054527
+text-only-meta-llama/llama-4-scout	submodality	audio.mastermix.wav	100	31	69	0	0	31.0	0.0	0.0	674.55	0.018472
+text-only-meta-llama/llama-4-scout	submodality	symbolic.abc.txt	100	27	73	0	0	27.0	0.0	0.0	668.77	0.018373
+text-only-meta-llama/llama-4-scout	submodality	visual.short.png	100	34	66	0	0	34.0	0.0	0.0	636.04	0.017682
+text-only-meta-llama/llama-4-scout	piece_id	Anonymous_AusMeinesHerzensGrunde	18	1	17	0	0	5.56	0.0	0.0	130.51	0.003674
+text-only-meta-llama/llama-4-scout	piece_id	Bach_IchStehAnDeinerKrippe	33	11	22	0	0	33.33	0.0	0.0	209.05	0.005841
+text-only-meta-llama/llama-4-scout	piece_id	Crueger_AufAufMeinHerzMitFreuden	30	6	24	0	0	20.0	0.0	0.0	198.55	0.005666
+text-only-meta-llama/llama-4-scout	piece_id	Drese_JesuGehVoran	39	18	21	0	0	46.15	0.0	0.0	218.48	0.006852
+text-only-meta-llama/llama-4-scout	piece_id	Gesius_BefiehlDuDeineWege	24	6	18	0	0	25.0	0.0	0.0	160.07	0.004531
+text-only-meta-llama/llama-4-scout	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	42	12	30	0	0	28.57	0.0	0.0	258.05	0.007749
+text-only-meta-llama/llama-4-scout	piece_id	Jan_DuGrosserSchmerzensmann	42	14	28	0	0	33.33	0.0	0.0	271.64	0.006765
+text-only-meta-llama/llama-4-scout	piece_id	Telemann_DerLiebenSonneLichtUndPracht	27	13	14	0	0	48.15	0.0	0.0	188.23	0.00508
+text-only-meta-llama/llama-4-scout	piece_id	Vulpius_ChristusDerIstMeinLeben	21	3	18	0	0	14.29	0.0	0.0	144.05	0.003485
+text-only-meta-llama/llama-4-scout	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	24	8	16	0	0	33.33	0.0	0.0	200.73	0.004885
+text-only-meta-llama/llama-4-scout	is_nota_correct	0	240	73	167	0	0	30.42	0.0	0.0	1567.92	0.043842
+text-only-meta-llama/llama-4-scout	is_nota_correct	1	60	19	41	0	0	31.67	0.0	0.0	411.45	0.010685
+text-only-meta-llama/llama-4-scout	meta-question_id	1	30	7	23	0	0	23.33	0.0	0.0	149.36	0.004203
+text-only-meta-llama/llama-4-scout	meta-question_id	10	21	5	16	0	0	23.81	0.0	0.0	136.75	0.003889
+text-only-meta-llama/llama-4-scout	meta-question_id	11	18	7	11	0	0	38.89	0.0	0.0	123.99	0.003662
+text-only-meta-llama/llama-4-scout	meta-question_id	2	30	9	21	0	0	30.0	0.0	0.0	184.78	0.00406
+text-only-meta-llama/llama-4-scout	meta-question_id	3	30	5	25	0	0	16.67	0.0	0.0	208.8	0.005055
+text-only-meta-llama/llama-4-scout	meta-question_id	4	30	14	16	0	0	46.67	0.0	0.0	175.23	0.004935
+text-only-meta-llama/llama-4-scout	meta-question_id	5	30	15	15	0	0	50.0	0.0	0.0	220.55	0.005354
+text-only-meta-llama/llama-4-scout	meta-question_id	6	30	12	18	0	0	40.0	0.0	0.0	196.56	0.005722
+text-only-meta-llama/llama-4-scout	meta-question_id	7	30	9	21	0	0	30.0	0.0	0.0	180.32	0.006682
+text-only-meta-llama/llama-4-scout	meta-question_id	8	30	1	29	0	0	3.33	0.0	0.0	194.57	0.006737
+text-only-meta-llama/llama-4-scout	meta-question_id	9	21	8	13	0	0	38.1	0.0	0.0	208.47	0.004228
+text-only-meta-llama/llama-4-scout	category	harmony	60	20	40	0	0	33.33	0.0	0.0	469.2	0.01178
+text-only-meta-llama/llama-4-scout	category	pitch	120	35	85	0	0	29.17	0.0	0.0	718.16	0.018253
+text-only-meta-llama/llama-4-scout	category	rhythm	120	37	83	0	0	30.83	0.0	0.0	792.0	0.024495
+text-only-meta-llama/llama-4-scout	subcategory	harmonic-recognition	60	20	40	0	0	33.33	0.0	0.0	469.2	0.01178
+text-only-meta-llama/llama-4-scout	subcategory	interval-recognition	60	19	41	0	0	31.67	0.0	0.0	384.03	0.00999
+text-only-meta-llama/llama-4-scout	subcategory	pitch-recognition	60	16	44	0	0	26.67	0.0	0.0	334.13	0.008263
+text-only-meta-llama/llama-4-scout	subcategory	proportion-recognition	60	10	50	0	0	16.67	0.0	0.0	374.89	0.013419
+text-only-meta-llama/llama-4-scout	subcategory	rhythmic-recognition	60	27	33	0	0	45.0	0.0	0.0	417.11	0.011075
+text-only-meta-llama/llama-4-scout	skill	cadence recognition	18	7	11	0	0	38.89	0.0	0.0	123.99	0.003662
+text-only-meta-llama/llama-4-scout	skill	chord recognition	21	5	16	0	0	23.81	0.0	0.0	136.75	0.003889
+text-only-meta-llama/llama-4-scout	skill	interval recognition	30	5	25	0	0	16.67	0.0	0.0	208.8	0.005055
+text-only-meta-llama/llama-4-scout	skill	interval statistics	30	14	16	0	0	46.67	0.0	0.0	175.23	0.004935
+text-only-meta-llama/llama-4-scout	skill	note length	30	15	15	0	0	50.0	0.0	0.0	220.55	0.005354
+text-only-meta-llama/llama-4-scout	skill	note length statistics	30	12	18	0	0	40.0	0.0	0.0	196.56	0.005722
+text-only-meta-llama/llama-4-scout	skill	pitch recognition	30	7	23	0	0	23.33	0.0	0.0	149.36	0.004203
+text-only-meta-llama/llama-4-scout	skill	pitch statistics	30	9	21	0	0	30.0	0.0	0.0	184.78	0.00406
+text-only-meta-llama/llama-4-scout	skill	rhythm pattern	30	9	21	0	0	30.0	0.0	0.0	180.32	0.006682
+text-only-meta-llama/llama-4-scout	skill	rhythm pattern statistics	30	1	29	0	0	3.33	0.0	0.0	194.57	0.006737
+text-only-meta-llama/llama-4-scout	skill	tonality recognition	21	8	13	0	0	38.1	0.0	0.0	208.47	0.004228
+text-only-meta-llama/llama-4-scout	rel/abs	absolute	141	48	93	0	0	34.04	0.0	0.0	887.99	0.023228
+text-only-meta-llama/llama-4-scout	rel/abs	relative	159	44	115	0	0	27.67	0.0	0.0	1091.37	0.031299
+text-only-meta-llama/llama-4-scout	specification	harmony-absolute	21	5	16	0	0	23.81	0.0	0.0	136.75	0.003889
+text-only-meta-llama/llama-4-scout	specification	harmony-relative	39	15	24	0	0	38.46	0.0	0.0	332.45	0.00789
+text-only-meta-llama/llama-4-scout	specification	pitch-absolute	60	16	44	0	0	26.67	0.0	0.0	334.13	0.008263
+text-only-meta-llama/llama-4-scout	specification	pitch-relative	60	19	41	0	0	31.67	0.0	0.0	384.03	0.00999
+text-only-meta-llama/llama-4-scout	specification	rhythm-absolute	60	27	33	0	0	45.0	0.0	0.0	417.11	0.011075
+text-only-meta-llama/llama-4-scout	specification	rhythm-relative	60	10	50	0	0	16.67	0.0	0.0	374.89	0.013419
