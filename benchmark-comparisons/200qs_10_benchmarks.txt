@@ -1,0 +1,11 @@
+Using 10 provided files.
+Comparing 10 files (45 unique pairs)...
+
+========================================
+========================================
+Average Overlap: 28.56%
+Maximum Overlap: 30.60%
+Minimum Overlap: 26.30%
+Total Files Compared: 10
+========================================
+
