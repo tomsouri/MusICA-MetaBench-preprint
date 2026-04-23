@@ -24,7 +24,7 @@ def extract_numeric(size_str):
         num *= 1000000
     return num
 
-def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="res.tsv"):
+def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="res.tsv", only_print_stddev=False):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -66,10 +66,13 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
     
     print(f"Using mean column: {mean_col}, stddev column: {std_col}")
 
-    full_df['display_val'] = (
-        full_df[mean_col].apply(lambda x: f"{x:.2f}") + 
-        " (" + full_df[std_col].apply(lambda x: f"{x:.2f}") + ")"
-    )
+    if only_print_stddev:
+        full_df['display_val'] = full_df[std_col].apply(lambda x: f"{x:.2f}")
+    else:
+        full_df['display_val'] = (
+            full_df[mean_col].apply(lambda x: f"{x:.2f}") + 
+            " (" + full_df[std_col].apply(lambda x: f"{x:.2f}") + ")"
+        )
 
     # 1. Custom sorting for sizes
     available_sizes = sorted(full_df['size'].unique(), key=extract_numeric)
@@ -84,7 +87,12 @@ def process_benchmarks(root_dir, output_dir, target_criteria, config, filename="
         pivot_table = pivot_table.reindex(columns=available_sizes)
         
         safe_name = criterion.replace(".", "_").replace(" ", "_")
-        output_path = os.path.join(output_dir, f"table_{safe_name}.tsv")
+        setup_name = filename.replace(".tsv", "")
+
+        output_path = os.path.join(output_dir, f"{setup_name}/{'stddev-only' if only_print_stddev else 'accuracy-stddev'}/table_{safe_name}.tsv")
+
+        # make sure the directory exists
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         # 2. Export to TSV
         pivot_table.to_csv(output_path, sep='\t')
@@ -103,6 +111,7 @@ if __name__ == "__main__":
                         help="Path to gspread credentials JSON file")
     parser.add_argument("--results_filename", type=str, default=None, choices=[None, "normal.tsv", "text-only.tsv", "white-noise.tsv"],
                         help="From which files take the input results?")
+    parser.add_argument("--only-print-stddev", action="store_true", help="Ignore Accuracy and only print stddev (not in parentheses)")
     
     args = parser.parse_args()
 
@@ -120,7 +129,13 @@ if __name__ == "__main__":
                 'credentials_location': args.gspread_credentials_location,
                 'sheet_id': args.gsheet_id_to_upload
             }
-            process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename)
+            process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename, only_print_stddev=args.only_print_stddev)
+    else:
+        config = {
+            'credentials_location': args.gspread_credentials_location,
+            'sheet_id': args.gsheet_id_to_upload
+        }
+        process_benchmarks(args.input_dir, args.output_dir, args.criteria, config, filename=args.results_filename, only_print_stddev=args.only_print_stddev)
 
 
 
