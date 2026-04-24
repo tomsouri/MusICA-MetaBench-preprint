@@ -1,0 +1,11 @@
+Model	Acc.	Time	Price ($)
+Gemini 3.1 FL	37.3	14m	0.4
+Qwen3 Omni 30B	33.0	3h	0.0
+Gemini 2.0 FL	27.7	15m	0.1
+Gemini 3.1 FL	29.3	11m	0.2
+Gemini 2.0 FL	22.7	13m	0.0
+Qwen3 Omni 30B	21.0	68m	0.0
+Gemini 2.0 FL	26.3	13m	0.1
+Gemini 3.1 FL	25.3	10m	0.4
+Qwen3 Omni 30B	21.0	64m	0.0
+Random Baseline	20.0	N/A	N/A
