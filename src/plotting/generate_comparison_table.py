@@ -174,6 +174,10 @@ def main():
     if args.omit_setup or args.multiline_setup:
         final_df = final_df.drop(columns=["Setup"])
 
+    # make directory if it does not exist
+    output_dir = Path(args.output).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     final_df.to_csv(args.output, sep='\t', index=False)
     print(f"Table saved to {args.output}")
 
