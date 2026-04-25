@@ -26,7 +26,7 @@ def shorten_model_name(name):
         return name[:12] + '...'
     return name
 
-def generate_spider_chart(input_file, output_file, criterion_type, excluded_models, included_models, include_baseline, font_size):
+def generate_spider_chart(input_file, output_file, criterion_type, excluded_models, included_models, include_baseline, font_size, compact=False):
     # Load data
     df = pd.read_csv(input_file, sep='\t')
     
@@ -43,13 +43,23 @@ def generate_spider_chart(input_file, output_file, criterion_type, excluded_mode
     
     # Compute angle for each axis
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+    
+    # Rotation logic for compactness
+    if compact:
+        # Rotate by 90 degrees (pi/2) to potentially save vertical space if labels are wide
+        offset = np.pi / 2
+        angles = [(a + offset) % (2 * np.pi) for a in angles]
+
     # Close the loop
     angles += angles[:1]
     
     plt.rcParams.update({'font.size': font_size})
     fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
     
-    # Identification of model columns (skip Criterion_Type, Criterion_Value, Total_Items)
+    # Ensure grid and spines are drawn on top of the filled areas
+    ax.set_axisbelow(False)
+    # Give the grid a high zorder so it's visible through overlapping fills
+    ax.grid(True, zorder=10, color='gray', linestyle='--', alpha=0.5)
     model_columns = [col for col in df.columns if col not in ['Criterion_Type', 'Criterion_Value', 'Total_Items']]
     
     # Filter models
@@ -67,8 +77,10 @@ def generate_spider_chart(input_file, output_file, criterion_type, excluded_mode
     # High contrast, colorblind-friendly color palette
     cb_colors = ['#0077BB', '#EE7733', '#009988', '#CC3311', '#AA4499', '#EECC66']
         
+    max_accuracy = 0
     for i, model in enumerate(model_columns):
         values = filtered_df[model].tolist()
+        max_accuracy = max(max_accuracy, max(values))
         # Close the loop
         values += values[:1]
         
@@ -78,6 +90,7 @@ def generate_spider_chart(input_file, output_file, criterion_type, excluded_mode
 
     # Add random baseline if requested
     if include_baseline:
+        max_accuracy = max(max_accuracy, 20.0)
         baseline_values = [20.0] * num_vars
         baseline_values += baseline_values[:1]
         ax.plot(angles, baseline_values, linewidth=2, linestyle='--', color='gray', label='Random Baseline (20%)')
@@ -88,10 +101,24 @@ def generate_spider_chart(input_file, output_file, criterion_type, excluded_mode
     ax.set_xticklabels(clean_labels)
     
     # Set y-axis range
-    ax.set_ylim(0, 100)
-    ax.set_yticks([20, 40, 60, 80, 100])
-    ax.set_yticklabels(["20%", "40%", "60%", "80%", "100%"])
+    if compact and max_accuracy <= 80:
+        y_limit = 80
+        ticks = [20, 40, 60, 80]
+        tick_labels = ["20%", "40%", "60%", "80%"]
+    else:
+        y_limit = 100
+        ticks = [20, 40, 60, 80, 100]
+        tick_labels = ["20%", "40%", "60%", "80%", "100%"]
+        
+    ax.set_ylim(0, y_limit)
+    ax.set_yticks(ticks)
+    ax.set_yticklabels(tick_labels)
     
+    # In compact mode, move the radial labels (accuracy percentages) 
+    # away from the vertical axis if it's likely to collide with category labels
+    if compact:
+        ax.set_rlabel_position(210)
+
     plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
 
     # ensure the output directory exists
@@ -109,7 +136,8 @@ if __name__ == "__main__":
     parser.add_argument('--include', nargs='*', help='List of model names to include (only these will be shown)')
     parser.add_argument('--baseline', action='store_true', help='Include a random baseline at 20%% accuracy')
     parser.add_argument('--font_size', type=int, default=12, help='Font size for the plot labels and legend')
+    parser.add_argument('--compact', action='store_true', help='Make the chart more compact (crop axes at 80%% if possible, rotate chart)')
     
     args = parser.parse_args()
     
-    generate_spider_chart(args.input_file, args.output_file, args.criterion_type, args.exclude, args.include, args.baseline, args.font_size)
+    generate_spider_chart(args.input_file, args.output_file, args.criterion_type, args.exclude, args.include, args.baseline, args.font_size, args.compact)
