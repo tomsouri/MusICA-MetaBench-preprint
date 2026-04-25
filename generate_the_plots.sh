@@ -11,22 +11,47 @@ SCRIPTS_DIR="$BASE_DIR/src/plotting"
 font_size=15
 
 echo "Generating submodality spider chart for selected models from $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv to $TGT_DIR/plots/spiders/submodality-chorale-bricks_s20_seed52_selected-models.png"
-.venv/bin/python $SCRIPTS_DIR/generate_spider_chart.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv \
-      --include google_gemini-3.1-pro-preview aggregate-gpt-4o aggregate-mistral Qwen_Qwen3-Omni-30B-A3B-Thinking \
+.venv/bin/python $SCRIPTS_DIR/generate_bar_chart.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv \
       --criterion_type submodality \
       --baseline \
       --font_size $font_size \
-      --output_file $TGT_DIR/plots/spiders/submodality-chorale-bricks_s20_seed52_selected-models.png
+      --exclude aggregate-gpt-5-full \
+      --round \
+      --sort_per_group \
+      --show_names_below \
+      --height 3 \
+      --tight_crop \
+      --output_file $TGT_DIR/plots/submodality-chorale-bricks_s20_seed52_selected-models_grouped_by_modalities.png
+
+
+
+# echo "Generating submodality spider chart for selected models from $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv to $TGT_DIR/plots/spiders/submodality-chorale-bricks_s20_seed52_selected-models.png"
+# .venv/bin/python $SCRIPTS_DIR/generate_spider_chart.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv \
+#       --include google_gemini-3.1-pro-preview aggregate-gpt-4o aggregate-mistral Qwen_Qwen3-Omni-30B-A3B-Thinking \
+#       --criterion_type submodality \
+#       --baseline \
+#       --font_size $font_size \
+#       --output_file $TGT_DIR/plots/spiders/submodality-chorale-bricks_s20_seed52_selected-models.png
+
+# echo "Generating subcategory spider chart from $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv"
+# .venv/bin/python $SCRIPTS_DIR/generate_spider_chart.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv \
+#       --include google_gemini-3.1-pro-preview aggregate-gpt-4o aggregate-mistral Qwen_Qwen3-Omni-30B-A3B-Thinking \
+#       --criterion_type subcategory \
+#       --baseline \
+#       --font_size $font_size \
+#       --output_file $TGT_DIR/plots/spiders/subcategory-chorale-bricks_s20_seed52_selected-models.png
 
 echo "Generating subcategory spider chart from $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv"
 .venv/bin/python $SCRIPTS_DIR/generate_spider_chart.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv \
-      --include google_gemini-3.1-pro-preview aggregate-gpt-4o aggregate-mistral Qwen_Qwen3-Omni-30B-A3B-Thinking \
       --criterion_type subcategory \
+      --exclude aggregate-gpt-5-full \
       --baseline \
       --font_size $font_size \
-      --output_file $TGT_DIR/plots/spiders/subcategory-chorale-bricks_s20_seed52_selected-models.png
+      --compact \
+      --output_file $TGT_DIR/plots/spiders/subcategory-chorale-bricks_s20_seed52_all.png
 
 
+exit
 # .venv/bin/python3 generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv --output-prefix $TGT_DIR/plots/size-20-seed-52-normal --y-max 70 --no-hatch --font-size 15 --height 7
 
 
@@ -44,6 +69,8 @@ echo "Generating plot with comparison of normal and text-only noise averaged ove
 
 .venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/mean_over_seeds/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-20-mean-over-seeds-normal-vs-textonly-vs-white-noise --ignore-incomplete --y-max 51 --no-hatch --font-size 15 --print-only-average --height 3.5
 
+echo "Generating the table with standard deviations across sizes into $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv"
+.venv/bin/python3 generate_averaged_tables.py --only-print-stddev --input_dir "aggregated/comparison_between_seeds/"
 
 echo "Generating plot with standard deviations across sizes from $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv"
 .venv/bin/python3 $SCRIPTS_DIR/plot_stddev_with_benchmark_size.py $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv --output $TGT_DIR/plots/stddevs3.png --log-x --exclude-size-one --multiply-sizes-by 15 --fontsize 12
