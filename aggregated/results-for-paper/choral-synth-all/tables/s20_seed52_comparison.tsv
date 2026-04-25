@@ -1,0 +1,29 @@
+Model	Acc.	Time	Price ($)
+Gemini 3.1 Pro	47.0	12h	54.6
+Gemini 3.1 FL	33.3	18m	0.5
+Gemini 2.5 FL	32.0	87m	0.8
+Qwen3 Omni 30B	31.7	3h	0.0
+GPT-5	31.3	2h	2.6
+Gemini 2.0 FL	31.0	18m	0.1
+GPT-4o	24.0	29m	7.3
+Mistral	22.0	2h	1.5
+GPT-5 Full	0.0	2h	0.0
+Gemini 3.1 FL	27.7	12m	0.2
+Llama 4 Scout	23.3	36m	0.1
+Mistral	21.3	15m	0.0
+Qwen3 Omni 30B	20.7	83m	0.0
+Gemini 2.5 FL	20.7	49m	0.3
+DeepSeek V3.2	20.3	2h	0.1
+Gemini 2.0 FL	19.3	12m	0.0
+Gemma 3 27B	19.3	43m	0.0
+GPT-4o	8.0	47m	0.5
+GPT-5	6.3	75m	0.6
+GPT-5 Full	0.0	2h	0.0
+Qwen3 Omni 30B	25.0	76m	0.0
+Gemini 3.1 FL	24.0	11m	0.4
+Gemini 2.0 FL	21.0	13m	0.1
+Gemini 2.5 FL	20.7	38m	0.3
+Mistral	18.0	63m	0.7
+GPT-5	16.7	50m	2.5
+GPT-4o	15.3	17m	4.6
+Random Baseline	20.0	N/A	N/A
