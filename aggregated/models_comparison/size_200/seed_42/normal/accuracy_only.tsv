@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-2.0-flash-lite-001
+OVERALL	ALL	3000	35.53
+submodality	audio.mastermix.wav	1000	30.4
+submodality	symbolic.abc.txt	1000	44.0
+submodality	visual.short.png	1000	32.2
+piece_id	Anonymous_AusMeinesHerzensGrunde	321	31.78
+piece_id	Bach_IchStehAnDeinerKrippe	318	34.91
+piece_id	Crueger_AufAufMeinHerzMitFreuden	330	32.42
+piece_id	Drese_JesuGehVoran	306	39.54
+piece_id	Gesius_BefiehlDuDeineWege	345	37.68
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	333	32.73
+piece_id	Jan_DuGrosserSchmerzensmann	303	31.02
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	255	43.14
+piece_id	Vulpius_ChristusDerIstMeinLeben	243	40.33
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	246	34.15
+is_nota_correct	0	2400	36.92
+is_nota_correct	1	600	30.0
+meta-question_id	1	300	29.0
+meta-question_id	10	273	42.86
+meta-question_id	11	267	22.47
+meta-question_id	2	300	36.33
+meta-question_id	3	300	24.0
+meta-question_id	4	300	44.33
+meta-question_id	5	300	40.67
+meta-question_id	6	300	56.33
+meta-question_id	7	300	36.67
+meta-question_id	8	300	17.67
+meta-question_id	9	60	56.67
+category	harmony	600	35.17
+category	pitch	1200	33.42
+category	rhythm	1200	37.83
+subcategory	harmonic-recognition	600	35.17
+subcategory	interval-recognition	600	34.17
+subcategory	pitch-recognition	600	32.67
+subcategory	proportion-recognition	600	27.17
+subcategory	rhythmic-recognition	600	48.5
+skill	cadence recognition	267	22.47
+skill	chord recognition	273	42.86
+skill	interval recognition	300	24.0
+skill	interval statistics	300	44.33
+skill	note length	300	40.67
+skill	note length statistics	300	56.33
+skill	pitch recognition	300	29.0
+skill	pitch statistics	300	36.33
+skill	rhythm pattern	300	36.67
+skill	rhythm pattern statistics	300	17.67
+skill	tonality recognition	60	56.67
+rel/abs	absolute	1473	41.0
+rel/abs	relative	1527	30.26
+specification	harmony-absolute	273	42.86
+specification	harmony-relative	327	28.75
+specification	pitch-absolute	600	32.67
+specification	pitch-relative	600	34.17
+specification	rhythm-absolute	600	48.5
+specification	rhythm-relative	600	27.17

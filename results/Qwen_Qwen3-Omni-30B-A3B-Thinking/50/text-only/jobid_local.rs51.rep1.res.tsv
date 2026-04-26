@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	OVERALL	ALL	750	178	572	0	0	23.73	0.0	0.0	9393.93	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	audio.mastermix.wav	250	59	191	0	0	23.6	0.0	0.0	1395.54	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	symbolic.abc.txt	250	68	182	0	0	27.2	0.0	0.0	5102.06	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	visual.short.png	250	51	199	0	0	20.4	0.0	0.0	2896.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Anonymous_AusMeinesHerzensGrunde	72	20	52	0	0	27.78	0.0	0.0	880.98	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Bach_IchStehAnDeinerKrippe	105	31	74	0	0	29.52	0.0	0.0	1325.69	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Crueger_AufAufMeinHerzMitFreuden	111	35	76	0	0	31.53	0.0	0.0	1273.24	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Drese_JesuGehVoran	45	12	33	0	0	26.67	0.0	0.0	447.78	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Gesius_BefiehlDuDeineWege	75	11	64	0	0	14.67	0.0	0.0	814.11	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	57	7	50	0	0	12.28	0.0	0.0	729.66	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Jan_DuGrosserSchmerzensmann	93	17	76	0	0	18.28	0.0	0.0	1423.69	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Telemann_DerLiebenSonneLichtUndPracht	66	11	55	0	0	16.67	0.0	0.0	885.83	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Vulpius_ChristusDerIstMeinLeben	57	13	44	0	0	22.81	0.0	0.0	700.49	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	69	21	48	0	0	30.43	0.0	0.0	912.46	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	is_nota_correct	0	600	129	471	0	0	21.5	0.0	0.0	7499.54	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	is_nota_correct	1	150	49	101	0	0	32.67	0.0	0.0	1894.39	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	1	75	18	57	0	0	24.0	0.0	0.0	718.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	10	51	11	40	0	0	21.57	0.0	0.0	497.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	11	48	13	35	0	0	27.08	0.0	0.0	441.78	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	2	75	13	62	0	0	17.33	0.0	0.0	888.76	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	3	75	17	58	0	0	22.67	0.0	0.0	714.46	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	4	75	22	53	0	0	29.33	0.0	0.0	1043.77	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	5	75	13	62	0	0	17.33	0.0	0.0	956.16	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	6	75	23	52	0	0	30.67	0.0	0.0	929.28	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	7	75	18	57	0	0	24.0	0.0	0.0	1364.77	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	8	75	11	64	0	0	14.67	0.0	0.0	1161.49	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	9	51	19	32	0	0	37.25	0.0	0.0	677.34	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	harmony	150	43	107	0	0	28.67	0.0	0.0	1616.93	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	pitch	300	70	230	0	0	23.33	0.0	0.0	3365.3	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	rhythm	300	65	235	0	0	21.67	0.0	0.0	4411.7	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	harmonic-recognition	150	43	107	0	0	28.67	0.0	0.0	1616.93	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	interval-recognition	150	39	111	0	0	26.0	0.0	0.0	1758.23	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	pitch-recognition	150	31	119	0	0	20.67	0.0	0.0	1607.07	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	proportion-recognition	150	29	121	0	0	19.33	0.0	0.0	2526.26	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	rhythmic-recognition	150	36	114	0	0	24.0	0.0	0.0	1885.44	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	cadence recognition	48	13	35	0	0	27.08	0.0	0.0	441.78	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	chord recognition	51	11	40	0	0	21.57	0.0	0.0	497.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	interval recognition	75	17	58	0	0	22.67	0.0	0.0	714.46	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	interval statistics	75	22	53	0	0	29.33	0.0	0.0	1043.77	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	note length	75	13	62	0	0	17.33	0.0	0.0	956.16	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	note length statistics	75	23	52	0	0	30.67	0.0	0.0	929.28	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	pitch recognition	75	18	57	0	0	24.0	0.0	0.0	718.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	pitch statistics	75	13	62	0	0	17.33	0.0	0.0	888.76	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	rhythm pattern	75	18	57	0	0	24.0	0.0	0.0	1364.77	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	rhythm pattern statistics	75	11	64	0	0	14.67	0.0	0.0	1161.49	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	tonality recognition	51	19	32	0	0	37.25	0.0	0.0	677.34	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	rel/abs	absolute	351	78	273	0	0	22.22	0.0	0.0	3990.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	rel/abs	relative	399	100	299	0	0	25.06	0.0	0.0	5403.6	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	harmony-absolute	51	11	40	0	0	21.57	0.0	0.0	497.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	harmony-relative	99	32	67	0	0	32.32	0.0	0.0	1119.12	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	pitch-absolute	150	31	119	0	0	20.67	0.0	0.0	1607.07	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	pitch-relative	150	39	111	0	0	26.0	0.0	0.0	1758.23	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	rhythm-absolute	150	36	114	0	0	24.0	0.0	0.0	1885.44	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	rhythm-relative	150	29	121	0	0	19.33	0.0	0.0	2526.26	0.0

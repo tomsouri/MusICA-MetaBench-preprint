@@ -1,0 +1,55 @@
+Model	Criterion_Type	Criterion_Value	Total_Items	Correct_Items	Incorrect_Items	Unparsable_Items	Model_Error_Items	Accuracy_Percent	Unparsable_Percent	Model_Error_Percent	Total_Time_s	Total_Price
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	OVERALL	ALL	150	34	116	0	0	22.67	0.0	0.0	2027.47	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	audio.mastermix.wav	50	11	39	0	0	22.0	0.0	0.0	266.88	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	symbolic.abc.txt	50	10	40	0	0	20.0	0.0	0.0	1180.97	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	submodality	visual.short.png	50	13	37	0	0	26.0	0.0	0.0	579.62	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Anonymous_AusMeinesHerzensGrunde	15	4	11	0	0	26.67	0.0	0.0	143.69	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Bach_IchStehAnDeinerKrippe	24	5	19	0	0	20.83	0.0	0.0	307.91	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Crueger_AufAufMeinHerzMitFreuden	24	8	16	0	0	33.33	0.0	0.0	176.02	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Drese_JesuGehVoran	3	0	3	0	0	0.0	0.0	0.0	39.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Gesius_BefiehlDuDeineWege	9	0	9	0	0	0.0	0.0	0.0	96.58	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	30	7	23	0	0	23.33	0.0	0.0	470.02	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Jan_DuGrosserSchmerzensmann	12	4	8	0	0	33.33	0.0	0.0	94.19	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Telemann_DerLiebenSonneLichtUndPracht	12	2	10	0	0	16.67	0.0	0.0	423.19	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Vulpius_ChristusDerIstMeinLeben	15	2	13	0	0	13.33	0.0	0.0	202.05	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	6	2	4	0	0	33.33	0.0	0.0	73.99	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	is_nota_correct	0	120	26	94	0	0	21.67	0.0	0.0	1467.23	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	is_nota_correct	1	30	8	22	0	0	26.67	0.0	0.0	560.23	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	1	15	2	13	0	0	13.33	0.0	0.0	430.95	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	10	9	0	9	0	0	0.0	0.0	0.0	85.22	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	11	9	1	8	0	0	11.11	0.0	0.0	79.12	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	2	15	4	11	0	0	26.67	0.0	0.0	243.2	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	3	15	3	12	0	0	20.0	0.0	0.0	202.54	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	4	15	5	10	0	0	33.33	0.0	0.0	155.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	5	15	3	12	0	0	20.0	0.0	0.0	124.93	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	6	15	6	9	0	0	40.0	0.0	0.0	206.5	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	7	15	5	10	0	0	33.33	0.0	0.0	113.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	8	15	1	14	0	0	6.67	0.0	0.0	235.47	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	meta-question_id	9	12	4	8	0	0	33.33	0.0	0.0	150.41	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	harmony	30	5	25	0	0	16.67	0.0	0.0	314.75	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	pitch	60	14	46	0	0	23.33	0.0	0.0	1032.5	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	category	rhythm	60	15	45	0	0	25.0	0.0	0.0	680.22	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	harmonic-recognition	30	5	25	0	0	16.67	0.0	0.0	314.75	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	interval-recognition	30	8	22	0	0	26.67	0.0	0.0	358.35	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	pitch-recognition	30	6	24	0	0	20.0	0.0	0.0	674.15	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	proportion-recognition	30	6	24	0	0	20.0	0.0	0.0	348.79	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	subcategory	rhythmic-recognition	30	9	21	0	0	30.0	0.0	0.0	331.43	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	cadence recognition	9	1	8	0	0	11.11	0.0	0.0	79.12	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	chord recognition	9	0	9	0	0	0.0	0.0	0.0	85.22	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	interval recognition	15	3	12	0	0	20.0	0.0	0.0	202.54	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	interval statistics	15	5	10	0	0	33.33	0.0	0.0	155.81	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	note length	15	3	12	0	0	20.0	0.0	0.0	124.93	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	note length statistics	15	6	9	0	0	40.0	0.0	0.0	206.5	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	pitch recognition	15	2	13	0	0	13.33	0.0	0.0	430.95	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	pitch statistics	15	4	11	0	0	26.67	0.0	0.0	243.2	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	rhythm pattern	15	5	10	0	0	33.33	0.0	0.0	113.32	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	rhythm pattern statistics	15	1	14	0	0	6.67	0.0	0.0	235.47	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	skill	tonality recognition	12	4	8	0	0	33.33	0.0	0.0	150.41	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	rel/abs	absolute	69	15	54	0	0	21.74	0.0	0.0	1090.8	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	rel/abs	relative	81	19	62	0	0	23.46	0.0	0.0	936.66	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	harmony-absolute	9	0	9	0	0	0.0	0.0	0.0	85.22	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	harmony-relative	21	5	16	0	0	23.81	0.0	0.0	229.52	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	pitch-absolute	30	6	24	0	0	20.0	0.0	0.0	674.15	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	pitch-relative	30	8	22	0	0	26.67	0.0	0.0	358.35	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	rhythm-absolute	30	9	21	0	0	30.0	0.0	0.0	331.43	0.0
+text-only-Qwen/Qwen3-Omni-30B-A3B-Thinking	specification	rhythm-relative	30	6	24	0	0	20.0	0.0	0.0	348.79	0.0

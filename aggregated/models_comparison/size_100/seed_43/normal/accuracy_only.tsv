@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview	google_gemini-2.0-flash-lite-001	aggregate-mistral
+OVERALL	ALL	1500	45.6	37.27	34.07
+submodality	audio.mastermix.wav	500	36.8	31.4	31.2
+submodality	symbolic.abc.txt	500	59.8	43.0	40.2
+submodality	visual.short.png	500	40.2	37.4	30.8
+piece_id	Anonymous_AusMeinesHerzensGrunde	168	43.45	35.71	27.98
+piece_id	Bach_IchStehAnDeinerKrippe	165	35.76	27.27	24.85
+piece_id	Crueger_AufAufMeinHerzMitFreuden	168	38.69	31.55	29.17
+piece_id	Drese_JesuGehVoran	135	48.15	38.52	33.33
+piece_id	Gesius_BefiehlDuDeineWege	123	50.41	44.72	45.53
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	153	47.71	35.95	30.07
+piece_id	Jan_DuGrosserSchmerzensmann	144	49.31	36.11	38.19
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	201	55.72	46.27	45.77
+piece_id	Vulpius_ChristusDerIstMeinLeben	144	43.75	39.58	34.03
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	99	41.41	37.37	31.31
+is_nota_correct	0	1200	45.08	38.83	34.17
+is_nota_correct	1	300	47.67	31.0	33.67
+meta-question_id	1	150	41.33	32.0	30.0
+meta-question_id	10	120	57.5	49.17	44.17
+meta-question_id	11	120	25.83	26.67	19.17
+meta-question_id	2	150	53.33	39.33	27.33
+meta-question_id	3	150	35.33	24.0	22.67
+meta-question_id	4	150	50.67	39.33	36.67
+meta-question_id	5	150	58.0	34.0	38.67
+meta-question_id	6	150	57.33	67.33	58.0
+meta-question_id	7	150	51.33	41.33	44.67
+meta-question_id	8	150	15.33	14.67	17.33
+meta-question_id	9	60	66.67	50.0	36.67
+category	harmony	300	46.67	40.33	32.67
+category	pitch	600	45.17	33.67	29.17
+category	rhythm	600	45.5	39.33	39.67
+subcategory	harmonic-recognition	300	46.67	40.33	32.67
+subcategory	interval-recognition	300	43.0	31.67	29.67
+subcategory	pitch-recognition	300	47.33	35.67	28.67
+subcategory	proportion-recognition	300	33.33	28.0	31.0
+subcategory	rhythmic-recognition	300	57.67	50.67	48.33
+skill	cadence recognition	120	25.83	26.67	19.17
+skill	chord recognition	120	57.5	49.17	44.17
+skill	interval recognition	150	35.33	24.0	22.67
+skill	interval statistics	150	50.67	39.33	36.67
+skill	note length	150	58.0	34.0	38.67
+skill	note length statistics	150	57.33	67.33	58.0
+skill	pitch recognition	150	41.33	32.0	30.0
+skill	pitch statistics	150	53.33	39.33	27.33
+skill	rhythm pattern	150	51.33	41.33	44.67
+skill	rhythm pattern statistics	150	15.33	14.67	17.33
+skill	tonality recognition	60	66.67	50.0	36.67
+rel/abs	absolute	720	53.33	44.17	39.44
+rel/abs	relative	780	38.46	30.9	29.1
+specification	harmony-absolute	120	57.5	49.17	44.17
+specification	harmony-relative	180	39.44	34.44	25.0
+specification	pitch-absolute	300	47.33	35.67	28.67
+specification	pitch-relative	300	43.0	31.67	29.67
+specification	rhythm-absolute	300	57.67	50.67	48.33
+specification	rhythm-relative	300	33.33	28.0	31.0

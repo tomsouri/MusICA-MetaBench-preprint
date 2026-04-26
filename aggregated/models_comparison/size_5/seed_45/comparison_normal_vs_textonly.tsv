@@ -1,0 +1,54 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview_normal	google_gemini-3.1-flash-lite-preview_text-only	google_gemini-3.1-flash-lite-preview_white-noise	aggregate-mistral_normal	Qwen_Qwen3-Omni-30B-A3B-Thinking_normal	Qwen_Qwen3-Omni-30B-A3B-Thinking_text-only	google_gemini-2.0-flash-lite-001_normal	google_gemini-2.0-flash-lite-001_text-only	google_gemini-2.0-flash-lite-001_white-noise	google_gemini-2.5-flash-lite_normal	aggregate-gpt-4o_normal
+OVERALL	ALL	75	44.0	25.33	20.0	28.0	48.0	24.0	36.0	32.0	29.33	42.67	36.0
+submodality	audio.mastermix.wav	25	24.0	28.0	36.0	24.0	44.0	20.0	36.0	24.0	24.0	28.0	36.0
+submodality	symbolic.abc.txt	25	64.0	24.0	8.0	44.0	72.0	32.0	48.0	36.0	40.0	60.0	48.0
+submodality	visual.short.png	25	44.0	24.0	16.0	16.0	28.0	20.0	24.0	36.0	24.0	40.0	24.0
+piece_id	Anonymous_AusMeinesHerzensGrunde	9	44.44	44.44	22.22	33.33	33.33	33.33	33.33	55.56	11.11	44.44	55.56
+piece_id	Bach_IchStehAnDeinerKrippe	9	44.44	0.0	0.0	55.56	44.44	22.22	22.22	11.11	22.22	33.33	22.22
+piece_id	Drese_JesuGehVoran	12	50.0	50.0	16.67	8.33	66.67	33.33	58.33	25.0	33.33	50.0	41.67
+piece_id	Gesius_BefiehlDuDeineWege	3	33.33	0.0	66.67	0.0	66.67	0.0	0.0	0.0	33.33	33.33	0.0
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	3	33.33	0.0	0.0	33.33	100.0	33.33	33.33	33.33	66.67	66.67	100.0
+piece_id	Jan_DuGrosserSchmerzensmann	15	33.33	26.67	20.0	26.67	40.0	20.0	40.0	46.67	46.67	33.33	20.0
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	9	66.67	22.22	44.44	44.44	55.56	22.22	44.44	33.33	22.22	66.67	66.67
+piece_id	Vulpius_ChristusDerIstMeinLeben	3	33.33	33.33	0.0	33.33	33.33	33.33	0.0	33.33	0.0	0.0	0.0
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	12	41.67	16.67	16.67	16.67	33.33	16.67	33.33	25.0	25.0	41.67	25.0
+is_nota_correct	0	60	40.0	28.33	18.33	23.33	43.33	18.33	41.67	28.33	28.33	46.67	38.33
+is_nota_correct	1	15	60.0	13.33	26.67	46.67	66.67	46.67	13.33	46.67	33.33	26.67	26.67
+meta-question_id	1	9	33.33	0.0	22.22	22.22	44.44	22.22	33.33	11.11	33.33	44.44	11.11
+meta-question_id	10	6	50.0	33.33	33.33	16.67	33.33	0.0	50.0	50.0	50.0	33.33	16.67
+meta-question_id	11	3	0.0	33.33	0.0	0.0	33.33	33.33	0.0	100.0	33.33	0.0	0.0
+meta-question_id	2	6	66.67	66.67	16.67	33.33	66.67	66.67	50.0	66.67	50.0	50.0	66.67
+meta-question_id	3	9	11.11	11.11	33.33	33.33	44.44	11.11	22.22	44.44	11.11	33.33	33.33
+meta-question_id	4	6	83.33	33.33	16.67	16.67	16.67	0.0	33.33	33.33	50.0	50.0	66.67
+meta-question_id	5	9	44.44	33.33	44.44	33.33	77.78	11.11	33.33	22.22	44.44	66.67	66.67
+meta-question_id	6	6	66.67	33.33	16.67	50.0	50.0	50.0	50.0	16.67	33.33	33.33	33.33
+meta-question_id	7	9	22.22	0.0	0.0	33.33	44.44	22.22	33.33	11.11	11.11	44.44	22.22
+meta-question_id	8	6	16.67	16.67	0.0	33.33	16.67	16.67	0.0	16.67	0.0	0.0	0.0
+meta-question_id	9	6	100.0	50.0	16.67	16.67	83.33	50.0	83.33	33.33	16.67	83.33	66.67
+category	harmony	15	60.0	40.0	20.0	13.33	53.33	26.67	53.33	53.33	33.33	46.67	33.33
+category	pitch	30	43.33	23.33	23.33	26.67	43.33	23.33	33.33	36.67	33.33	43.33	40.0
+category	rhythm	30	36.67	20.0	16.67	36.67	50.0	23.33	30.0	16.67	23.33	40.0	33.33
+subcategory	harmonic-recognition	15	60.0	40.0	20.0	13.33	53.33	26.67	53.33	53.33	33.33	46.67	33.33
+subcategory	interval-recognition	15	40.0	20.0	26.67	26.67	33.33	6.67	26.67	40.0	26.67	40.0	46.67
+subcategory	pitch-recognition	15	46.67	26.67	20.0	26.67	53.33	40.0	40.0	33.33	40.0	46.67	33.33
+subcategory	proportion-recognition	15	20.0	6.67	0.0	33.33	33.33	20.0	20.0	13.33	6.67	26.67	13.33
+subcategory	rhythmic-recognition	15	53.33	33.33	33.33	40.0	66.67	26.67	40.0	20.0	40.0	53.33	53.33
+skill	cadence recognition	3	0.0	33.33	0.0	0.0	33.33	33.33	0.0	100.0	33.33	0.0	0.0
+skill	chord recognition	6	50.0	33.33	33.33	16.67	33.33	0.0	50.0	50.0	50.0	33.33	16.67
+skill	interval recognition	9	11.11	11.11	33.33	33.33	44.44	11.11	22.22	44.44	11.11	33.33	33.33
+skill	interval statistics	6	83.33	33.33	16.67	16.67	16.67	0.0	33.33	33.33	50.0	50.0	66.67
+skill	note length	9	44.44	33.33	44.44	33.33	77.78	11.11	33.33	22.22	44.44	66.67	66.67
+skill	note length statistics	6	66.67	33.33	16.67	50.0	50.0	50.0	50.0	16.67	33.33	33.33	33.33
+skill	pitch recognition	9	33.33	0.0	22.22	22.22	44.44	22.22	33.33	11.11	33.33	44.44	11.11
+skill	pitch statistics	6	66.67	66.67	16.67	33.33	66.67	66.67	50.0	66.67	50.0	50.0	66.67
+skill	rhythm pattern	9	22.22	0.0	0.0	33.33	44.44	22.22	33.33	11.11	11.11	44.44	22.22
+skill	rhythm pattern statistics	6	16.67	16.67	0.0	33.33	16.67	16.67	0.0	16.67	0.0	0.0	0.0
+skill	tonality recognition	6	100.0	50.0	16.67	16.67	83.33	50.0	83.33	33.33	16.67	83.33	66.67
+rel/abs	absolute	36	50.0	30.56	27.78	30.56	55.56	27.78	41.67	30.56	41.67	47.22	38.89
+rel/abs	relative	39	38.46	20.51	12.82	25.64	41.03	20.51	30.77	33.33	17.95	38.46	33.33
+specification	harmony-absolute	6	50.0	33.33	33.33	16.67	33.33	0.0	50.0	50.0	50.0	33.33	16.67
+specification	harmony-relative	9	66.67	44.44	11.11	11.11	66.67	44.44	55.56	55.56	22.22	55.56	44.44
+specification	pitch-absolute	15	46.67	26.67	20.0	26.67	53.33	40.0	40.0	33.33	40.0	46.67	33.33
+specification	pitch-relative	15	40.0	20.0	26.67	26.67	33.33	6.67	26.67	40.0	26.67	40.0	46.67
+specification	rhythm-absolute	15	53.33	33.33	33.33	40.0	66.67	26.67	40.0	20.0	40.0	53.33	53.33
+specification	rhythm-relative	15	20.0	6.67	0.0	33.33	33.33	20.0	20.0	13.33	6.67	26.67	13.33

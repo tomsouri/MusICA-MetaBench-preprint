@@ -1,0 +1,36 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview	google_gemini-2.0-flash-lite-001
+OVERALL	ALL	15	6.67	20.0
+submodality	audio.mastermix.wav	5	0.0	20.0
+submodality	symbolic.abc.txt	5	0.0	20.0
+submodality	visual.short.png	5	20.0	20.0
+piece_id	Jan_DuGrosserSchmerzensmann	3	0.0	33.33
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	3	33.33	66.67
+piece_id	Vulpius_ChristusDerIstMeinLeben	6	0.0	0.0
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	3	0.0	0.0
+is_nota_correct	0	12	0.0	8.33
+is_nota_correct	1	3	33.33	66.67
+meta-question_id	1	3	0.0	0.0
+meta-question_id	3	3	33.33	66.67
+meta-question_id	5	3	0.0	0.0
+meta-question_id	7	3	0.0	0.0
+meta-question_id	9	3	0.0	33.33
+category	harmony	3	0.0	33.33
+category	pitch	6	16.67	33.33
+category	rhythm	6	0.0	0.0
+subcategory	harmonic-recognition	3	0.0	33.33
+subcategory	interval-recognition	3	33.33	66.67
+subcategory	pitch-recognition	3	0.0	0.0
+subcategory	proportion-recognition	3	0.0	0.0
+subcategory	rhythmic-recognition	3	0.0	0.0
+skill	interval recognition	3	33.33	66.67
+skill	note length	3	0.0	0.0
+skill	pitch recognition	3	0.0	0.0
+skill	rhythm pattern	3	0.0	0.0
+skill	tonality recognition	3	0.0	33.33
+rel/abs	absolute	6	0.0	0.0
+rel/abs	relative	9	11.11	33.33
+specification	harmony-relative	3	0.0	33.33
+specification	pitch-absolute	3	0.0	0.0
+specification	pitch-relative	3	33.33	66.67
+specification	rhythm-absolute	3	0.0	0.0
+specification	rhythm-relative	3	0.0	0.0

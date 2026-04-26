@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview	google_gemini-2.0-flash-lite-001
+OVERALL	ALL	750	40.93	37.33
+submodality	audio.mastermix.wav	250	26.8	34.8
+submodality	symbolic.abc.txt	250	58.4	42.0
+submodality	visual.short.png	250	37.6	35.2
+piece_id	Anonymous_AusMeinesHerzensGrunde	84	36.9	45.24
+piece_id	Bach_IchStehAnDeinerKrippe	102	38.24	41.18
+piece_id	Crueger_AufAufMeinHerzMitFreuden	57	45.61	26.32
+piece_id	Drese_JesuGehVoran	84	40.48	35.71
+piece_id	Gesius_BefiehlDuDeineWege	84	44.05	41.67
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	45	48.89	35.56
+piece_id	Jan_DuGrosserSchmerzensmann	75	24.0	24.0
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	75	52.0	45.33
+piece_id	Vulpius_ChristusDerIstMeinLeben	69	46.38	31.88
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	75	38.67	40.0
+is_nota_correct	0	600	40.83	39.33
+is_nota_correct	1	150	41.33	29.33
+meta-question_id	1	75	34.67	40.0
+meta-question_id	10	51	41.18	47.06
+meta-question_id	11	48	10.42	22.92
+meta-question_id	2	75	54.67	28.0
+meta-question_id	3	75	24.0	25.33
+meta-question_id	4	75	42.67	50.67
+meta-question_id	5	75	58.67	42.67
+meta-question_id	6	75	49.33	46.67
+meta-question_id	7	75	42.67	41.33
+meta-question_id	8	75	24.0	20.0
+meta-question_id	9	51	64.71	47.06
+category	harmony	150	39.33	39.33
+category	pitch	300	39.0	36.0
+category	rhythm	300	43.67	37.67
+subcategory	harmonic-recognition	150	39.33	39.33
+subcategory	interval-recognition	150	33.33	38.0
+subcategory	pitch-recognition	150	44.67	34.0
+subcategory	proportion-recognition	150	33.33	30.67
+subcategory	rhythmic-recognition	150	54.0	44.67
+skill	cadence recognition	48	10.42	22.92
+skill	chord recognition	51	41.18	47.06
+skill	interval recognition	75	24.0	25.33
+skill	interval statistics	75	42.67	50.67
+skill	note length	75	58.67	42.67
+skill	note length statistics	75	49.33	46.67
+skill	pitch recognition	75	34.67	40.0
+skill	pitch statistics	75	54.67	28.0
+skill	rhythm pattern	75	42.67	41.33
+skill	rhythm pattern statistics	75	24.0	20.0
+skill	tonality recognition	51	64.71	47.06
+rel/abs	absolute	351	48.15	40.46
+rel/abs	relative	399	34.59	34.59
+specification	harmony-absolute	51	41.18	47.06
+specification	harmony-relative	99	38.38	35.35
+specification	pitch-absolute	150	44.67	34.0
+specification	pitch-relative	150	33.33	38.0
+specification	rhythm-absolute	150	54.0	44.67
+specification	rhythm-relative	150	33.33	30.67

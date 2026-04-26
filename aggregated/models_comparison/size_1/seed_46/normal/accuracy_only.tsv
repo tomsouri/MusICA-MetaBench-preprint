@@ -1,0 +1,36 @@
+Criterion_Type	Criterion_Value	Total_Items	google_gemini-3.1-flash-lite-preview	aggregate-mistral	Qwen_Qwen3-Omni-30B-A3B-Thinking	google_gemini-2.0-flash-lite-001	google_gemini-2.5-flash-lite	aggregate-gpt-4o
+OVERALL	ALL	15	46.67	13.33	40.0	26.67	26.67	33.33
+submodality	audio.mastermix.wav	5	40.0	20.0	40.0	20.0	20.0	40.0
+submodality	symbolic.abc.txt	5	60.0	0.0	60.0	20.0	20.0	0.0
+submodality	visual.short.png	5	40.0	20.0	20.0	40.0	40.0	60.0
+piece_id	Bach_IchStehAnDeinerKrippe	3	33.33	0.0	33.33	33.33	0.0	0.0
+piece_id	Drese_JesuGehVoran	6	50.0	16.67	50.0	33.33	50.0	50.0
+piece_id	Vulpius_ChristusDerIstMeinLeben	3	100.0	33.33	33.33	33.33	33.33	33.33
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	3	0.0	0.0	33.33	0.0	0.0	33.33
+is_nota_correct	0	12	41.67	16.67	25.0	25.0	33.33	33.33
+is_nota_correct	1	3	66.67	0.0	100.0	33.33	0.0	33.33
+meta-question_id	1	3	0.0	0.0	66.67	0.0	0.0	33.33
+meta-question_id	3	3	33.33	0.0	33.33	33.33	0.0	0.0
+meta-question_id	5	3	100.0	33.33	33.33	33.33	33.33	33.33
+meta-question_id	7	3	0.0	0.0	33.33	0.0	0.0	33.33
+meta-question_id	9	3	100.0	33.33	33.33	66.67	100.0	66.67
+category	harmony	3	100.0	33.33	33.33	66.67	100.0	66.67
+category	pitch	6	16.67	0.0	50.0	16.67	0.0	16.67
+category	rhythm	6	50.0	16.67	33.33	16.67	16.67	33.33
+subcategory	harmonic-recognition	3	100.0	33.33	33.33	66.67	100.0	66.67
+subcategory	interval-recognition	3	33.33	0.0	33.33	33.33	0.0	0.0
+subcategory	pitch-recognition	3	0.0	0.0	66.67	0.0	0.0	33.33
+subcategory	proportion-recognition	3	0.0	0.0	33.33	0.0	0.0	33.33
+subcategory	rhythmic-recognition	3	100.0	33.33	33.33	33.33	33.33	33.33
+skill	interval recognition	3	33.33	0.0	33.33	33.33	0.0	0.0
+skill	note length	3	100.0	33.33	33.33	33.33	33.33	33.33
+skill	pitch recognition	3	0.0	0.0	66.67	0.0	0.0	33.33
+skill	rhythm pattern	3	0.0	0.0	33.33	0.0	0.0	33.33
+skill	tonality recognition	3	100.0	33.33	33.33	66.67	100.0	66.67
+rel/abs	absolute	6	50.0	16.67	50.0	16.67	16.67	33.33
+rel/abs	relative	9	44.44	11.11	33.33	33.33	33.33	33.33
+specification	harmony-relative	3	100.0	33.33	33.33	66.67	100.0	66.67
+specification	pitch-absolute	3	0.0	0.0	66.67	0.0	0.0	33.33
+specification	pitch-relative	3	33.33	0.0	33.33	33.33	0.0	0.0
+specification	rhythm-absolute	3	100.0	33.33	33.33	33.33	33.33	33.33
+specification	rhythm-relative	3	0.0	0.0	33.33	0.0	0.0	33.33

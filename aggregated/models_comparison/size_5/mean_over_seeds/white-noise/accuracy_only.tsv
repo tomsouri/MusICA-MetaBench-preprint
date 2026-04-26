@@ -1,0 +1,49 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview
+OVERALL	ALL	28.266	28.135
+submodality	audio.mastermix.wav	29.6	36.0
+submodality	symbolic.abc.txt	29.6	24.8
+submodality	visual.short.png	25.6	23.6
+piece_id	Anonymous_AusMeinesHerzensGrunde	27.078	19.174
+piece_id	Bach_IchStehAnDeinerKrippe	26.055	25.888
+piece_id	Gesius_BefiehlDuDeineWege	30.832	40.834
+piece_id	Jan_DuGrosserSchmerzensmann	37.167	35.053
+is_nota_correct	0	20.333	25.332
+is_nota_correct	1	60.0	39.333
+meta-question_id	1	22.22	16.665
+meta-question_id	10	30.0	26.667
+meta-question_id	11	9.999	19.999
+meta-question_id	2	28.333	31.667
+meta-question_id	3	19.998	25.554
+meta-question_id	4	48.333	51.667
+meta-question_id	5	33.332	34.441
+meta-question_id	6	45.001	30.001
+meta-question_id	7	21.109	29.997
+meta-question_id	8	19.999	25.0
+meta-question_id	9	31.667	16.668
+category	harmony	26.667	21.333
+category	pitch	27.999	29.332
+category	rhythm	29.334	30.336
+subcategory	harmonic-recognition	26.667	21.333
+subcategory	interval-recognition	31.334	36.001
+subcategory	pitch-recognition	24.666	22.667
+subcategory	proportion-recognition	20.666	28.0
+subcategory	rhythmic-recognition	37.999	32.665
+skill	cadence recognition	9.999	19.999
+skill	chord recognition	30.0	26.667
+skill	interval recognition	19.998	25.554
+skill	interval statistics	48.333	51.667
+skill	note length	33.332	34.441
+skill	note length statistics	45.001	30.001
+skill	pitch recognition	22.22	16.665
+skill	pitch statistics	28.333	31.667
+skill	rhythm pattern	21.109	29.997
+skill	rhythm pattern statistics	19.999	25.0
+skill	tonality recognition	31.667	16.668
+rel/abs	absolute	31.113	27.5
+rel/abs	relative	25.642	28.719
+specification	harmony-absolute	30.0	26.667
+specification	harmony-relative	24.442	17.776
+specification	pitch-absolute	24.666	22.667
+specification	pitch-relative	31.334	36.001
+specification	rhythm-absolute	37.999	32.665
+specification	rhythm-relative	20.666	28.0

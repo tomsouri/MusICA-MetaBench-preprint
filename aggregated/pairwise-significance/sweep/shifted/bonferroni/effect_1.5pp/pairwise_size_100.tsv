@@ -1,0 +1,4 @@
+alpha=0.008333	aggregate-mistral	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview
+aggregate-mistral	-	S (p=0.0049)	N (p=0.0181)
+google_gemini-2.0-flash-lite-001	S (p=0.0049)	-	S (p=0.0065)
+google_gemini-3.1-flash-lite-preview	N (p=0.0181)	S (p=0.0065)	-

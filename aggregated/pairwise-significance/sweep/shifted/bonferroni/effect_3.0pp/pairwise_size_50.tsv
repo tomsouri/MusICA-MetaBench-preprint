@@ -1,0 +1,5 @@
+alpha=0.004167	Qwen_Qwen3-Omni-30B-A3B-Thinking	aggregate-mistral	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview
+Qwen_Qwen3-Omni-30B-A3B-Thinking	-	S (p=0.0040)	S (p=0.0007)	S (p=0.0013)
+aggregate-mistral	S (p=0.0040)	-	S (p=0.0026)	S (p=0.0026)
+google_gemini-2.0-flash-lite-001	S (p=0.0007)	S (p=0.0026)	-	S (p=0.0002)
+google_gemini-3.1-flash-lite-preview	S (p=0.0013)	S (p=0.0026)	S (p=0.0002)	-

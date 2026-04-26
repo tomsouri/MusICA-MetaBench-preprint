@@ -1,0 +1,55 @@
+Criterion_Type	Criterion_Value	google_gemini-2.0-flash-lite-001	google_gemini-3.1-flash-lite-preview
+OVERALL	ALL	35.387	43.954
+submodality	audio.mastermix.wav	29.92	32.88
+submodality	symbolic.abc.txt	42.24	57.8
+submodality	visual.short.png	34.0	41.18
+piece_id	Anonymous_AusMeinesHerzensGrunde	32.302	38.8
+piece_id	Bach_IchStehAnDeinerKrippe	34.204	42.891
+piece_id	Crueger_AufAufMeinHerzMitFreuden	30.353	39.532
+piece_id	Drese_JesuGehVoran	35.848	43.879
+piece_id	Gesius_BefiehlDuDeineWege	39.635	43.659
+piece_id	Gesius_DuFriedensfuerstHerrJesuChrist	35.924	45.327
+piece_id	Jan_DuGrosserSchmerzensmann	32.836	43.964
+piece_id	Telemann_DerLiebenSonneLichtUndPracht	40.646	51.753
+piece_id	Vulpius_ChristusDerIstMeinLeben	36.489	47.277
+piece_id	Vulpius_DieHelleSonnLeuchtJetztHerfuer	37.83	43.676
+is_nota_correct	0	37.174	43.391
+is_nota_correct	1	28.233	46.2
+meta-question_id	1	26.666	34.467
+meta-question_id	10	44.499	47.749
+meta-question_id	11	25.249	26.5
+meta-question_id	2	35.266	50.798
+meta-question_id	3	26.867	35.666
+meta-question_id	4	43.266	53.266
+meta-question_id	5	35.668	57.268
+meta-question_id	6	54.2	53.068
+meta-question_id	7	39.666	48.732
+meta-question_id	8	17.067	21.532
+meta-question_id	9	48.501	63.332
+category	harmony	37.599	42.367
+category	pitch	33.017	43.55
+category	rhythm	36.65	45.151
+subcategory	harmonic-recognition	37.599	42.367
+subcategory	interval-recognition	35.066	44.467
+subcategory	pitch-recognition	30.965	42.631
+subcategory	proportion-recognition	28.366	35.133
+subcategory	rhythmic-recognition	44.934	55.168
+skill	cadence recognition	25.249	26.5
+skill	chord recognition	44.499	47.749
+skill	interval recognition	26.867	35.666
+skill	interval statistics	43.266	53.266
+skill	note length	35.668	57.268
+skill	note length statistics	54.2	53.068
+skill	pitch recognition	26.666	34.467
+skill	pitch statistics	35.266	50.798
+skill	rhythm pattern	39.666	48.732
+skill	rhythm pattern statistics	17.067	21.532
+skill	tonality recognition	48.501	63.332
+rel/abs	absolute	39.041	48.709
+rel/abs	relative	32.012	39.563
+specification	harmony-absolute	44.499	47.749
+specification	harmony-relative	32.999	38.777
+specification	pitch-absolute	30.965	42.631
+specification	pitch-relative	35.066	44.467
+specification	rhythm-absolute	44.934	55.168
+specification	rhythm-relative	28.366	35.133
