@@ -3,29 +3,26 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 
-def shorten_name(base):
-    """Shorten model base names for readability on the x-axis."""
-    # Replace common prefixes
-    name = base
-    replacements = [
-        ("google_", ""),
-        ("Qwen_", ""),
-        ("meta-llama_", ""),
-        ("deepseek_", ""),
-        ("aggregate-", "agg-"),
-    ]
-    for old, new in replacements:
-        name = name.replace(old, new)
-    # Wrap long names
-    if len(name) > 25:
-        # Try to break at a hyphen or underscore near the middle
-        mid = len(name) // 2
-        for offset in range(10):
-            for pos in [mid + offset, mid - offset]:
-                if 0 < pos < len(name) and name[pos] in "-_":
-                    name = name[:pos] + "\n" + name[pos:]
-                    return name
-        name = name[:mid] + "\n" + name[mid:]
+def shorten_model_name(name):
+    # Mapping for common model names to shorter versions
+    mapping = {
+        'google_gemini-3.1-flash-lite-preview': 'Gemini 3.1 FL',
+        'google_gemini-3.1-pro-preview': 'Gemini 3.1 Pro',
+        'google_gemini-2.0-flash-lite-001': 'Gemini 2.0 FL',
+        'google_gemini-2.5-flash-lite': 'Gemini 2.5 FL',
+        'Qwen_Qwen3-Omni-30B-A3B-Thinking': 'Qwen3 Omni 30B',
+        'aggregate-gpt-4o': 'agg-GPT-4o',
+        'aggregate-gpt-5': 'agg-GPT-5',
+        'aggregate-mistral': 'agg-Mistral',
+        'aggregate-gpt-5-full': 'agg-GPT-5 Full'
+    }
+    if name in mapping:
+        return mapping[name]
+    
+    # Generic shortening
+    name = name.replace('google_', '').replace('aggregate-', '')
+    if len(name) > 15:
+        return name[:12] + '...'
     return name
 
 def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=False, multiply_sizes_by=1, figsize=(10, 6), fontsize=10):
@@ -62,7 +59,7 @@ def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=Fals
         marker = markers[i % len(markers)]
         
         plt.plot(x_vals, y_vals, 
-                 label=shorten_name(model_name), 
+                 label=shorten_model_name(model_name), 
                  marker=marker, 
                  linestyle=':', 
                  color=color,
@@ -78,12 +75,17 @@ def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=Fals
     plt.ylabel('Stddev of acc. (%)')
     # title = f'Standard Deviation vs Benchmark Size'
     title = ""
-    plt.title(title)
+    plt.title(title, fontsize=fontsize)
     plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend(loc='upper right')
+    plt.legend(loc='upper right', fontsize=fontsize)
     plt.tight_layout()
 
     if output_file:
+        # make directory if it does not exist
+        output_dir = os.path.dirname(output_file)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         plt.savefig(output_file)
         print(f"Plot saved to {output_file}")
     else:

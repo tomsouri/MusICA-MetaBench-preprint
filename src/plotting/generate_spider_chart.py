@@ -12,10 +12,10 @@ def shorten_model_name(name):
         'google_gemini-2.0-flash-lite-001': 'Gemini 2.0 FL',
         'google_gemini-2.5-flash-lite': 'Gemini 2.5 FL',
         'Qwen_Qwen3-Omni-30B-A3B-Thinking': 'Qwen3 Omni 30B',
-        'aggregate-gpt-4o': 'GPT-4o',
-        'aggregate-gpt-5': 'GPT-5',
-        'aggregate-mistral': 'Mistral',
-        'aggregate-gpt-5-full': 'GPT-5 Full'
+        'aggregate-gpt-4o': 'agg-GPT-4o',
+        'aggregate-gpt-5': 'agg-GPT-5',
+        'aggregate-mistral': 'agg-Mistral',
+        'aggregate-gpt-5-full': 'agg-GPT-5 Full'
     }
     if name in mapping:
         return mapping[name]
@@ -119,7 +119,7 @@ def generate_spider_chart(input_file, output_file, criterion_type, excluded_mode
     if compact:
         ax.set_rlabel_position(210)
 
-    plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), fontsize=font_size)
 
     # ensure the output directory exists
     os.makedirs(os.path.dirname(output_file), exist_ok=True)

@@ -51,7 +51,7 @@ echo "Generating subcategory spider chart from $SRC_DIR/aggregated/models_compar
       --output_file $TGT_DIR/plots/spiders/subcategory-chorale-bricks_s20_seed52_all.png
 
 
-exit
+# exit
 # .venv/bin/python3 generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/normal/accuracy_only.tsv --output-prefix $TGT_DIR/plots/size-20-seed-52-normal --y-max 70 --no-hatch --font-size 15 --height 7
 
 
@@ -73,4 +73,4 @@ echo "Generating the table with standard deviations across sizes into $SRC_DIR/t
 .venv/bin/python3 generate_averaged_tables.py --only-print-stddev --input_dir "aggregated/comparison_between_seeds/"
 
 echo "Generating plot with standard deviations across sizes from $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv"
-.venv/bin/python3 $SCRIPTS_DIR/plot_stddev_with_benchmark_size.py $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv --output $TGT_DIR/plots/stddevs3.png --log-x --exclude-size-one --multiply-sizes-by 15 --fontsize 12
+.venv/bin/python3 $SCRIPTS_DIR/plot_stddev_with_benchmark_size.py $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv --output $TGT_DIR/plots/stddevs3.png --log-x --exclude-size-one --multiply-sizes-by 15 --fontsize 15
