@@ -161,8 +161,8 @@ def make_plot(
     }
     LABELS = {
         "normal": "Normal",
-        "text-only": "Text-only",
-        "white-noise": "White-noise",
+        "text-only": "no-input",
+        "white-noise": "noise-input",
     }
     # Hatch patterns for B&W readability
     HATCHES = {

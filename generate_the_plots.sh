@@ -64,13 +64,13 @@ echo "Generating plot with comparison of normal and text-only noise for a single
 .venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/seed_52/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-20-seed-52-normal-vs-textonly-vs-white-noise --y-max 70 --no-hatch --font-size 15 --height 7
 
 
-echo "Generating plot with comparison of normal and text-only noise averaged over seeds for size 20 and size 50 from $SRC_DIR/aggregated/models_comparison/size_20/mean_over_seeds/comparison_normal_vs_textonly.tsv and $SRC_DIR/aggregated/models_comparison/size_50/mean_over_seeds/comparison_normal_vs_textonly.tsv"
-.venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_50/mean_over_seeds/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-50-mean-over-seeds-normal-vs-textonly-vs-white-noise --ignore-incomplete --y-max 51 --no-hatch --font-size 15 --print-only-average --height 3.5
+echo "Generating plot with comparison of normal and text-only noise averaged over seeds for size 20 from $SRC_DIR/aggregated/models_comparison/size_20/mean_over_seeds/comparison_normal_vs_textonly.tsv and $SRC_DIR/aggregated/models_comparison/size_50/mean_over_seeds/comparison_normal_vs_textonly.tsv"
+# .venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_50/mean_over_seeds/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-50-mean-over-seeds-normal-vs-textonly-vs-white-noise --ignore-incomplete --y-max 51 --no-hatch --font-size 15 --print-only-average --height 3.5
 
-.venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/mean_over_seeds/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-20-mean-over-seeds-normal-vs-textonly-vs-white-noise --ignore-incomplete --y-max 51 --no-hatch --font-size 15 --print-only-average --height 3.5
+.venv/bin/python3 $SCRIPTS_DIR/generate_plot_with_comparison_of_normal_textonly_noise.py $SRC_DIR/aggregated/models_comparison/size_20/mean_over_seeds/comparison_normal_vs_textonly.tsv --output-prefix $TGT_DIR/plots/size-20-mean-over-seeds-normal-vs-textonly-vs-white-noise --ignore-incomplete --y-max 51 --no-hatch --font-size 15 --print-only-average --height 2.5
 
 echo "Generating the table with standard deviations across sizes into $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv"
 .venv/bin/python3 generate_averaged_tables.py --only-print-stddev --input_dir "aggregated/comparison_between_seeds/"
 
 echo "Generating plot with standard deviations across sizes from $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv"
-.venv/bin/python3 $SCRIPTS_DIR/plot_stddev_with_benchmark_size.py $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv --output $TGT_DIR/plots/stddevs3.png --log-x --exclude-size-one --multiply-sizes-by 15 --fontsize 15
+.venv/bin/python3 $SCRIPTS_DIR/plot_stddev_with_benchmark_size.py $SRC_DIR/tables/normal/stddev-only/table_ALL.tsv --output $TGT_DIR/plots/stddevs3.png --log-x --exclude-size-one --multiply-sizes-by 15 --fontsize 20 --height 4 --legend-fontsize 15

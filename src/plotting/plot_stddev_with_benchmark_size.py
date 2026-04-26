@@ -25,7 +25,7 @@ def shorten_model_name(name):
         return name[:12] + '...'
     return name
 
-def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=False, multiply_sizes_by=1, figsize=(10, 6), fontsize=10):
+def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=False, multiply_sizes_by=1, figsize=(10, 6), fontsize=10, legend_fontsize=None):
     # Read the TSV file
     df = pd.read_csv(input_file, sep='\t', index_col=0)
     
@@ -71,13 +71,16 @@ def plot_stddev(input_file, output_file=None, exclude_size_one=False, log_x=Fals
         unique_x = sorted(list(set([int(x) for col in df.columns for x in [col]])))
         plt.xticks(unique_x, labels=[str(x) for x in unique_x])
 
-    plt.xlabel('Benchmark Size')
+    plt.xlabel('Benchmark Size (total item count, s)')
     plt.ylabel('Stddev of acc. (%)')
     # title = f'Standard Deviation vs Benchmark Size'
     title = ""
     plt.title(title, fontsize=fontsize)
     plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend(loc='upper right', fontsize=fontsize)
+    
+    if legend_fontsize is None:
+        legend_fontsize = fontsize
+    plt.legend(loc='upper right', fontsize=legend_fontsize)
     plt.tight_layout()
 
     if output_file:
@@ -103,8 +106,14 @@ if __name__ == "__main__":
     parser.add_argument('--log-x', action='store_true', help='Use log scale for x-axis')
     parser.add_argument('--multiply-sizes-by', type=int, default=1, help='Multiply benchmark sizes by this factor')
     parser.add_argument('--figsize', type=float, nargs=2, default=[10, 6], help='Plot size (width height)')
+    parser.add_argument('--height', type=float, help='Override the height of the plot (width stays from --figsize)')
     parser.add_argument('--fontsize', type=int, default=10, help='Font size for labels and legend')
+    parser.add_argument('--legend-fontsize', type=int, default=None, help='Font size for legend (defaults to --fontsize)')
     
     args = parser.parse_args()
     
-    plot_stddev(args.input, args.output, args.exclude_size_one, args.log_x, args.multiply_sizes_by, tuple(args.figsize), args.fontsize)
+    figsize = tuple(args.figsize)
+    if args.height:
+        figsize = (figsize[0], args.height)
+    
+    plot_stddev(args.input, args.output, args.exclude_size_one, args.log_x, args.multiply_sizes_by, figsize, args.fontsize, args.legend_fontsize)
