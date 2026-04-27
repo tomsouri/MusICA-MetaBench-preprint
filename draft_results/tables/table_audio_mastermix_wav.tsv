@@ -1,5 +1,0 @@
-model	1	5	10	50
-aggregate-gpt-4o		nan (nan)		
-aggregate-mistral		34.87 (6.55)		
-google_gemini-2.0-flash-lite-001	nan (nan)	29.84 (6.57)	28.29 (2.74)	26.51 (2.81)
-google_gemini-2.5-flash-lite		25.89 (8.27)		
