@@ -1,0 +1,50 @@
+Using standard alpha = 0.05
+----------------------------------------
+Testing normality for: Qwen_Qwen3-Omni-30B-A3B-Thinking.tsv
+  Size 1.0: p-value = 0.0123 (alpha=0.05000) -> FAIL
+  Size 5.0: p-value = 0.7013 (alpha=0.05000) -> PASS
+  Size 10.0: p-value = 0.1539 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.9305 (alpha=0.05000) -> PASS
+  Size 50.0: p-value = 0.4252 (alpha=0.05000) -> PASS
+----------------------------------------
+Testing normality for: aggregate-gpt-4o.tsv
+  Size 1.0: p-value = 0.2580 (alpha=0.05000) -> PASS
+  Size 5.0: p-value = 0.8308 (alpha=0.05000) -> PASS
+  Size 10.0: p-value = 0.6625 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.3191 (alpha=0.05000) -> PASS
+----------------------------------------
+Testing normality for: aggregate-mistral.tsv
+  Size 1.0: p-value = 0.9512 (alpha=0.05000) -> PASS
+  Size 5.0: p-value = 0.2583 (alpha=0.05000) -> PASS
+  Size 10.0: p-value = 0.8610 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.1969 (alpha=0.05000) -> PASS
+  Size 50.0: p-value = 0.9688 (alpha=0.05000) -> PASS
+  Size 100.0: p-value = 0.0151 (alpha=0.05000) -> FAIL
+----------------------------------------
+Testing normality for: google_gemini-2.0-flash-lite-001.tsv
+  Size 1.0: p-value = 0.4066 (alpha=0.05000) -> PASS
+  Size 5.0: p-value = 0.0385 (alpha=0.05000) -> FAIL
+  Size 10.0: p-value = 0.7014 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.9416 (alpha=0.05000) -> PASS
+  Size 50.0: p-value = 0.0005 (alpha=0.05000) -> FAIL
+  Size 100.0: p-value = 0.2306 (alpha=0.05000) -> PASS
+----------------------------------------
+Testing normality for: google_gemini-2.5-flash-lite.tsv
+  Size 1.0: p-value = 0.0134 (alpha=0.05000) -> FAIL
+  Size 5.0: p-value = 0.5773 (alpha=0.05000) -> PASS
+  Size 10.0: p-value = 0.4313 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.6677 (alpha=0.05000) -> PASS
+----------------------------------------
+Testing normality for: google_gemini-3.1-flash-lite-preview.tsv
+  Size 1.0: p-value = 0.7820 (alpha=0.05000) -> PASS
+  Size 5.0: p-value = 0.3947 (alpha=0.05000) -> PASS
+  Size 10.0: p-value = 0.1890 (alpha=0.05000) -> PASS
+  Size 20.0: p-value = 0.0483 (alpha=0.05000) -> FAIL
+  Size 50.0: p-value = 0.6847 (alpha=0.05000) -> PASS
+  Size 100.0: p-value = 0.7050 (alpha=0.05000) -> PASS
+----------------------------------------
+
+OVERALL RESULTS
+Total tests performed: 31
+Normalities NOT REJECTED (PASS): 25
+Normalities REJECTED (FAIL):     6
