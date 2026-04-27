@@ -113,6 +113,7 @@ Responses are parsed to extract the final letter choice. The logic is:
 ### Per-Category Analysis
 
 ![Per-Category Analysis](aggregated/results-for-paper/chorale-bricks/plots/spiders/subcategory-chorale-bricks_s20_seed52_all.png)
+Results, Chorale-bricks, s=300 (20 questions per modality-category pair), one benchmark instance, comparison across categories. Axes for accuracy end at 80%.
 
 ### Technical Setup of Running LLMs
 
