@@ -30,6 +30,12 @@ The benchmark includes a flexible generation pipeline, an inference engine via t
 
 ## Setup
 
+### Prerequisites
+Before starting, ensure you have the following installed and configured:
+- **Tools**: `ffmpeg`, `pdftoppm`, and **MuseScore**.
+- **Display Access**: Required for score rendering (e.g., connect via `ssh -X` or `ssh -Y` if running remotely).
+- **MuseScore Configuration**: The path to your MuseScore executable must be correctly set in [src/conversions/musicxml2pdf.py](src/conversions/musicxml2pdf.py) (see `get_musescore_path`).
+
 ### Environment
 ```bash
 # Create a virtual environment and install dependencies
@@ -43,10 +49,16 @@ export OPENROUTER_API_KEY="your-api-key"
 ```
 
 ### Data Preparation
+
+#### ChoraleBricks
 ```bash
 # Download ChoraleBricks and process it to the required format
 bash prepare_data.sh
 ```
+
+#### ChoralSynth
+TBA
+
 
 ## Quick Start
 
@@ -93,7 +105,7 @@ You may define your own questions:
 - **Benchmark Instance:** [seed_52.tsv](benchmarks/qs_per_subcat_20/seed_52.tsv) (the one used as the one instance in the experiments)
 
 ### ChoralSynth
-TBA
+- **Benchmark Instance:** [choralsynth.size20.seed_52.tsv](benchmarks/choralsynth.size20.seed_52.tsv) (the one used as the one instance in the experiments)
 
 ## Inference & Parsing
 
