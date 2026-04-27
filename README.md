@@ -1,97 +1,151 @@
-# multimodal-music-understanding-benchmark
-Multimodal music understanding benchmark for LLMs on music in audio (recording), image (scan/render of sheet music), symbolic music (musicXML, MIDI, ABC, MEI, ...), and text (lyrics).
+# Music I Care About Meta-Benchmark (MusICA MetaBench)
 
-## TODOs
-Implement  further results aggregation script (for single benchmark instance) (#79)
-- one that gets specified size (qs per category count) and seed, and for this, goes over the results directory, extracts all corresponding "normal" files and extracts a selected column from it (by default, accuracy, but also unparsable, model error, time and price are relevant), and generate a large table with 1 column per model with the accuracy for each of the criterion values
+A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
 
-- and one that gets specified the same but compare text-only and normal setup: for every model, print the whole column for text-only and for normal setup
+## Overview
 
+This project provides a systematic framework to assess how well MLLMs understand classical music. It generates music theory questions covering pitch, rhythm, and harmony using various modalities:
+- **Audio**: WAV files (mastermixes).
+- **Symbolic**: MusicXML and ABC notation.
+- **Visual**: PNG images of scores.
 
+The benchmark includes a flexible generation pipeline, an inference engine via the OpenRouter API, and a suite of evaluation and aggregation tools.
 
-## To run
-- adjust the script `submit-jobs.sh` to fit your needs (e.g., the usage of `sbatch` command)
-- to use it as it is, you need to have an API key defined in your `~/.bashrc` file for each model-size-setup tuple, in
-  the following format: `<model_name_with_underscores>_<count>[_to]`
-    - e.g., among many others, I have the following lines in my `~/.bashrc` file:
-    export xiaomi_mimo_v2_omni_20_to="sk-or-v1..."
-    export google_gemini_3_1_flash_lite_preview_20="sk-or-v1..."
-    export google_gemini_3_1_flash_lite_preview_20_to="sk-or-v1..."
+## Key Features
 
+- **8-Step Generation Pipeline**: Controlled generation of questions, ground truth, and distractors.
+- **Multi-Modality**: Support for evaluating models on different representations of the same musical content.
+- **NOTA Support**: Includes "None of the above" as a correct answer for ~20% of questions to test for hallucination/over-confidence.
+- **Extensible Configuration**: YAML-based setup for benchmarks, evaluations, and music theory ontologies.
+- **Statistical Analysis**: Tools for significance testing (pairwise comparison) and aggregate reporting.
 
-## Quickstart
-- you need:
-	- ffmpeg, pdftoppm, MuseScore, display access (e.g. by ssh -Y user@account)
-	- musescore path needs to be passed to src/musicxml2pdf.py converter (as default value of the path to musescore)
+## Table of Contents
+1. [Setup](#setup)
+2. [Quick Start](#quick-start)
+3. [Technical Guidelines](#technical-guidelines)
+4. [Dataset Information](#dataset-information)
+5. [Inference & Parsing](#inference--parsing)
+6. [Evaluation & Results](#evaluation--results)
+7. [Logs & Reproducibility](#logs--reproducibility)
 
-Prepare virtual env:
-`bash prepare_venv.sh`
+## Setup
 
-Prepare data to the desired format:
-`bash prepare_data.sh`
+### Environment
+```bash
+# Create a virtual environment and install dependencies
+bash prepare_venv.sh
+```
 
-Generate the benchmark items:
-`.venv/bin/python3 generate_benchmark.py --config benchmark-generation-config.yaml`
+### API Configuration
+Set your OpenRouter API key:
+```bash
+export OPENROUTER_API_KEY="your-api-key"
+```
 
-Run LLMs on the benchmark:
-`.venv/bin/python3 run_benchmark.py --config eval-config.yaml`
-- print logs to `logs/run_<datetime>/benchmark_results.tsv` and appends them to Google sheet
+### Data Preparation
+```bash
+# Download ChoraleBricks and process it to the required format
+bash prepare_data.sh
+```
 
-Evaluate:
-- is performed already by `run_benchmark.py`, with output in `evaluation_summary.tsv`
+## Quick Start
 
-Then, the data is in
-data/$DATASET/$PIECE_ID/{audio.mastermix.wav, image.pdf, image.png, symbolic.musicxml, symbolic.abc.txt, symbolic.mei, symbolic.midi}
+### Step A: Generate a Benchmark
+```bash
+.venv/bin/python3 generate_benchmark.py \
+    --config benchmark-generation-config.yaml \
+    --benchmark_file test_benchmark.tsv \
+    --size 10 
+```
+*The `size` parameter specifies questions per category-modality combination.*
 
-The interesting ones in the preliminary experiments are audio.mastermix.wav, image.pdf, and symbolic.abc.txt.
+### Step B: Run Inference
+```bash
+.venv/bin/python3 run_benchmark.py \
+    --config eval-config.yaml \
+    --benchmark_file test_benchmark.tsv \
+    --models "openai/gpt-4o"
+```
 
-## Your own data
-- provide the data in data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]
-- the file `symbolic.musicxml` for every piece is required for automatic benchmark generation
-- run `generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation
+## Technical Guidelines
 
-## Your own questions
-- you may define your own questions
-- for that, provide the questions in `meta-questions.tsv` file (see example for the format), and implement a python
-  method (inside `src/ground_truth_extractions.py`) that automatically extracts the ground truth for given musicxml file
-  (and link it from the `meta-questions.tsv` file)
+### Custom Datasets
+To apply MusICA MetaBench to a custom dataset:
+1. **Prepare Pieces**: Organize your musical pieces in a directory structure. Each piece should have its own folder.
+2. **Metadata**: Create a `pieces.tsv` file listing the paths to these directories.
+3. **Format Support**: Ensure the desired modalities (Audio, Symbolic, Visual) are available in each piece directory (e.g., `symbolic.musicxml`, `audio.mastermix.wav`, `image.png`).
 
+### Custom Formats
+To add support for a new musical format:
+1. Update `musical_piece_format_info` in `run_benchmark.py` or your config file to include the new extension and its description.
+2. Ensure the generation pipeline (`generate_benchmark.py`) is aware of the new submodality by adding it to the `benchmark-generation-config.yaml`.
 
+### New Question Templates
+Adding a new question template involves:
+1. **Define Meta-Question**: Add a new row to [meta-questions.tsv](meta-questions.tsv) with a unique ID, category, and text template (using `{wildcards}`).
+2. **Implement Extraction**: Add a corresponding function in [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py). This function must:
+   - Accept arguments matching the wildcards.
+   - Return a `(ground_truth, distractor_pool)` tuple.
+3. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts.
 
+## Dataset Information
 
-## Our approach
-- come up with a question, e.g. "what is the pitch of the first note in the soprano part, expressed in scientific
-  notation?"
-- get Gemini 3.1 Pro Preview to improve the wording: "Reformulate this question and suggest pool of options to be used
-  in a benchmark for evaluating multimodal LLMs on understanding audio, image sheet music and symbolic scores:
-  <QUESTION>"
-- get the same model to generate the python method that would extract the ground truth: "And now, carefully implement a
-  python method, that would receive musicxml as the input file representing the music excerpt, and using music21 library
-  would extract the correct answer to this question (that is, extract the pitch of the first note in the soprano part in
-  scientific notation)."
-- decide to which modalities is it applicable
-- decide which distractors to include in the pool
-- and put the question as a single row to the meta-questions.tsv
+### ChoraleBricks
+A collection of Bach chorale fragments.
+- **Benchmark Instance:** [A-pre-generated_full_benchmark.tsv](benchmarks/A-pre-generated_full_benchmark.tsv)
 
+### ChoralSynth
+ChoralSynth is a synthetic dataset for testing specific music understanding capabilities, available in a separate branch.
+- **Switch to branch:** `git checkout choralsynth`
+- **Setup:** Follow the `prepare_data.sh` script in that branch to synthesize or download the audio files.
+- **Benchmark Instance:** [benchmark_viena4x22.tsv](benchmark_viena4x22.tsv) (Example instance)
 
-## Guidelines for Custom Datasets
+## Inference & Parsing
 
-1.  **Repository Setup**: Download the project's repository.
-2.  **Environment**: Install the required dependencies:
-    `bash prepare_venv.sh`
-3.  **Data Structure**: Place your data in the `data/` directory using the following structure:
-    `data/<dataset-name>/<piece-name>/<modality>.<format>`
-    *   *Example*: `data/asap/bwv846/symbolic.musicxml`
-    *   **Required**: A `symbolic.musicxml` file is mandatory, as the ground truth is extracted from it.
-    *   **Optional**: Additional modalities (e.g., `audio.wav`, `visual.png`) are optional. Note that modalities not provided cannot be used in evaluation.
-4.  **Configuration (Optional)**: Edit `generation-config.yaml` to customize generation parameters (such as benchmark size). If skipped, the default configuration is used.
-5.  **Define Ontology (Optional)**: Update the ontology of possible values for the wildcards used in prompts.
-6.  **Index Pieces**: Run `generate_pieces_list.sh` to generate the list of available pieces.
-    `bash generate_pieces_list.sh`
-7.  **Generate Benchmark**: Run the `generate_benchmark.py` script to execute the benchmark generation pipeline.
-    `.venv/bin/python generate_benchmark.py`
-8.  **Setup Evaluation**: Configure `eval-config.yaml` to specify which models to evaluate, including their API endpoint URLs and API keys.
-9.  **Run Evaluation**: Run the `run_benchmark.py` script to execute the selected models on the generated benchmark.
-    `.venv/bin/python run_benchmark.py`
-10. **Analyze**: Inspect the generated fine-grained results.
+### User Prompt Template
+The prompt template defines how the question and musical context are presented to the LLM. It can be customized in [eval-config.yaml](eval-config.yaml).
+- **Template Variable:** `user_prompt_template`
+- **Placeholder Replacement:** `<FORMAT>`, `<QUESTION>`, `<OPTIONS_TEXT>`, and `<OPTION_LABELS>` are dynamically replaced during runtime.
+
+### Response Parsing
+Responses are parsed to extract the final letter choice. The logic is:
+1. **Extraction**: `run_benchmark.py` uses methods loaded from `src/extraction_methods.py` (configured via `path_to_extraction_file`).
+2. **Format**: The model is instructed to end with `Final Answer: <answer>`.
+3. **Regex**: A regex typically searches for the last occurrence of a single letter enclosed in parentheses or following "Final Answer:".
+
+## Evaluation & Results
+
+### Per-Category Analysis
+Generate detailed plots with evaluation across categories (pitch, rhythm, harmony, etc.):
+```bash
+bash generate_the_plots.sh
+```
+The script processes `results.tsv` and generates visualizations in the `aggregated/` folder.
+
+### Technical Setup of Running LLMs
+- **Environment:** Tested on Linux (Ubuntu 22.04) using Python 3.10+.
+- **LLM Configuration:** Controlled via [eval-config.yaml](eval-config.yaml).
+  - **Seed:** Set to `42` for reproducibility.
+  - **API:** Primarily uses OpenRouter for access to various models.
+  - **Parameters:** Default settings for temperature and max tokens are managed by the API provider unless specified in the payload.
+
+## Logs & Reproducibility
+
+### LLM Inference Logs
+Full logs of LLM inference (prompts and raw JSON responses) are stored for selected models:
+- [Link to Logs Directory](logs/) <!-- TODO: Add more specific links if available -->
+
+### Reproducing Results
+... <!-- TODO: Instructions for reproducing paper results -->
+
+## Project Structure
+| Path | Description |
+| :--- | :--- |
+| `benchmarks/` | Pre-generated and custom benchmark TSV files. |
+| `data/` | Source musical pieces (ChoraleBricks, Vienna piano corpus, etc.). |
+| `src/` | Core logic for ground truth extraction and distractor generation. |
+| `results/` | Raw results from inference runs. |
+| `aggregated/` | Processed results and significance tests. |
+| `tables/` | LaTeX and TSV tables for paper results. |
+
 
