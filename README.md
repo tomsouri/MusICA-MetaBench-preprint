@@ -71,9 +71,9 @@ bash prepare_data.sh
 
 ### Custom Datasets
 To apply MusICA MetaBench to a custom dataset:
-1. **Prepare Pieces**: Organize your musical pieces in a directory structure. Each piece should have its own folder.
-2. **Metadata**: Create a `pieces.tsv` file listing the paths to these directories.
-3. **Format Support**: Ensure the desired modalities (Audio, Symbolic, Visual) are available in each piece directory (e.g., `symbolic.musicxml`, `audio.mastermix.wav`, `image.png`).
+1. **Prepare Pieces**: Provide the data in `data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]`.
+2. **Requirement**: The file `symbolic.musicxml` for every piece is required for automatic benchmark generation.
+3. **Generate List**: Run `bash generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation.
 
 ### Custom Formats
 To add support for a new musical format:
@@ -81,24 +81,19 @@ To add support for a new musical format:
 2. Ensure the generation pipeline (`generate_benchmark.py`) is aware of the new submodality by adding it to the `benchmark-generation-config.yaml`.
 
 ### New Question Templates
-Adding a new question template involves:
-1. **Define Meta-Question**: Add a new row to [meta-questions.tsv](meta-questions.tsv) with a unique ID, category, and text template (using `{wildcards}`).
-2. **Implement Extraction**: Add a corresponding function in [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py). This function must:
-   - Accept arguments matching the wildcards.
-   - Return a `(ground_truth, distractor_pool)` tuple.
-3. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts.
+You may define your own questions:
+1. **Define Meta-Question**: Provide the questions in [meta-questions.tsv](meta-questions.tsv) file (see example for the format).
+2. **Implement Extraction**: Implement a python method inside [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py) that automatically extracts the ground truth for a given musicxml file.
+3. **Link Method**: Link the implemented method from the [meta-questions.tsv](meta-questions.tsv) file.
+4. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts.
 
 ## Dataset Information
 
 ### ChoraleBricks
-A collection of Bach chorale fragments.
-- **Benchmark Instance:** [A-pre-generated_full_benchmark.tsv](benchmarks/A-pre-generated_full_benchmark.tsv)
+- **Benchmark Instance:** [seed_52.tsv](benchmarks/qs_per_subcat_20/seed_52.tsv) (the one used as the one instance in the experiments)
 
 ### ChoralSynth
-ChoralSynth is a synthetic dataset for testing specific music understanding capabilities, available in a separate branch.
-- **Switch to branch:** `git checkout choralsynth`
-- **Setup:** Follow the `prepare_data.sh` script in that branch to synthesize or download the audio files.
-- **Benchmark Instance:** [benchmark_viena4x22.tsv](benchmark_viena4x22.tsv) (Example instance)
+TBA
 
 ## Inference & Parsing
 
@@ -109,31 +104,34 @@ The prompt template defines how the question and musical context are presented t
 
 ### Response Parsing
 Responses are parsed to extract the final letter choice. The logic is:
-1. **Extraction**: `run_benchmark.py` uses methods loaded from `src/extraction_methods.py` (configured via `path_to_extraction_file`).
+1. **Extraction**: `run_benchmark.py` uses methods loaded from `src/extraction_methods.py` (configured via `path_to_extraction_file`). The methods used now are in `src/mmmu_eval_utils` (adapted from MMMU benchmark).
 2. **Format**: The model is instructed to end with `Final Answer: <answer>`.
 3. **Regex**: A regex typically searches for the last occurrence of a single letter enclosed in parentheses or following "Final Answer:".
 
 ## Evaluation & Results
 
 ### Per-Category Analysis
-Generate detailed plots with evaluation across categories (pitch, rhythm, harmony, etc.):
-```bash
-bash generate_the_plots.sh
-```
-The script processes `results.tsv` and generates visualizations in the `aggregated/` folder.
+
+![Per-Category Analysis](aggregated/results-for-paper/chorale-bricks/plots/spiders/subcategory-chorale-bricks_s20_seed52_all.png)
 
 ### Technical Setup of Running LLMs
-- **Environment:** Tested on Linux (Ubuntu 22.04) using Python 3.10+.
-- **LLM Configuration:** Controlled via [eval-config.yaml](eval-config.yaml).
-  - **Seed:** Set to `42` for reproducibility.
-  - **API:** Primarily uses OpenRouter for access to various models.
-  - **Parameters:** Default settings for temperature and max tokens are managed by the API provider unless specified in the payload.
 
-## Logs & Reproducibility
+- **Environment:** Tested on Linux (Ubuntu 22.04) using Python 3.10+.
+- **LLM API & Infrastructure:**
+  - **OpenRouter API:** Most models are accessed via a unified [OpenRouter API](https://openrouter.ai/).
+  - **Local Deployment:** Qwen-3-omni (specifically `Qwen3-Omni-30B-A3B-Thinking`, full precision) is run locally using [vLLM](https://docs.vllm.ai/) on an NVIDIA GH200 superchip (144GB GPU VRAM).
+- **Data Privacy & Leakage Prevention:**
+  - **Leakage Prevention:** Use of endpoints that may train on inputs is disabled.
+  - **Zero Data Retention (ZDR):** Enabled via [OpenRouter ZDR](https://openrouter.ai/docs/guides/features/zdr) where available (note: this was not available for GPT-family audio models).
+- **Inference Configuration:**
+  - **Data Encoding:** Symbolic musical files are sent as raw text; audio and image files are sent using Base64 encoding.
+  - **Parameters:** Models use default parameters to reflect real-world usage, with the exception of the random seed.
+  - **Reproducibility:** A pseudo-random seed is generated for each inference call to ensure better reproducibility (successfully achieved for local Qwen-3-omni, though limited for OpenRouter endpoints). We use distributed seeds rather than a single fixed seed to evaluate the model as a distribution rather than a single fixed instance.
+
 
 ### LLM Inference Logs
-Full logs of LLM inference (prompts and raw JSON responses) are stored for selected models:
-- [Link to Logs Directory](logs/) <!-- TODO: Add more specific links if available -->
+Full logs of the inference (prompts and raw JSON responses, parsed and evaluated responses) are provided for the best-performing model, Gemini 3.1 Pro Preview: 
+- [Link to Logs Directory](logs/run_2026-04-19_210028_normal-google_gemini-3.1-pro-preview-20-52/logs.tsv) 
 
 ### Reproducing Results
 ... <!-- TODO: Instructions for reproducing paper results -->
