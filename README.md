@@ -1,4 +1,4 @@
-# Music I Care About Meta-Benchmark (MusICA MetaBench)
+# Music I Care About Meta-Benchmark (MusICA MetaBench) - under double-blind rewiew at ISMIR 2026
 
 A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
 
