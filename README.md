@@ -142,8 +142,9 @@ Full logs of the inference (prompts and raw JSON responses, parsed and evaluated
 | `benchmarks/` | Pre-generated and custom benchmark TSV files. |
 | `data/` | Source musical pieces (ChoraleBricks, Vienna piano corpus, etc.). |
 | `src/` | Core logic for ground truth extraction and distractor generation. |
-| `results/` | Raw results from inference runs. |
+| `results/` |  Detailed results for all models, for multiple benchmark sizes and benchmark instances. |
 | `aggregated/` | Processed results and significance tests. |
 | `tables/` | LaTeX and TSV tables for paper results. |
+| `aggregated/results-for-paper/` | The visualization and selected results for paper. |
 
 
