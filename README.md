@@ -85,10 +85,22 @@ See the logs from the benchmark evaluation in `logs/run_<datetime><other>/logs.t
 
 ### Custom Datasets
 To apply MusICA MetaBench to a custom dataset:
-1. **Prepare Pieces**: Provide the data in `data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]`.
-2. **Requirement**: The file `symbolic.musicxml` for every piece is required for automatic benchmark generation.
+1. **Dataset Requirements**:
+   - **Tonal Dataset**: Otherwise, adjustment of question templates and ground truth extraction methods is needed.
+   - **One or more monophonic voices**: For polyphonic instruments (e.g.,piano), adjustments are needed.
+   - **Piece-aligned**: The same piece represented simultaneously as audio, sheet music image, and symbolic file.
+   - **MusicXML is provided**: The file `symbolic.musicxml` is required for every piece for automatic extraction of the ground truth. Other symbolic formats (MIDI, ABC notation, LilyPond, Humdrum, etc.) may also work but have not been verified and may require adjustments.
+2. **Prepare Pieces**: Provide the data in `data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]`.
 3. **Other Modalities**: The pipeline is now configured to receive `symblic.abc.txt` (for symbolic modality), `visual.short.png` (for image modality), and `audio.mastermix.wav` (for audio), which are also the names of submodalities.
 4. **Generate List**: Run `bash generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation.
+5. **Generate the Benchmark Instance**: 
+```bash
+.venv/bin/python3 generate_benchmark.py \
+    --config benchmark-generation-config.yaml \
+    --benchmark_file test_benchmark.tsv \
+    --size 10 
+```
+6. **Potentially, debug the ground truth extraction methods in [ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py), as their validation was limited to ChoraleBricks and ChoralSynth.
 
 ### Custom Formats
 To add support for a new musical format (treated as new submodality), e.g. MIDI, different types of images (e.g. for comparing performance on rendered vs. scan vs. handwritten):
