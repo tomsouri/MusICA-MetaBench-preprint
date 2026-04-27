@@ -44,9 +44,6 @@ supported_aggregate_models:
 url: "https://openrouter.ai/api/v1/chat/completions"
 env_api_key_name: "OPENROUTER_API_KEY"
 
-# url: "https://llm.ai.e-infra.cz/v1/chat/completions"
-# env_api_key_name: "EINFRA_KEY"
-
 
 max_waiting_time_per_request: 300 # in seconds, after which the request will be considered failed and logged as such
 
@@ -116,8 +113,6 @@ extraction_method: "parse_multi_choice_response"
 system_prompt: 
 
 
-# Zdůvodnění, proč je to dobrý prompt (v kombinaci s extraction metodou): pokud nebudu mít žádné unparsable answers, je
-# to dobré.
 # Formatting instructions adopted from MMMU-Pro: https://github.com/MMMU-Benchmark/MMMU/blob/main/mmmu-pro/prompts.yaml
 user_prompt_template: |
   You are a specialist in the analysis and interpretation of musical materials. You are provided with a musical work as <FORMAT>. Analyze the material carefully. Then, given a question and a set of options, choose the most appropriate option.
@@ -144,8 +139,8 @@ musical_piece_format_info:
     symbolic.abc: "a musical score (ABC notation format)"
 
 # Google Sheets Logging
-log_to_google_sheet: true
-sheet_id: "1KzX89Hv6E6FqH_baJ_WtyJhnWVqTCY-9C5jVgCUOrpU"
+log_to_google_sheet: false # Whether to log the results to a Google Sheet. If true, the following Google Sheets configuration will be used.
+sheet_id: "xxxx"
 sheet_name: "original-do-not-modify-nor-hide-columns"
-credentials_location: "logs/protobenchmark-logging-aa9418338494.json"
+credentials_location: "<path-to-credentials>.json"
 force_header_print: false
