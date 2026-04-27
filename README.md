@@ -47,6 +47,7 @@ Set your OpenRouter API key:
 ```bash
 export OPENROUTER_API_KEY="your-api-key"
 ```
+If not using OpenRouter, you can configure your own API endpoint and environment variable name with the API key in `eval-config.yaml`.
 
 ### Data Preparation
 
@@ -78,26 +79,28 @@ TBA
     --benchmark_file test_benchmark.tsv \
     --models "openai/gpt-4o"
 ```
+See the logs from the benchmark evaluation in `logs/run_<datetime><other>/logs.tsv`, and the result table in `results/<model>/<benchmark-size>/<setup>`.
 
-## Technical Guidelines
+## Technical Guidelines (custom datasets/formats/questions)
 
 ### Custom Datasets
 To apply MusICA MetaBench to a custom dataset:
 1. **Prepare Pieces**: Provide the data in `data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]`.
 2. **Requirement**: The file `symbolic.musicxml` for every piece is required for automatic benchmark generation.
-3. **Generate List**: Run `bash generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation.
+3. **Other Modalities**: The pipeline is now configured to receive `symblic.abc.txt` (for symbolic modality), `visual.short.png` (for image modality), and `audio.mastermix.wav` (for audio), which are also the names of submodalities.
+4. **Generate List**: Run `bash generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation.
 
 ### Custom Formats
-To add support for a new musical format:
-1. Update `musical_piece_format_info` in `run_benchmark.py` or your config file to include the new extension and its description.
+To add support for a new musical format (treated as new submodality), e.g. MIDI, different types of images (e.g. for comparing performance on rendered vs. scan vs. handwritten):
+1. Update `musical_piece_format_info` in `run_benchmark.py` or your config file to include the new extension and its description. For `run_benchmark.py` to work properly, audio files should be in `WAV` format, images either in `PNG` or `PDF`, and symbolic being a textual file (MIDI needs to be converted e.g. to a CSV before feeding into LLMs), and every submodality name should be in format `<modality><anything>.<file-extension>`
 2. Ensure the generation pipeline (`generate_benchmark.py`) is aware of the new submodality by adding it to the `benchmark-generation-config.yaml`.
 
 ### New Question Templates
 You may define your own questions:
 1. **Define Meta-Question**: Provide the questions in [meta-questions.tsv](meta-questions.tsv) file (see example for the format).
-2. **Implement Extraction**: Implement a python method inside [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py) that automatically extracts the ground truth for a given musicxml file.
+2. **Implement Extraction**: Implement a python method inside [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py) that automatically extracts the ground truth for a given musicxml file. For the method signature, check the existing functions (linked from `meta-questions.tsv`).
 3. **Link Method**: Link the implemented method from the [meta-questions.tsv](meta-questions.tsv) file.
-4. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts.
+4. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts, and debug.
 
 ## Dataset Information
 
