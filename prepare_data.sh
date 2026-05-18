@@ -20,6 +20,7 @@ DATA_ROOT="$(pwd)/data"
 ORIG_ROOT="$DATA_ROOT/original/chorale-bricks"
 TARGET_ROOT="$DATA_ROOT/chorale-bricks"
 MASTER_MIX_DIR="$ORIG_ROOT/master-mixes"
+SHORT_PNG_DIR="$ORIG_ROOT/short-pngs"
 ZIP_URL="https://zenodo.org/records/15081741/files/01_AudioAndAnnotations.zip"
 ZIP_FILE="$ORIG_ROOT/01_AudioAndAnnotations.zip"
 EXTRACT_DIR="$ORIG_ROOT/01_AudioAndAnnotations"
@@ -52,6 +53,7 @@ log() {
 }
 
 mkdir -p "$MASTER_MIX_DIR"
+mkdir -p "$SHORT_PNG_DIR"
 mkdir -p "$TARGET_ROOT"
 
 cd "$ORIG_ROOT"
@@ -97,6 +99,46 @@ for file in *.m4a; do
     fi
 done
 shopt -u nullglob
+
+
+cd "$SHORT_PNG_DIR"
+PNG_LIST_FILE="../list-of-pngs.txt"
+PNG_URL_PREFIX="https://audiolabs-erlangen.de/media/pages/resources/MIR/2025-ChoraleBricks/"
+if [[ -f "$PNG_LIST_FILE" ]]; then
+    log "Downloading short PNGs..."
+    while IFS= read -r png_url; do
+        if [[ -z "$png_url" ]]; then
+            continue
+        fi
+
+        if [[ "$png_url" == "$PNG_URL_PREFIX"* ]]; then
+            png_suffix="${png_url#${PNG_URL_PREFIX}}"
+            png_name="${png_suffix%%/*}"
+        else
+            png_name="${png_url##*/}"
+        fi
+
+        if [[ -n "$png_name" && "$png_name" != *.png ]]; then
+            png_name="${png_name}.png"
+        fi
+
+        if [[ -z "$png_name" ]]; then
+            echo "Warning: could not derive PNG name from $png_url" >&2
+            count_missing_files=$((count_missing_files + 1))
+            continue
+        fi
+
+        if [[ -f "$png_name" ]]; then
+            log "Short PNG already downloaded: $png_name"
+            continue
+        fi
+
+        wget -O "$png_name" "$png_url"
+    done < "$PNG_LIST_FILE"
+else
+    echo "Warning: png list not found at $PNG_LIST_FILE" >&2
+    count_missing_files=$((count_missing_files + 1))
+fi
 
 cd "$EXTRACT_DIR"
 for dir in */; do
@@ -210,6 +252,16 @@ for dir in */; do
         log "Master mix already copied for $subdir_name; skipping."
     else
         cp "$audio_file" "$tgt_dir/audio.mastermix.wav"
+    fi
+
+    png_file=$(find "$SHORT_PNG_DIR" -maxdepth 1 -type f -name "${subdir_name}*.png" -print -quit || true)
+    if [[ -z "$png_file" ]]; then
+        echo "Warning: no short PNG found for $subdir_name" >&2
+        count_missing_files=$((count_missing_files + 1))
+    elif [[ -f "$tgt_dir/visual.short.png" ]]; then
+        log "Short PNG already copied for $subdir_name; skipping."
+    else
+        cp "$png_file" "$tgt_dir/visual.short.png"
     fi
 done
 
