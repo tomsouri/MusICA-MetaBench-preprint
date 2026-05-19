@@ -1,4 +1,4 @@
-# Music I Care About Meta-Benchmark (MusICA MetaBench) - under double-blind rewiew at ISMIR 2026
+# Music I Care About Meta-Benchmark (MusICA MetaBench) - submitted to ISMIR 2026
 
 A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
 
@@ -58,7 +58,13 @@ bash prepare_data.sh
 ```
 
 #### ChoralSynth
-TBA
+```bash
+# Checkout to a different branch
+git checkout dataset-choralsynth
+
+# Download ChoralSynth and process it to the required format
+bash prepare_data_choral_synth.sh
+```
 
 
 ## Quick Start
