@@ -65,10 +65,10 @@ TBA
 
 ### Step A: Generate a Benchmark
 ```bash
-.venv/bin/python3 generate_benchmark.py \
+.venv/bin/python generate_benchmark.py \
     --config benchmark-generation-config.yaml \
     --benchmark_file test_benchmark.tsv \
-    --size 10 
+    --questions_per_subcategory_count 10 
 ```
 *The `size` parameter specifies questions per category-modality combination.*
 
