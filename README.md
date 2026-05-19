@@ -70,7 +70,7 @@ TBA
     --benchmark_file test_benchmark.tsv \
     --questions_per_subcategory_count 10 
 ```
-*The `size` parameter specifies questions per category-modality combination.*
+*The `questions_per_subcategory_count` parameter specifies questions per category-modality combination.*
 
 ### Step B: Run Inference
 ```bash
