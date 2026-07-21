@@ -1,35 +1,9 @@
-# This file is a modified derivative of:
-#   https://github.com/MMMU-Benchmark/MMMU/blob/main/mmmu/utils/eval_utils.py
-# Copyright the MMMU-Benchmark authors, licensed under the Apache License,
-# Version 2.0 (see LICENSE-THIRD-PARTY-MMMU in the repository root, or
-# http://www.apache.org/licenses/LICENSE-2.0). An unmodified copy of the
-# original file is kept at third_party/mmmu_eval_utils.orig.py.
-#
-# Modified by Tomáš Sourada, Katia Vendrame, Jan Hajič, jr. (2026):
-#   - disabled random seeding (random import / random.seed(42) commented out)
-#   - in parse_multi_choice_response(): added a type check returning
-#     "UNPARSABLE" for non-string responses, and a check returning
-#     "MODEL_ERROR" when response == "ERROR"
-#   - added a shortcut that strips trailing non-alphabetic characters and
-#     returns the response directly if the last remaining character matches
-#     one of the answer choices (handles outputs like "The answer is (A).")
-#     before falling back to the original MMMU stripping/matching logic
-#   - replaced the random-guess fallback (random.choice(all_choices)) with
-#     an explicit "UNPARSABLE" sentinel when no answer could be parsed
-#
-# This modified version, as part of the MusICA MetaBench repository, is
-# distributed under the GNU GPL v3.0-or-later (see LICENSE-SOURCE-CODE),
-# consistent with Apache License 2.0 Section 4's permission to relicense
-# derivative works as a whole, provided the above attribution and the
-# original Apache-2.0 terms are retained.
-
-
 """Response Parsing and Evaluation for various models"""
 from typing import Dict
 
 import re
-# import random
-# random.seed(42)
+import random
+random.seed(42)
 import numpy as np
 
 # ----------- Process Multi-choice -------------
@@ -38,31 +12,8 @@ def parse_multi_choice_response(response, all_choices, index2ans):
     Parse the prediction from the generated response.
     Return the predicted index e.g., A, B, C, D.
     """
-    
-    # --- ADDED CHECK TO PREVENT TYPE ERRORS ---
-    if not isinstance(response, str):
-        return "UNPARSABLE"
-
-
-    if response == "ERROR":
-        return "MODEL_ERROR"
-
-    # EDIT: first, look if the last character is one of the choices, if so, directly use it as the answer (this is to handle the case where the model directly outputs "The answer is (A)." or "The answer is A.")
-    import re
-    # [^a-zA-Z] matches any non-alphabetical character
-    # + matches one or more of them
-    # $ anchors the match to the very end of the string
-    stripped_response = re.sub(r'[^a-zA-Z()]+$', '', response)
-    last_char = stripped_response[-1] if len(stripped_response) > 0 else ''
-    for choice in all_choices:
-        if last_char == choice:
-            return last_char
-        
-    # If this did not work, fallback to the original MMMU implementation
-
-    characters_to_remove = ",.!?:;'\n "
-    response = response.strip(characters_to_remove)
-
+    for char in [',', '.', '!', '?', ';', ':', "'"]:
+        response = response.strip(char)
     response = " " + response + " " # add space to avoid partial match
 
     index_ans = True
@@ -86,10 +37,7 @@ def parse_multi_choice_response(response, all_choices, index2ans):
                 index_ans = False # it's content ans.
 
     if len(candidates) == 0:  # still not get answer, randomly choose one.
-        # pred_index = random.choice(all_choices)
-        # EDITED:
-        pred_index = "UNPARSABLE"
-
+        pred_index = random.choice(all_choices)
     elif len(candidates) > 1:
         start_indexes = []
         if index_ans:
@@ -305,3 +253,4 @@ def calculate_ins_level_acc(results: Dict):
     if ins_num == 0:
         return 0
     return acc / ins_num
+
