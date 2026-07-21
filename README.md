@@ -2,8 +2,7 @@
 
 A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
 
-> **📄 Paper companion repository.** This repository accompanies the paper *Music I Care About Meta-Benchmark (MusICA MetaBench)*, submitted to ISMIR 2026. It contains the code, data preparation scripts, benchmark instances, inference logs, and results presented in the paper.
-> <!-- TODO: add paper link / arXiv URL / DOI and BibTeX citation once available -->
+> **📄 Paper companion repository.** This repository accompanies the paper [*Music I Care About Meta-Benchmark (MusICA MetaBench)*](https://arxiv.org/abs/2607.06015), submitted to ISMIR 2026. It contains the code, data preparation scripts, benchmark instances, inference logs, and results presented in the paper.
 
 
 ## Overview
@@ -199,18 +198,17 @@ Full logs of the inference (prompts and raw JSON responses, parsed and evaluated
 
 If you use this benchmark or code, please cite our paper:
 
-TBA
-
-<!-- TODO: replace with final BibTeX entry once the paper is published -->
-<!--```bibtex
-@inproceedings{musica-metabench-2026,
-  title     = {Music I Care About Meta-Benchmark (MusICA MetaBench)},
-  author    = {TODO},
-  booktitle = {Proceedings of the International Society for Music Information Retrieval Conference (ISMIR)},
-  year      = {2026},
-  note      = {Submitted}
+```bibtex
+@misc{sourada2026musicicareabout,
+      title={Music I Care About: Automated Multimodal Benchmarking of LLM Music Perception Skills on (Almost) Any Music}, 
+      author={Tomáš Sourada and Katia Vendrame and Jan Hajič jr},
+      year={2026},
+      eprint={2607.06015},
+      archivePrefix={arXiv},
+      primaryClass={cs.SD},
+      url={https://arxiv.org/abs/2607.06015}, 
 }
-``` -->
+``` 
 
 ## License
 
