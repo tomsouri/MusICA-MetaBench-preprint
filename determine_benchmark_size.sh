@@ -1,4 +1,10 @@
 #!/bin/bash
+# Copyright (C) 2026  Tomáš Sourada, Katia Vendrame, Jan Hajič, jr.
+#
+# This file is part of the MusICA MetaBench source code, licensed under
+# the GNU General Public License v3.0 or later (SPDX: GPL-3.0-or-later).
+# See the LICENSE-SOURCE-CODE file in the repository root for the full
+# license text, or <https://www.gnu.org/licenses/>.
 
 .venv/bin/python3 aggregate_results_for_determining_benchmark_size.py --all
 

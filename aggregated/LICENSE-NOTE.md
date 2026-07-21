@@ -1,0 +1,8 @@
+# Licensing note
+
+The contents of this directory are aggregated tables, plots, and paper
+results derived from the raw evaluation results in `results/`, produced by
+running the (GPL-3.0-or-later licensed) benchmark scripts. They are kept in
+the repository for reproducibility but are **not separately licensed** —
+see the "License" section of the [top-level README](../README.md#license)
+for the full picture of how the rest of the repository is licensed.
