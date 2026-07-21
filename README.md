@@ -1,8 +1,8 @@
-# Music I Care About Meta-Benchmark (MusICA MetaBench) - submitted to ISMIR 2026
+# Music I Care About Meta-Benchmark (MusICA MetaBench)
 
 A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
 
-> **📄 Paper companion repository.** This repository accompanies the paper [*Music I Care About Meta-Benchmark (MusICA MetaBench)*](https://arxiv.org/abs/2607.06015), submitted to ISMIR 2026. It contains the code, data preparation scripts, benchmark instances, inference logs, and results presented in the paper.
+> **📄 Paper companion repository.** This repository accompanies the paper [*Music I Care About: Automated Multimodal Benchmarking of LLM Music Perception Skills on (Almost) Any Music*](https://arxiv.org/abs/2607.06015). It contains the code, data preparation scripts, benchmark instances, inference logs, and results presented in the paper.
 
 
 ## Overview
