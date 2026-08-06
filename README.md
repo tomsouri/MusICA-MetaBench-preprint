@@ -60,7 +60,7 @@ reachable by tag:
 | Tag | What it is |
 | :--- | :--- |
 | `v0.0-preprint` | The state released with the arXiv preprint, including the license overhaul. This is what the preprint's link refers to. |
-| `submission-ismir` | The state at the ISMIR submission, after every results, log and plot commit — the code behind the reported numbers. |
+| `provenance-reported-results` | The tree behind the numbers reported in the preprint: it sits after every commit that added results, inference logs and plots. Check this out if you want to verify a reported figure. |
 
 Papers link the repository **root**, not a tag, so that the link stays an invitation to
 contribute rather than landing readers on a frozen tree; this table is how you get from the root
