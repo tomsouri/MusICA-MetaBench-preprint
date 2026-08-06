@@ -1,26 +1,80 @@
-# Music I Care About Meta-Benchmark (MusICA-MetaBench)
+# Music I Care About Meta-Benchmark (MusICA MetaBench)
 
-Accompanying repo for the paper Music I Care About: Automated Multimodal Benchmarking of LLM Music Perception Skills on (Almost) Any Music.
+**Generate a multiple-choice benchmark of music perception, on demand, from the music you care
+about.** Give the pipeline a set of pieces and it produces questions about pitch, rhythm and
+harmony, asking the same question of an audio recording, a score image and symbolic notation, so
+that Multimodal Large Language Models can be compared across representations of the same music.
+Ground truth is extracted programmatically from the MusicXML — **there is no LLM in the loop** at
+generation time, so the answers are not a model's opinion about the music.
 
+## What you need to bring
 
-A comprehensive benchmark suite for evaluating Multimodal Large Language Models (MLLMs) on music perception tasks across multiple modalities (Audio, Symbolic, and Visual).
+- **MusicXML for every piece.** This is where all ground truth comes from; it is the one hard
+  requirement.
+- **Whichever aligned modalities you want compared** — recordings, score images — of the *same*
+  pieces in the *same* key.
 
-> **📄 Paper companion repository.** This repository accompanies the paper [*Music I Care About: Automated Multimodal Benchmarking of LLM Music Perception Skills on (Almost) Any Music*](https://arxiv.org/abs/2607.06015). It contains the code, data preparation scripts, benchmark instances, inference logs, and results presented in the paper.
+Modalities you do not have can be synthesised: score images are rendered from the MusicXML with
+MuseScore, and the symbolic condition is produced by converting MusicXML to ABC. See
+[CONTRIBUTING.md](CONTRIBUTING.md#adding-a-dataset).
 
+## Current status
 
-## Overview
+Read this before planning work around the pipeline.
 
-This project provides a systematic framework to assess how well MLLMs understand classical music. It generates music theory questions covering pitch, rhythm, and harmony using various modalities:
-- **Audio**: WAV files (mastermixes).
-- **Symbolic**: MusicXML and ABC notation.
-- **Visual**: PNG images of scores.
+- **Verified on two datasets: ChoraleBricks and ChoralSynth.** Extending to the second one
+  required real adaptation of the extraction code, not just configuration — see the table below.
+  **A new corpus should be expected to need some adaptation too.**
+- **Supports tonal repertoire made of one or more monophonic voices** (choral, wind, string).
+  Non-tonal music, and polyphonic instruments such as piano, need changes to the question
+  templates and the ground-truth extraction.
+- **MusicXML is the only verified symbolic input.** MIDI, ABC, LilyPond and Humdrum may work but
+  have not been tested.
+- Ground-truth extraction should be spot-checked by hand on any new corpus before a full run.
 
-The benchmark includes a flexible generation pipeline, an inference engine via the OpenRouter API, and a suite of evaluation and aggregation tools.
+### Datasets known to work
+
+| Dataset | Status | Notes |
+| :--- | :--- | :--- |
+| [ChoraleBricks](https://doi.org/10.5281/zenodo.15081741) | Verified | Primary development dataset. `prepare_data.sh` downloads and prepares it. |
+| [ChoralSynth](https://doi.org/10.5281/zenodo.10161065) | Verified — required adaptation | Lives on the `dataset-choralsynth` branch, **not merged into `main`**. Needed: voices addressed by number instead of the hard-coded `S`/`A`/`T`/`B` mapping; part names extracted from the score behind a `use_xml_part_names` setting; a monophonicity check that skips non-conforming voices; skipping questions when a piece lacks the expected voice count; enharmonic tonality names and a guard for ground truth absent from the ontology; and handling of larger pieces in data preparation. |
+| Anything else | Unverified | — |
+
+## Links
+
+- **Preprint:** [*Music I Care About: Automated Multimodal Benchmarking of LLM Music Perception
+  Skills on (Almost) Any Music*](https://arxiv.org/abs/2607.06015) (arXiv:2607.06015) — the code,
+  data preparation scripts, benchmark instances, inference logs and results behind it are all in
+  this repository.
+- **Late-breaking demo:** *Bring Your Own Music: Towards Community-Built, On-Demand Benchmarks of
+  MLLM Music Perception*, submitted to the ISMIR 2026 Late-Breaking Demo track.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — how to add a question template, a dataset or a format.
+  Contributions are welcome; making question templates fully modality-neutral is an open problem
+  we would particularly like help with.
+
+## Which version is which
+
+This repository is the permanent home of the project, and it keeps moving. Frozen states are
+reachable by tag:
+
+| Tag | What it is |
+| :--- | :--- |
+| `v0.0-preprint` | The state released with the arXiv preprint, including the license overhaul. This is what the preprint's link refers to. |
+| `provenance-reported-results` | The tree behind the numbers reported in the preprint: it sits after every commit that added results, inference logs and plots. Check this out if you want to verify a reported figure. |
+
+Papers link the repository **root**, not a tag, so that the link stays an invitation to
+contribute rather than landing readers on a frozen tree; this table is how you get from the root
+to a specific frozen state.
+
+> **Note on the old repository name.** This repository was renamed from `MusICA-MetaBench-preprint`,
+> and GitHub redirects the old URL — which matters, because that URL is printed in the published
+> arXiv preprint and cannot be edited. **The name `MusICA-MetaBench-preprint` must never be reused
+> for a new repository**: creating one silently breaks the redirect and orphans the published link.
 
 ## Key Features
 
 - **8-Step Generation Pipeline**: Controlled generation of questions, ground truth, and distractors.
-- **Multi-Modality**: Support for evaluating models on different representations of the same musical content.
+- **Multi-Modality**: Support for evaluating models on different representations of the same musical content — audio (WAV mastermixes), symbolic (MusicXML and ABC), and visual (PNG images of scores).
 - **NOTA Support**: Includes "None of the above" as a correct answer for ~20% of questions to test for hallucination/over-confidence.
 - **Extensible Configuration**: YAML-based setup for benchmarks, evaluations, and music theory ontologies.
 - **Statistical Analysis**: Tools for significance testing (pairwise comparison) and aggregate reporting.
@@ -28,11 +82,11 @@ The benchmark includes a flexible generation pipeline, an inference engine via t
 ## Table of Contents
 1. [Setup](#setup)
 2. [Quick Start](#quick-start)
-3. [Technical Guidelines](#technical-guidelines)
+3. [Custom datasets, formats and questions](#custom-datasets-formats-and-questions)
 4. [Dataset Information](#dataset-information)
 5. [Inference & Parsing](#inference--parsing)
 6. [Evaluation & Results](#evaluation--results)
-7. [Logs & Reproducibility](#logs--reproducibility)
+7. [Project Structure](#project-structure)
 
 ## Setup
 
@@ -93,38 +147,19 @@ bash prepare_data_choral_synth.sh
 ```
 See the logs from the benchmark evaluation in `logs/run_<datetime><other>/logs.tsv`, and the result table in `results/<model>/<benchmark-size>/<setup>`.
 
-## Technical Guidelines (custom datasets/formats/questions)
+## Custom datasets, formats and questions
 
-### Custom Datasets
-To apply MusICA MetaBench to a custom dataset:
-1. **Dataset Requirements**:
-   - **Tonal Dataset**: Otherwise, adjustment of question templates and ground truth extraction methods is needed.
-   - **One or more monophonic voices**: For polyphonic instruments (e.g.,piano), adjustments are needed.
-   - **Piece-aligned**: The same piece represented simultaneously as audio, sheet music image, and symbolic file.
-   - **MusicXML is provided**: The file `symbolic.musicxml` is required for every piece for automatic extraction of the ground truth. Other symbolic formats (MIDI, ABC notation, LilyPond, Humdrum, etc.) may also work but have not been verified and may require adjustments.
-2. **Prepare Pieces**: Provide the data in `data/$DATASET/$PIECE_ID/<music-file>.[pdf/wav/png/musicxml/...]`.
-3. **Other Modalities**: The pipeline is now configured to receive `symblic.abc.txt` (for symbolic modality), `visual.short.png` (for image modality), and `audio.mastermix.wav` (for audio), which are also the names of submodalities.
-4. **Generate List**: Run `bash generate_pieces_list.sh` to obtain the list of pieces, which is required for automatic benchmark generation.
-5. **Generate the Benchmark Instance**: 
-```bash
-.venv/bin/python3 generate_benchmark.py \
-    --config benchmark-generation-config.yaml \
-    --benchmark_file test_benchmark.tsv \
-    --size 10 
-```
-6. **Potentially, debug the ground truth extraction methods in [ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py), as their validation was limited to ChoraleBricks and ChoralSynth.
+Applying the pipeline to your own music, adding a question template, or adding a new format is
+documented in **[CONTRIBUTING.md](CONTRIBUTING.md)**, with a complete worked example:
 
-### Custom Formats
-To add support for a new musical format (treated as new submodality), e.g. MIDI, different types of images (e.g. for comparing performance on rendered vs. scan vs. handwritten):
-1. Update `musical_piece_format_info` in `run_benchmark.py` or your config file to include the new extension and its description. For `run_benchmark.py` to work properly, audio files should be in `WAV` format, images either in `PNG` or `PDF`, and symbolic being a textual file (MIDI needs to be converted e.g. to a CSV before feeding into LLMs), and every submodality name should be in format `<modality><anything>.<file-extension>`
-2. Ensure the generation pipeline (`generate_benchmark.py`) is aware of the new submodality by adding it to the `benchmark-generation-config.yaml`.
-
-### New Question Templates
-You may define your own questions:
-1. **Define Meta-Question**: Provide the questions in [meta-questions.tsv](meta-questions.tsv) file (see example for the format).
-2. **Implement Extraction**: Implement a python method inside [src/ground_truth_and_distractor_pool_extractions.py](src/ground_truth_and_distractor_pool_extractions.py) that automatically extracts the ground truth for a given musicxml file. For the method signature, check the existing functions (linked from `meta-questions.tsv`).
-3. **Link Method**: Link the implemented method from the [meta-questions.tsv](meta-questions.tsv) file.
-4. **Ontology**: If needed, update [ontology.yaml](ontology.yaml) to include new musical concepts, and debug.
+- [Adding a question template](CONTRIBUTING.md#adding-a-question-template) — the extraction
+  contract, registration in `meta-questions.tsv`, the ontology, and how to iterate for free before
+  spending anything on inference.
+- [Adding a dataset](CONTRIBUTING.md#adding-a-dataset) — requirements, directory layout,
+  synthesising missing modalities, and the pitfalls that have actually bitten us.
+- [Adding a new format or submodality](CONTRIBUTING.md#adding-a-new-format-or-submodality).
+- [Designing questions that travel across modalities](CONTRIBUTING.md#designing-questions-that-travel-across-modalities)
+  — why an absolute pitch question is not a fair question to ask of a recording.
 
 ## Dataset Information
 
@@ -174,18 +209,33 @@ Full logs of the inference (prompts and raw JSON responses, parsed and evaluated
 - [Link to Logs Directory](logs/run_2026-04-19_210028_normal-google_gemini-3.1-pro-preview-20-52/logs.tsv) 
 
 ### Reproducing Results
-... <!-- TODO: Instructions for reproducing paper results -->
+
+There is no single one-shot reproduction command; the full experiment grid was run on a cluster.
+The entry points are:
+
+| Script | What it does |
+| :--- | :--- |
+| [run_all.sh](run_all.sh) | The entry point for the whole experiment grid. Generates benchmark instances for every seed and size via `generate_benchmarks.sh`, then submits the inference jobs. The seeds, sizes and repetition counts are variables at the top of the file — **edit them before running**, and note that inference costs real money. |
+| [submit_experiments.sh](submit_experiments.sh), [run-multiple-models.sh](run-multiple-models.sh), [run-model-multiple-times.sh](run-model-multiple-times.sh) | Job submission for a cluster, and the loops over models and repetitions that `run_all.sh` drives. |
+| [generate_the_plots.sh](generate_the_plots.sh) | Regenerates the figures in `aggregated/results-for-paper/` from the aggregated result tables already in this repository. This one needs no inference and no API key. |
+| [compute_mean_stddev.py](compute_mean_stddev.py), [pairwise_significance.py](pairwise_significance.py), [test_normality.py](test_normality.py), [generate_aggregated_table.py](generate_aggregated_table.py), [generate_averaged_tables.py](generate_averaged_tables.py) | Aggregation, significance testing and the LaTeX/TSV tables used in the paper. |
+| [aggregate_results_for_determining_benchmark_size.py](aggregate_results_for_determining_benchmark_size.py), [determine_benchmark_size.sh](determine_benchmark_size.sh) | The benchmark-size calibration behind the "~300 items suffice" figure. |
+
+If you only want the figures and tables, start with `generate_the_plots.sh` — the per-model
+results it consumes are already committed under `results/` and `aggregated/`. Note that inference
+against commercial APIs is not bit-reproducible: the models drift, and endpoints ignore the seed
+(see the reproducibility note above).
 
 ## Project Structure
 | Path | Description |
 | :--- | :--- |
 | `benchmarks/` | Pre-generated and custom benchmark TSV files. |
-| `data/` | Source musical pieces (ChoraleBricks, Vienna piano corpus, etc.). |
-| `src/` | Core logic for ground truth extraction and distractor generation. |
+| `data/` | Where source musical pieces are placed. Mostly empty in a fresh clone — the source material is downloaded on demand by `prepare_data.sh` (see [License](#license)). |
+| `src/` | Core logic for ground truth extraction and distractor generation, plus format conversions and plotting. |
 | `results/` |  Detailed results for all models, for multiple benchmark sizes and benchmark instances. |
-| `aggregated/` | Processed results and significance tests. |
-| `tables/` | LaTeX and TSV tables for paper results. |
+| `aggregated/` | Processed results, significance tests, and the LaTeX/TSV tables for the paper. |
 | `aggregated/results-for-paper/` | The visualization and selected results for paper. |
+| `logs/` | Inference logs. Only one run is committed (the best-performing model, ~34 MB); everything else is gitignored. |
 
 ## Authors
 
